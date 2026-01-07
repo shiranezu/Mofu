@@ -14,7 +14,7 @@ from django.http import HttpResponse
 def timetable_view(request, timetable_id):
     timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-    timeslots = Timeslot.objects.all().order_by('start_time')
+    timeslots = Timeslot.objects.filter(user=request.user).order_by('start_time')
 
     grid = []
     for day in days:
@@ -25,7 +25,7 @@ def timetable_view(request, timetable_id):
                 day=day,
                 timeslot=timeslot
             ).first()
-            row.append((entry, timeslot))  # ✅ store both
+            row.append((entry, timeslot))
         grid.append((day, row))
 
     context = {
@@ -37,38 +37,18 @@ def timetable_view(request, timetable_id):
 
 
 @login_required(login_url='planner:login')
-def edit_view(request):
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-    timeslots = Timeslot.objects.all().order_by('start_time')
-    
-    grid = []
-    for day in days:
-        row = []
-        for timeslot in timeslots:
-            entry = TimetableEntry.objects.filter(day=day, timeslot=timeslot).first()
-            row.append(entry)
-        grid.append((day, row))
-
-    context = {
-        'grid': grid,
-        'timeslots': timeslots
-    }
-    return render(request, 'edit.html', context)
-
-
-@login_required(login_url='planner:login')
 def add_course(request):
     timetable_id = request.GET.get('timetable') or request.POST.get('timetable')
     timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
 
-    day = request.GET.get('day')  # pre-fill
+    day = request.GET.get('day')
     timeslot_id = request.GET.get('timeslot')
 
-    form = Subject_and_locationForm(request.POST or None)
+    form = Subject_and_locationForm(request.POST or None, user=request.user)
 
     if form.is_valid():
         course = form.save()
-        timeslot = Timeslot.objects.get(id=request.POST.get('timeslot'))
+        timeslot = Timeslot.objects.get(id=request.POST.get('timeslot'), user=request.user)
         TimetableEntry.objects.create(
             timetable=timetable,
             day=request.POST.get('day'),
@@ -90,7 +70,9 @@ def add_course(request):
 def add_timeslot(request):
     form = TimeslotForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        timeslot = form.save(commit=False)
+        timeslot.user = request.user
+        timeslot.save()
         return redirect('planner:home')
     else:
         print(form.errors)
@@ -167,9 +149,9 @@ def delete_timetable(request, timetable_id):
 
 @login_required
 def delete_timeslot(request, timeslot_id):
-    timeslot = Timeslot.objects.filter(id=timeslot_id).first()
+    timeslot = Timeslot.objects.filter(id=timeslot_id, user=request.user).first()
     if not timeslot:
-        messages.error(request, "This timeslot does not exist or was already deleted.")
+        messages.error(request, "This timeslot does not exist or you don't have permission to delete it.")
         return redirect('planner:home')
 
     if request.method == "POST":
@@ -302,6 +284,15 @@ def delete_schedule(request, schedule_id):
     })
 
 
+@login_required(login_url='planner:login')
+def toggle_schedule_item(request, item_id):
+    item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
+    item.is_done = not item.is_done
+    item.save()
+    return redirect("planner:schedule_view", item.schedule.id)
+
+
+
 @login_required
 def export_schedule_pdf(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
@@ -341,14 +332,22 @@ def login_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        if username == '':
+        
+        if not username:
+            messages.error(request, 'Please enter a username.')
             return render(request, 'auth/login.html')
-        elif password == '':
+        
+        if not password:
+            messages.error(request, 'Please enter a password.')
             return render(request, 'auth/login.html')
-        user = authenticate(username = username, password = password)
+        
+        user = authenticate(username=username, password=password)
         if user:
             login(request, user)
             return redirect('planner:home')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    
     return render(request, 'auth/login.html')
 
 def register(request):

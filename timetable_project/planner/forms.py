@@ -6,11 +6,18 @@ from django.contrib.auth.forms import UserCreationForm
 # Timetable forms
 class Subject_and_locationForm(forms.ModelForm):
     day = forms.ChoiceField(choices=DAYS_OF_WEEK)
-    timeslot = forms.ModelChoiceField(queryset=Timeslot.objects.all())
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['timeslot'] = forms.ModelChoiceField(
+                queryset=Timeslot.objects.filter(user=user)
+            )
+    
     class Meta:
         model = Subject_and_location
         fields = ['subject', 'location']
-
 
 class TimeslotForm(forms.ModelForm):
     class Meta:

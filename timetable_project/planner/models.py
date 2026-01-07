@@ -17,14 +17,16 @@ class Subject_and_location(models.Model):
 
     def __str__(self):
         return f"{self.subject} at {self.location}"
-    
+
+
 class Timeslot(models.Model):
-    start_time=models.TimeField()
-    end_time=models.TimeField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Remove null=True, blank=True
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
     def __str__(self):
         return f"{self.start_time} - {self.end_time}"
- 
+
 
 # Experimental
 class Timetable(models.Model):

@@ -10,6 +10,10 @@
     <ul>
     {% for item in items %}
     <li>
+        <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}" style="display:inline;">
+            {% csrf_token %}
+            <input type="checkbox" {% if item.is_done %}checked{% endif %} onchange="this.form.submit()">
+        </form>
         {% if item.is_done %}
         <s>{{ item.title }}</s>
         {% else %}
@@ -22,8 +26,7 @@
     {% endfor %}
     </ul>
     <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
-
-
+    <br>
     <a href="{% url 'planner:add_schedule_item' schedule.id %}">+ Add Task</a>
     <a href="{% url 'planner:home' %}">Back to Select Schedule</a>
 

@@ -6,20 +6,25 @@
     <title>Login Page</title>
 </head>
 <body>
-    <body>
     <form method="POST">
         <h2>Login</h2>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
         <br>
         {% csrf_token %}
-        <!-- <label>username</label> -->
-        <input placeholder="username" name = "username">
+        <input placeholder="username" name="username">
         <br>
-        <!-- <label>password</label> -->
-        <input placeholder="password" type="password" name = "password">
+        <input placeholder="password" type="password" name="password">
         <br>
         <button>Login</button>
-        <p class="message">Not registered? <a href="/register">Create an account</a></p>
-
+        <p class="message">Not registered? <a href="{% url 'planner:register' %}">Create an account</a></p>
     </form>
 </body>
 </html>

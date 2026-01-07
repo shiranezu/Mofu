@@ -12,7 +12,6 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('register/', views.register, name='register'),
     path('logout/', views.logout_user, name='logout'),
-    path('edit/', views.edit_view, name='edit'),
     path('edit/<int:entry_id>/', views.edit_entry, name='edit_entry'),
     path('delete/<int:entry_id>/', views.delete_entry, name='delete_entry'),
     path('timetable/<int:timetable_id>/delete/', views.delete_timetable, name='delete_timetable'),
@@ -28,6 +27,7 @@ urlpatterns = [
     path('schedule/item/<int:item_id>/delete/', views.delete_schedule_item, name='delete_schedule_item'),
     path('schedule/<int:schedule_id>/delete/', views.delete_schedule, name='delete_schedule'),
     path('schedule/<int:schedule_id>/export/pdf/', views.export_schedule_pdf, name='export_schedule_pdf'),
+    path('schedule/item/<int:item_id>/toggle/', views.toggle_schedule_item, name='toggle_schedule_item'),
     # Other Pages
     path('help/', views.help, name='help'),
 
