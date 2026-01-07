@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create timetable</title>
+</head>
+<body>
+    
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="timetable" value="{{ timetable.id }}">
+        {% if day %}
+            <input type="hidden" name="day" value="{{ day }}">
+        {% endif %}
+        {% if timeslot_id %}
+            <input type="hidden" name="timeslot" value="{{ timeslot_id }}">
+        {% endif %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+
+    <a href="{% url 'planner:home' %}">Back</a>
+
+
+</body>
+</html>

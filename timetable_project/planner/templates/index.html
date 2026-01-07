@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable view</title>
+    <style>
+        table{
+            width: 50em;
+        }
+    </style>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+            <th>Day/Time</th>
+            {% for slot in timeslots %}
+                <th>{{ slot.start_time }} - {{ slot.end_time }}
+                    <a href="{% url 'planner:delete_timeslot' slot.id %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </a>
+                </th>
+            {% endfor %}
+            </tr>
+        </thead>
+
+        
+    <tbody>
+            {% for day, row in grid %}
+            <tr>
+                <td>{{ day }}</td>
+                {% for entry, timeslot in row %}
+                    <td>
+                        {% if entry %}
+                            <a href="{% url 'planner:edit_entry' entry.id %}">
+                                {{ entry.subjectInfo.subject }}
+                            </a>
+                            <form action="{% url 'planner:delete_entry' entry.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('Delete this entry?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}&day={{ day }}&timeslot={{ timeslot.id }}">
+                                +
+                            </a>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<a href="{% url 'planner:export_timetable_pdf' timetable.id %}" target="_blank">Download Timetable</a>
+
+<br>
+<a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}">Add Course</a> 
+<!-- <a href="{% url 'planner:edit' %}">Edit Table Content</a> -->
+<a href="{% url 'planner:add_timeslot' %}">Add to Timeslots</a>
+<a href="{% url 'planner:home' %}">Select a Different Timetable</a>
+</body>
+</html>

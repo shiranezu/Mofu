@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit page</title>
+    <style>
+        table{
+            width: 50em;
+        }
+    </style>
+</head>
+<body>
+    <table border="1">
+    <thead>
+        <tr>
+            <th>Day/Time</th>
+            {% for slot in timeslots %}
+                <th>{{ slot.start_time }} - {{ slot.end_time }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for day, row in grid %}
+        <tr>
+            <td>{{ day }}</td>
+            {% for entry in row %}
+    <td>
+        {% if entry %}
+            {{ entry.subjectInfo.subject }}<br>
+            <a href="{% url 'planner:edit_entry' entry.id %}">Edit</a> |
+            <form action="{% url 'planner:delete_entry' entry.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
+            </form>
+        {% else %}
+            -
+        {% endif %}
+    </td>
+        {% endfor %}
+
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
+
+<a href="{% url 'planner:add_course' %}">Add table content</a> 
+<a href="{% url 'planner:add_timeslot' %}">Add time</a>
+<a href="{% url 'planner:home' %}">Return Home</a>
+</body>
+</html>

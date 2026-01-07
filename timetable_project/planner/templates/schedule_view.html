@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>schedule home</title>
+</head>
+<body>
+    <h2>{{ schedule.name }}</h2>
+    <ul>
+    {% for item in items %}
+    <li>
+        {% if item.is_done %}
+        <s>{{ item.title }}</s>
+        {% else %}
+        {{ item.title }}
+        {% endif %}
+        {% if item.due_date %} (due {{ item.due_date }}){% endif %}
+        | <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a>
+        | <a href="{% url 'planner:delete_schedule_item' item.id %}">Delete</a>
+    </li>
+    {% endfor %}
+    </ul>
+    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
+
+
+    <a href="{% url 'planner:add_schedule_item' schedule.id %}">+ Add Task</a>
+    <a href="{% url 'planner:home' %}">Back to Select Schedule</a>
+
+</body>
+</html>
