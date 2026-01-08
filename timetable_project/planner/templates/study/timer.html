@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Timer</title>
+    <style>
+        .timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .timer-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Study Timer</h1>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <p style="color: red;">{{ message }}</p>
+            {% else %}
+                <p style="color: green;">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if active_session %}
+        <div class="timer-display">
+            <p>Currently Studying: {% if active_session.category %}{{ active_session.category.name }}{% else %}No Category{% endif %}</p>
+            <p id="timer">00:00:00</p>
+        </div>
+        <div class="timer-controls">
+            <a href="{% url 'planner:stop_timer' active_session.id %}">
+                <button style="background-color: red; color: white;">Stop Session</button>
+            </a>
+        </div>
+
+        <script>
+            let startTime = new Date("{{ active_session.start_time|date:'c' }}");
+            
+            function updateTimer() {
+                let now = new Date();
+                let diff = Math.floor((now - startTime) / 1000);
+                
+                let hours = Math.floor(diff / 3600);
+                let minutes = Math.floor((diff % 3600) / 60);
+                let seconds = diff % 60;
+                
+                document.getElementById('timer').textContent = 
+                    String(hours).padStart(2, '0') + ':' + 
+                    String(minutes).padStart(2, '0') + ':' + 
+                    String(seconds).padStart(2, '0');
+            }
+            
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        </script>
+    {% else %}
+        <div class="timer-display">
+            <p>Ready to study?</p>
+        </div>
+
+        <form method="post" action="{% url 'planner:start_timer' %}">
+            {% csrf_token %}
+            <label for="category">Select Category (optional):</label>
+            <select name="category">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+            <button type="submit" style="background-color: green; color: white;">Start Session</button>
+        </form>
+    {% endif %}
+
+    <hr>
+    <a href="{% url 'planner:study_history' %}">View History</a> |
+    <a href="{% url 'planner:manage_categories' %}">Manage Categories</a> |
+    <a href="{% url 'planner:home' %}">Back to Home</a>
+</body>
+</html>

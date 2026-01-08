@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study History</title>
+</head>
+<body>
+    <h1>Study History</h1>
+
+    <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0;">
+        <h3>Statistics</h3>
+        <p><strong>Today:</strong> {{ today_total|floatformat:0 }} seconds ({{ today_total|floatformat:0|add:"0"|date:"H:i:s" }})</p>
+        <p><strong>This Week:</strong> {{ week_total|floatformat:0 }} seconds</p>
+    </div>
+
+    <h3>All Sessions</h3>
+    <table border="1" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Duration</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td>{{ session.start_time|date:"M d, Y H:i" }}</td>
+                <td>{% if session.category %}{{ session.category.name }}{% else %}-{% endif %}</td>
+                <td>{{ session.get_duration_display }}</td>
+                <td>{{ session.notes|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No study sessions yet. Start studying!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="{% url 'planner:study_timer' %}">Back to Timer</a>
+</body>
+</html>

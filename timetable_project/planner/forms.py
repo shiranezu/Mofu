@@ -1,5 +1,5 @@
 from django import forms
-from .models import Subject_and_location, Timeslot, DAYS_OF_WEEK, ScheduleItem, Schedule
+from .models import Subject_and_location, Timeslot, DAYS_OF_WEEK, ScheduleItem, Schedule, StudyCategory, StudySession 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -45,3 +45,19 @@ class ScheduleItemForm(forms.ModelForm):
         widgets = {
             "due_date": forms.DateInput(attrs={"type": "date"})
         }
+
+# study sessions
+
+class StudyCategoryForm(forms.ModelForm):
+    class Meta:
+        model = StudyCategory
+        fields = ['name', 'color']
+        widgets = {
+            'color': forms.TextInput(attrs={'type': 'color'})
+        }
+
+
+class StudySessionForm(forms.ModelForm):
+    class Meta:
+        model = StudySession
+        fields = ['category', 'notes']

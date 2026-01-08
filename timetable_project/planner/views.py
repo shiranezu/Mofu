@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout, login, authenticate
-from .models import Timetable, TimetableEntry, Timeslot, Schedule, ScheduleItem
-from .forms import Subject_and_locationForm, RegistrationForm, TimeslotForm, ScheduleForm, ScheduleItemForm
+from .models import Timetable, TimetableEntry, Timeslot, Schedule, ScheduleItem, StudyCategory, StudySession
+from .forms import Subject_and_locationForm, RegistrationForm, TimeslotForm, ScheduleForm, ScheduleItemForm, StudyCategoryForm, StudySessionForm
 from django.contrib.auth.decorators import login_required
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
+from django.utils import timezone
+from django.db.models import Sum
+from datetime import timedelta
+
 
 
 # Timetable Views
@@ -292,7 +296,6 @@ def toggle_schedule_item(request, item_id):
     return redirect("planner:schedule_view", item.schedule.id)
 
 
-
 @login_required
 def export_schedule_pdf(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
@@ -326,6 +329,121 @@ def export_schedule_pdf(request, schedule_id):
     p.showPage()
     p.save()
     return response 
+
+# study timer
+@login_required(login_url='planner:login')
+def study_timer(request):
+    """Main timer page"""
+    categories = StudyCategory.objects.filter(user=request.user)
+    active_session = StudySession.objects.filter(user=request.user, is_active=True).first()
+    
+    context = {
+        'categories': categories,
+        'active_session': active_session,
+    }
+    return render(request, 'study/timer.html', context)
+
+
+@login_required(login_url='planner:login')
+def start_timer(request):
+    """Start a new study session"""
+    if request.method == 'POST':
+        category_id = request.POST.get('category')
+        category = None
+        if category_id:
+            category = StudyCategory.objects.get(id=category_id, user=request.user)
+        
+        # Check if there's already an active session
+        active_session = StudySession.objects.filter(user=request.user, is_active=True).first()
+        if active_session:
+            messages.warning(request, "You already have an active study session!")
+            return redirect('planner:study_timer')
+        
+        # Create new session
+        StudySession.objects.create(
+            user=request.user,
+            category=category,
+            start_time=timezone.now(),
+            is_active=True
+        )
+        messages.success(request, "Study session started!")
+        return redirect('planner:study_timer')
+    
+    return redirect('planner:study_timer')
+
+
+@login_required(login_url='planner:login')
+def stop_timer(request, session_id):
+    """Stop and save study session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True)
+    
+    session.end_time = timezone.now()
+    session.duration_seconds = int((session.end_time - session.start_time).total_seconds())
+    session.is_active = False
+    session.save()
+    
+    messages.success(request, f"Study session completed! Duration: {session.get_duration_display()}")
+    return redirect('planner:study_timer')
+
+
+@login_required(login_url='planner:login')
+def study_history(request):
+    """View all past study sessions"""
+    sessions = StudySession.objects.filter(user=request.user, is_active=False)
+    
+    # Calculate statistics
+    today = timezone.now().date()
+    today_sessions = sessions.filter(start_time__date=today)
+    today_total = today_sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+    
+    week_start = today - timedelta(days=today.weekday())
+    week_sessions = sessions.filter(start_time__date__gte=week_start)
+    week_total = week_sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+    
+    context = {
+        'sessions': sessions,
+        'today_total': today_total,
+        'week_total': week_total,
+    }
+    return render(request, 'study/history.html', context)
+
+
+@login_required(login_url='planner:login')
+def manage_categories(request):
+    """Manage study categories"""
+    categories = StudyCategory.objects.filter(user=request.user)
+    return render(request, 'study/categories.html', {'categories': categories})
+
+
+@login_required(login_url='planner:login')
+def add_category(request):
+    """Add a new study category"""
+    form = StudyCategoryForm(request.POST or None)
+    if form.is_valid():
+        category = form.save(commit=False)
+        category.user = request.user
+        category.save()
+        messages.success(request, "Category added successfully!")
+        return redirect('planner:manage_categories')
+    
+    return render(request, 'add_generic.html', {'form': form, 'title': 'Add Study Category'})
+
+
+@login_required(login_url='planner:login')
+def delete_category(request, category_id):
+    """Delete a study category"""
+    category = get_object_or_404(StudyCategory, id=category_id, user=request.user)
+    
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, "Category deleted successfully!")
+        return redirect('planner:manage_categories')
+    
+    return render(request, 'confirm_delete.html', {
+        'object': category,
+        'type': 'category'
+    })
+
 
 # Authentication Views
 def login_user(request):
@@ -373,4 +491,3 @@ def help(request):
 
 # @login_required(login_url='planner:login')
 # def chatbot(request):
-    

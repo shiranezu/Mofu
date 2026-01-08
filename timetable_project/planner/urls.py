@@ -28,6 +28,16 @@ urlpatterns = [
     path('schedule/<int:schedule_id>/delete/', views.delete_schedule, name='delete_schedule'),
     path('schedule/<int:schedule_id>/export/pdf/', views.export_schedule_pdf, name='export_schedule_pdf'),
     path('schedule/item/<int:item_id>/toggle/', views.toggle_schedule_item, name='toggle_schedule_item'),
+
+    # Study Timer URLs
+    path('study/timer/', views.study_timer, name='study_timer'),
+    path('study/start/', views.start_timer, name='start_timer'),
+    path('study/stop/<int:session_id>/', views.stop_timer, name='stop_timer'),
+    path('study/history/', views.study_history, name='study_history'),
+    path('study/categories/', views.manage_categories, name='manage_categories'),
+    path('study/categories/add/', views.add_category, name='add_category'),
+    path('study/categories/<int:category_id>/delete/', views.delete_category, name='delete_category'),
+    
     # Other Pages
     path('help/', views.help, name='help'),
 

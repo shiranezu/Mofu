@@ -71,3 +71,41 @@ class ScheduleItem(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+# study sessions
+
+class StudyCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    color = models.CharField(max_length=7, default='#3498db')  # Hex color code
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Study Categories"
+
+
+class StudySession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(StudyCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.IntegerField(default=0)  # Total seconds studied
+    notes = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)  # True if timer is running
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.category} - {self.duration_seconds}s"
+    
+    def get_duration_display(self):
+        """Convert seconds to HH:MM:SS format"""
+        hours = self.duration_seconds // 3600
+        minutes = (self.duration_seconds % 3600) // 60
+        seconds = self.duration_seconds % 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    
+    class Meta:
+        ordering = ['-start_time']
