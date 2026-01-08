@@ -37,6 +37,9 @@ urlpatterns = [
     path('study/categories/', views.manage_categories, name='manage_categories'),
     path('study/categories/add/', views.add_category, name='add_category'),
     path('study/categories/<int:category_id>/delete/', views.delete_category, name='delete_category'),
+
+    # statistics
+    path('study/statistics/', views.study_statistics, name='study_statistics'),
     
     # Other Pages
     path('help/', views.help, name='help'),

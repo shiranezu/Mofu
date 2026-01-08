@@ -8,10 +8,10 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncDate
 from datetime import timedelta
-
-
+import json
 
 # Timetable Views
 @login_required(login_url='planner:login')
@@ -443,6 +443,78 @@ def delete_category(request, category_id):
         'object': category,
         'type': 'category'
     })
+
+# statsistics view
+
+@login_required(login_url='planner:login')
+def study_statistics(request):
+    """Statistics dashboard with charts"""
+    sessions = StudySession.objects.filter(user=request.user, is_active=False)
+    
+    # Overall statistics
+    total_sessions = sessions.count()
+    total_seconds = sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+    total_hours = total_seconds / 3600
+    
+    # Today's stats
+    today = timezone.now().date()
+    today_sessions = sessions.filter(start_time__date=today)
+    today_seconds = today_sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+    
+    # This week's stats
+    week_start = today - timedelta(days=today.weekday())
+    week_sessions = sessions.filter(start_time__date__gte=week_start)
+    week_seconds = week_sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+    
+    # Study time by category
+    category_stats = sessions.values('category__name', 'category__color').annotate(
+        total_seconds=Sum('duration_seconds'),
+        session_count=Count('id')
+    ).order_by('-total_seconds')
+    
+    # Convert to list and add hours calculation
+    category_stats_list = list(category_stats)
+    for stat in category_stats_list:
+        stat['total_hours'] = round(stat['total_seconds'] / 3600, 2)
+    
+    # Prepare data for pie chart (study time by category)
+    category_labels = []
+    category_data = []
+    category_colors = []
+    
+    for stat in category_stats_list:
+        category_name = stat['category__name'] or 'No Category'
+        category_labels.append(category_name)
+        category_data.append(round(stat['total_seconds'] / 3600, 2))  # Convert to hours
+        category_colors.append(stat['category__color'] or '#95a5a6')
+    
+    # Last 7 days data for line chart
+    last_7_days = []
+    daily_data = []
+    
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        last_7_days.append(date.strftime('%b %d'))
+        
+        day_seconds = sessions.filter(start_time__date=date).aggregate(
+            total=Sum('duration_seconds')
+        )['total'] or 0
+        daily_data.append(round(day_seconds / 3600, 2))  # Convert to hours
+    
+    context = {
+        'total_sessions': total_sessions,
+        'total_hours': round(total_hours, 2),
+        'today_seconds': today_seconds,
+        'week_seconds': week_seconds,
+        'category_labels': json.dumps(category_labels),
+        'category_data': json.dumps(category_data),
+        'category_colors': json.dumps(category_colors),
+        'daily_labels': json.dumps(last_7_days),
+        'daily_data': json.dumps(daily_data),
+        'category_stats': category_stats_list,
+    }
+    
+    return render(request, 'study/statistics.html', context)
 
 
 # Authentication Views
