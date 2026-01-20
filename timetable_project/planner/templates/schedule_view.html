@@ -20,15 +20,16 @@
         {{ item.title }}
         {% endif %}
         {% if item.due_date %} (due {{ item.due_date }}){% endif %}
-        | <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a>
+        | <a href="{% url 'planner:edit_schedule_item' item.id %}">View</a>
         | <a href="{% url 'planner:delete_schedule_item' item.id %}">Delete</a>
     </li>
     {% endfor %}
     </ul>
-    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
-    <br>
     <a href="{% url 'planner:add_schedule_item' schedule.id %}">+ Add Task</a>
     <a href="{% url 'planner:home' %}">Back to Select Schedule</a>
+    <br>
+    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
+    
 
 </body>
 </html>

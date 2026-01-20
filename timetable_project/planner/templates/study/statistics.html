@@ -90,6 +90,7 @@
 
     <div class="nav-links">
         <a href="{% url 'planner:study_timer' %}">← Back to Timer</a> |
+        <a href="{% url 'planner:study_streaks' %}">🔥 Streaks</a> |
         <a href="{% url 'planner:study_history' %}">View History</a> |
         <a href="{% url 'planner:home' %}">Home</a>
     </div>
@@ -103,6 +104,10 @@
         <div class="stat-card">
             <div class="stat-label">Total Sessions</div>
             <div class="stat-value">{{ total_sessions }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value">{{ current_streak }} 🔥</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Today</div>

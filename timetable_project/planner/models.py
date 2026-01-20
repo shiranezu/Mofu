@@ -107,5 +107,98 @@ class StudySession(models.Model):
         seconds = self.duration_seconds % 60
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     
+    @staticmethod
+    def get_user_streak(user):
+        """Calculate the user's current study streak"""
+        from datetime import date, timedelta
+        
+        # Get all completed sessions for this user, ordered by date
+        sessions = StudySession.objects.filter(
+            user=user, 
+            is_active=False
+        ).order_by('-start_time')
+        
+        if not sessions.exists():
+            return 0
+        
+        # Get unique dates that have study sessions
+        study_dates = set()
+        for session in sessions:
+            study_dates.add(session.start_time.date())
+        
+        # Sort dates in descending order
+        study_dates = sorted(study_dates, reverse=True)
+        
+        # Check if user studied today or yesterday (to keep streak alive)
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        if today not in study_dates and yesterday not in study_dates:
+            return 0  # Streak broken
+        
+        # Count consecutive days
+        streak = 0
+        current_date = today if today in study_dates else yesterday
+        
+        while current_date in study_dates:
+            streak += 1
+            current_date -= timedelta(days=1)
+        
+        return streak
+    
+    @staticmethod
+    def get_longest_streak(user):
+        """Calculate the user's longest streak ever"""
+        from datetime import timedelta
+        
+        sessions = StudySession.objects.filter(
+            user=user,
+            is_active=False
+        ).order_by('start_time')
+        
+        if not sessions.exists():
+            return 0
+        
+        # Get unique dates
+        study_dates = sorted(set(session.start_time.date() for session in sessions))
+        
+        if not study_dates:
+            return 0
+        
+        longest_streak = 1
+        current_streak = 1
+        
+        for i in range(1, len(study_dates)):
+            if study_dates[i] - study_dates[i-1] == timedelta(days=1):
+                current_streak += 1
+                longest_streak = max(longest_streak, current_streak)
+            else:
+                current_streak = 1
+        
+        return longest_streak
+    
+    class Meta:
+        ordering = ['-start_time']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     class Meta:
         ordering = ['-start_time']

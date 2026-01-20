@@ -455,6 +455,9 @@ def study_statistics(request):
     total_sessions = sessions.count()
     total_seconds = sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
     total_hours = total_seconds / 3600
+
+    # Streak data
+    current_streak = StudySession.get_user_streak(request.user)
     
     # Today's stats
     today = timezone.now().date()
@@ -472,10 +475,9 @@ def study_statistics(request):
         session_count=Count('id')
     ).order_by('-total_seconds')
     
-    # Convert to list and add hours calculation
     category_stats_list = list(category_stats)
     for stat in category_stats_list:
-        stat['total_hours'] = round(stat['total_seconds'] / 3600, 2)
+        stat['total_hours'] = round(stat['total_seconds'] / 3600, 2) # Convert to list and add hours calculation
     
     # Prepare data for pie chart (study time by category)
     category_labels = []
@@ -506,6 +508,7 @@ def study_statistics(request):
         'total_hours': round(total_hours, 2),
         'today_seconds': today_seconds,
         'week_seconds': week_seconds,
+        'current_streak': current_streak, 
         'category_labels': json.dumps(category_labels),
         'category_data': json.dumps(category_data),
         'category_colors': json.dumps(category_colors),
@@ -515,6 +518,42 @@ def study_statistics(request):
     }
     
     return render(request, 'study/statistics.html', context)
+
+@login_required(login_url='planner:login')
+def study_streaks(request):
+    """View study streaks and streak statistics"""
+    current_streak = StudySession.get_user_streak(request.user)
+    longest_streak = StudySession.get_longest_streak(request.user)
+    
+    # Get study dates for calendar visualization
+    sessions = StudySession.objects.filter(user=request.user, is_active=False)
+    study_dates = set(session.start_time.date() for session in sessions)
+    
+    # Last 30 days calendar data
+    today = timezone.now().date()
+    calendar_data = []
+    
+    for i in range(29, -1, -1):
+        date = today - timedelta(days=i)
+        studied = date in study_dates
+        calendar_data.append({
+            'date': date,
+            'studied': studied,
+            'day': date.strftime('%a'),
+            'day_num': date.day
+        })
+    
+    # Calculate total study days
+    total_study_days = len(study_dates)
+    
+    context = {
+        'current_streak': current_streak,
+        'longest_streak': longest_streak,
+        'total_study_days': total_study_days,
+        'calendar_data': calendar_data,
+    }
+    
+    return render(request, 'study/streaks.html', context)
 
 
 # Authentication Views
