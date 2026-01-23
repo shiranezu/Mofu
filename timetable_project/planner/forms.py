@@ -1,5 +1,5 @@
 from django import forms
-from .models import Subject_and_location, Timeslot, DAYS_OF_WEEK, ScheduleItem, Schedule, StudyCategory, StudySession 
+from .models import StudyGoal, Subject_and_location, Timeslot, DAYS_OF_WEEK, ScheduleItem, Schedule, StudyCategory, StudySession 
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -61,3 +61,18 @@ class StudySessionForm(forms.ModelForm):
     class Meta:
         model = StudySession
         fields = ['category', 'notes']
+
+class StudyGoalForm(forms.ModelForm):
+    class Meta:
+        model = StudyGoal
+        fields = ['goal_type', 'target_hours', 'category']
+        widgets = {
+            'target_hours': forms.NumberInput(attrs={'step': '0.5', 'min': '0.5'})
+        }
+        
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
+            self.fields['category'].required = False

@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date, timedelta
+from django.utils import timezone
+from django.db.models import Sum
 
 DAYS_OF_WEEK=[
     ('Monday', 'Monday'),
@@ -110,7 +113,6 @@ class StudySession(models.Model):
     @staticmethod
     def get_user_streak(user):
         """Calculate the user's current study streak"""
-        from datetime import date, timedelta
         
         # Get all completed sessions for this user, ordered by date
         sessions = StudySession.objects.filter(
@@ -180,25 +182,66 @@ class StudySession(models.Model):
     class Meta:
         ordering = ['-start_time']
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Study Goals Model
+class StudyGoal(models.Model):
+    GOAL_TYPE_CHOICES = [
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goal_type = models.CharField(max_length=10, choices=GOAL_TYPE_CHOICES)
+    target_hours = models.DecimalField(max_digits=5, decimal_places=2)
+    category = models.ForeignKey(StudyCategory, on_delete=models.CASCADE, null=True, blank=True)  # Goal for specific category
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        category_str = f" - {self.category.name}" if self.category else ""
+        return f"{self.user.username} - {self.goal_type} goal: {self.target_hours}h{category_str}"
+    
+    def get_progress(self):
+        """Calculate current progress towards this goal"""
+        
+        now = timezone.now()
+        
+        if self.goal_type == 'daily':
+            # Get today's sessions
+            start_date = now.date()
+            sessions = StudySession.objects.filter(
+                user=self.user,
+                is_active=False,
+                start_time__date=start_date
+            )
+        else:  # weekly
+            # Get this week's sessions (Monday to Sunday)
+            start_of_week = now.date() - timedelta(days=now.weekday())
+            sessions = StudySession.objects.filter(
+                user=self.user,
+                is_active=False,
+                start_time__date__gte=start_of_week
+            )
+        
+        # Filter by category if goal is category-specific
+        if self.category:
+            sessions = sessions.filter(category=self.category)
+        
+        # Calculate total hours
+        total_seconds = sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+        total_hours = total_seconds / 3600
+        
+        # Calculate percentage
+        if self.target_hours > 0:
+            percentage = min((total_hours / float(self.target_hours)) * 100, 100)
+        else:
+            percentage = 0
+        
+        return {
+            'current_hours': round(total_hours, 2),
+            'target_hours': float(self.target_hours),
+            'percentage': round(percentage, 1),
+            'remaining_hours': max(float(self.target_hours) - total_hours, 0)
+        }
+    
     class Meta:
-        ordering = ['-start_time']
+        ordering = ['-created_at']

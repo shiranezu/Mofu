@@ -42,6 +42,13 @@ urlpatterns = [
     # statistics
     path('study/statistics/', views.study_statistics, name='study_statistics'),
     
+    # Study Goals
+    path('study/goals/', views.study_goals, name='study_goals'),
+    path('study/goals/add/', views.add_goal, name='add_goal'),
+    path('study/goals/<int:goal_id>/edit/', views.edit_goal, name='edit_goal'),
+    path('study/goals/<int:goal_id>/delete/', views.delete_goal, name='delete_goal'),
+    path('study/goals/<int:goal_id>/toggle/', views.toggle_goal, name='toggle_goal'),
+    
     # Other Pages
     path('help/', views.help, name='help'),
 

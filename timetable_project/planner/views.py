@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout, login, authenticate
-from .models import Timetable, TimetableEntry, Timeslot, Schedule, ScheduleItem, StudyCategory, StudySession
-from .forms import Subject_and_locationForm, RegistrationForm, TimeslotForm, ScheduleForm, ScheduleItemForm, StudyCategoryForm, StudySessionForm
+from .models import StudyGoal, Timetable, TimetableEntry, Timeslot, Schedule, ScheduleItem, StudyCategory, StudySession
+from .forms import Subject_and_locationForm, RegistrationForm, TimeslotForm, ScheduleForm, ScheduleItemForm, StudyCategoryForm, StudySessionForm, StudyGoalForm
 from django.contrib.auth.decorators import login_required
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
@@ -508,7 +508,7 @@ def study_statistics(request):
         'total_hours': round(total_hours, 2),
         'today_seconds': today_seconds,
         'week_seconds': week_seconds,
-        'current_streak': current_streak, 
+        'current_streak': current_streak,
         'category_labels': json.dumps(category_labels),
         'category_data': json.dumps(category_data),
         'category_colors': json.dumps(category_colors),
@@ -554,6 +554,83 @@ def study_streaks(request):
     }
     
     return render(request, 'study/streaks.html', context)
+
+
+@login_required(login_url='planner:login')
+def study_goals(request):
+    """View and manage study goals"""
+    goals = StudyGoal.objects.filter(user=request.user, is_active=True)
+    
+    # Calculate progress for each goal
+    goals_with_progress = []
+    for goal in goals:
+        progress = goal.get_progress()
+        goals_with_progress.append({
+            'goal': goal,
+            'progress': progress
+        })
+    
+    context = {
+        'goals_with_progress': goals_with_progress,
+    }
+    return render(request, 'study/goals.html', context)
+
+
+@login_required(login_url='planner:login')
+def add_goal(request):
+    """Add a new study goal"""
+    form = StudyGoalForm(request.POST or None, user=request.user)
+    
+    if form.is_valid():
+        goal = form.save(commit=False)
+        goal.user = request.user
+        goal.save()
+        messages.success(request, "Goal created successfully!")
+        return redirect('planner:study_goals')
+    
+    return render(request, 'add_generic.html', {'form': form, 'title': 'Create Study Goal'})
+
+
+@login_required(login_url='planner:login')
+def edit_goal(request, goal_id):
+    """Edit an existing study goal"""
+    goal = get_object_or_404(StudyGoal, id=goal_id, user=request.user)
+    form = StudyGoalForm(request.POST or None, instance=goal, user=request.user)
+    
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Goal updated successfully!")
+        return redirect('planner:study_goals')
+    
+    return render(request, 'add_generic.html', {'form': form, 'title': 'Edit Study Goal'})
+
+
+@login_required(login_url='planner:login')
+def delete_goal(request, goal_id):
+    """Delete a study goal"""
+    goal = get_object_or_404(StudyGoal, id=goal_id, user=request.user)
+    
+    if request.method == 'POST':
+        goal.delete()
+        messages.success(request, "Goal deleted successfully!")
+        return redirect('planner:study_goals')
+    
+    return render(request, 'confirm_delete.html', {
+        'object': goal,
+        'type': 'goal'
+    })
+
+
+@login_required(login_url='planner:login')
+def toggle_goal(request, goal_id):
+    """Toggle goal active/inactive status"""
+    goal = get_object_or_404(StudyGoal, id=goal_id, user=request.user)
+    goal.is_active = not goal.is_active
+    goal.save()
+    
+    status = "activated" if goal.is_active else "deactivated"
+    messages.success(request, f"Goal {status} successfully!")
+    return redirect('planner:study_goals')
 
 
 # Authentication Views
