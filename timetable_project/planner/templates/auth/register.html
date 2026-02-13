@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Registration</title>
-</head>
-<body>
-     <form method="POST">
+{% extends 'auth/base_auth.html' %}
+
+{% block title %}Register - Sachi{% endblock %}
+
+{% block content %}
+    <h2>Create an Account</h2>
+    <form method="POST">
         {% csrf_token %}
-        {{form}}
+        {{ form.as_p }}
         <br>
         <button>Submit</button>
+        <p>Already registered? <a href="{% url 'planner:login' %}">Login</a></p>
     </form>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Session Details - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Study Session Details</h1>
+
+    <p><strong>Date:</strong> {{ session.start_time|date:"l, F d, Y" }}</p>
+    <p><strong>Time:</strong> {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</p>
+    <p><strong>Duration:</strong> {{ session.get_duration_display }}</p>
+    <p><strong>Category:</strong> {% if session.category %}{{ session.category.name }}{% else %}No Category{% endif %}</p>
+    {% if session.is_pomodoro %}
+        <p><strong>Pomodoros Completed:</strong> {{ session.pomodoros_completed }}</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Notes:</h3>
+    {% if session.notes %}
+        <p>{{ session.notes|linebreaks }}</p>
+    {% else %}
+        <p><em>No notes for this session.</em></p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'planner:edit_session_notes' session.id %}">Edit Notes</a> |
+    <a href="{% url 'planner:study_history' %}">← Back to History</a>
+{% endblock %}

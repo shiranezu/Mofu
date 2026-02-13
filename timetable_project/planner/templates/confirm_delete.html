@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm delete</title>
-</head>
-<body>
-    <h2>Are you sure you want to delete this timetable: "{{ object.name }}"?</h2>
+{% extends 'base.html' %}
 
+{% block title %}Confirm Delete - Sachi{% endblock %}
+
+{% block content %}
+    <h2>Are you sure you want to delete "{{ object.name }}"?</h2>
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Yes, delete</button>
-        <a href="{% url 'planner:home' %}">Cancel</a>
+        <button type="submit">Yes, Delete</button>
+        <a href="javascript:history.back()">Cancel</a>
     </form>
-</body>
-</html>
+{% endblock %}

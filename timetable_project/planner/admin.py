@@ -1,6 +1,9 @@
 from django.contrib import admin
-from .models import StudyGoal, Subject_and_location, Timeslot, TimetableEntry, Timetable, Schedule, ScheduleItem, StudyCategory, StudySession
-from .forms import Subject_and_locationForm, TimeslotForm, RegistrationForm, ScheduleForm, ScheduleItemForm
+from .models import (
+    Subject_and_location, Timeslot, TimetableEntry, Timetable,
+    Schedule, ScheduleItem, StudyCategory, StudySession,
+    StudyGoal, StudyResource
+)
 
 admin.site.register(Subject_and_location)
 admin.site.register(Timeslot)
@@ -11,5 +14,4 @@ admin.site.register(ScheduleItem)
 admin.site.register(StudyCategory)
 admin.site.register(StudySession)
 admin.site.register(StudyGoal)
-# Register your models here.
-
+admin.site.register(StudyResource)

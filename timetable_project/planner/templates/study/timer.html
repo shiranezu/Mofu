@@ -1,78 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Timer</title>
-    <style>
-        .timer-display {
-            font-size: 48px;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .timer-controls {
-            text-align: center;
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Study Timer - Sachi{% endblock %}
+
+{% block content %}
+    <!-- Clock Display -->
+    <div style="text-align: center; padding: 20px; border-bottom: 2px solid #ddd; margin-bottom: 20px;">
+        <div id="current-date" style="font-size: 16px; color: #666; margin-bottom: 5px;"></div>
+        <div id="current-clock" style="font-size: 32px; font-weight: bold; color: #2c3e50;"></div>
+    </div>
+
     <h1>Study Timer</h1>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            {% if message.tags == 'error' %}
-                <p style="color: red;">{{ message }}</p>
-            {% else %}
-                <p style="color: green;">{{ message }}</p>
-            {% endif %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
     {% if active_session %}
-        <div class="timer-display">
-            <p>Currently Studying: {% if active_session.category %}{{ active_session.category.name }}{% else %}No Category{% endif %}</p>
-            <p id="timer">00:00:00</p>
-        </div>
-        <div class="timer-controls">
-            <a href="{% url 'planner:stop_timer' active_session.id %}">
-                <button style="background-color: red; color: white;">Stop Session</button>
-            </a>
+        <p>Currently Studying: {% if active_session.category %}{{ active_session.category.name }}{% else %}No Category{% endif %}</p>
+        <p id="timer" style="font-size: 48px; font-weight: bold;">00:00:00</p>
+
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3>Session Notes</h3>
+            <form method="post" action="{% url 'planner:update_session_notes' active_session.id %}">
+                {% csrf_token %}
+                <textarea name="notes" rows="5" style="width: 100%;" placeholder="Add notes about what you're studying...">{{ active_session.notes|default:'' }}</textarea>
+                <br><br>
+                <button type="submit">Save Notes</button>
+            </form>
         </div>
 
-        <script>
-            let startTime = new Date("{{ active_session.start_time|date:'c' }}");
-            
-            function updateTimer() {
-                let now = new Date();
-                let diff = Math.floor((now - startTime) / 1000);
-                
-                let hours = Math.floor(diff / 3600);
-                let minutes = Math.floor((diff % 3600) / 60);
-                let seconds = diff % 60;
-                
-                document.getElementById('timer').textContent = 
-                    String(hours).padStart(2, '0') + ':' + 
-                    String(minutes).padStart(2, '0') + ':' + 
-                    String(seconds).padStart(2, '0');
-            }
-            
-            setInterval(updateTimer, 1000);
-            updateTimer();
-        </script>
+        <a href="{% url 'planner:stop_timer' active_session.id %}">
+            <button style="background-color: red; color: white;">Stop Session</button>
+        </a>
+        <a href="{% url 'planner:pomodoro_timer' %}">🍅 Switch to Pomodoro Mode</a>
     {% else %}
-        <div class="timer-display">
-            <p>Ready to study?</p>
-        </div>
-
+        <p>Ready to study?</p>
         <form method="post" action="{% url 'planner:start_timer' %}">
             {% csrf_token %}
             <label for="category">Select Category (optional):</label>
@@ -85,16 +43,95 @@
             <br><br>
             <button type="submit" style="background-color: green; color: white;">Start Session</button>
         </form>
+        <br>
+        <a href="{% url 'planner:pomodoro_timer' %}">Pomodoro Mode</a>
     {% endif %}
 
     <hr>
+    <a href="{% url 'planner:study_goals' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+            <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>
+            <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+        </svg>
+        Goals
+    </a> |
     <hr>
-    <hr>
-<a href="{% url 'planner:study_goals' %}">🎯 Goals</a> |
-<a href="{% url 'planner:study_streaks' %}">🔥 Streaks</a> |
-<a href="{% url 'planner:study_statistics' %}">📊 Statistics</a> |
-<a href="{% url 'planner:study_history' %}">View History</a> |
-<a href="{% url 'planner:manage_categories' %}">Manage Categories</a> |
-<a href="{% url 'planner:home' %}">Back to Home</a>
-</body>
-</html>
+    <a href="{% url 'planner:study_resources' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-plus" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
+            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
+        </svg>
+        Resources
+    </a> |
+    <a href="{% url 'planner:study_streaks' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fire" viewBox="0 0 16 16">
+            <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/>
+        </svg>
+        Streaks
+    </a> |
+    <a href="{% url 'planner:study_statistics' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
+            <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/>
+        </svg>
+        Stats
+    </a> |
+    <a href="{% url 'planner:study_history' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+            <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
+        </svg>
+        History
+    </a> |
+    <a href="{% url 'planner:manage_categories' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
+            <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
+            <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
+        </svg>
+        Manage Categories
+    </a> |
+    <a href="{% url 'planner:suggest_subjects' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
+            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/>
+            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/>
+        </svg>
+        Link Subjects
+    </a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current-clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    {% if active_session %}
+    let startTime = new Date("{{ active_session.start_time|date:'c' }}");
+
+    function updateTimer() {
+        let diff = Math.floor((new Date() - startTime) / 1000);
+        let h = Math.floor(diff / 3600);
+        let m = Math.floor((diff % 3600) / 60);
+        let s = diff % 60;
+        document.getElementById('timer').textContent =
+            String(h).padStart(2, '0') + ':' +
+            String(m).padStart(2, '0') + ':' +
+            String(s).padStart(2, '0');
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+    {% endif %}
+</script>
+{% endblock %}

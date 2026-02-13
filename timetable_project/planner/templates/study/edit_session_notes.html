@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Notes - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Edit Session Notes</h1>
+
+    <p><strong>Session:</strong> {{ session.start_time|date:"M d, Y H:i" }} - {{ session.get_duration_display }}</p>
+    <p><strong>Category:</strong> {% if session.category %}{{ session.category.name }}{% else %}No Category{% endif %}</p>
+
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Notes:</label><br>
+        <textarea name="notes" rows="10" style="width: 100%;" placeholder="Add your study notes here...">{{ session.notes|default:'' }}</textarea>
+        <br><br>
+        <button type="submit">Save Notes</button>
+    </form>
+
+    <br>
+    <a href="{% url 'planner:view_session' session.id %}">Cancel</a> |
+    <a href="{% url 'planner:study_history' %}">← Back to History</a>
+{% endblock %}

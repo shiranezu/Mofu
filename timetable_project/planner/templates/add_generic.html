@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create timetable</title>
-</head>
-<body>
-    
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Sachi{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
     <form method="post">
         {% csrf_token %}
         <input type="hidden" name="timetable" value="{{ timetable.id }}">
@@ -19,9 +16,6 @@
         {{ form.as_p }}
         <button type="submit">Save</button>
     </form>
-
-    <a href="{% url 'planner:home' %}">Back</a>
-
-
-</body>
-</html>
+    <br>
+    <a href="javascript:history.back()">← Back</a>
+{% endblock %}

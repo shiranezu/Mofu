@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Link Subjects - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Link Timetable Subjects to Categories</h1>
+
+    <p>Subjects from your timetables that aren't categories yet:</p>
+
+    <hr>
+
+    {% if suggested_subjects %}
+        <h2>Suggested Subjects ({{ suggested_subjects|length }})</h2>
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in suggested_subjects %}
+                <tr>
+                    <td>{{ subject }}</td>
+                    <td><a href="{% url 'planner:quick_add_category' subject %}">+ Add as Category</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <form method="post" action="{% url 'planner:bulk_add_categories' %}">
+            {% csrf_token %}
+            <button type="submit">✓ Add All as Categories</button>
+        </form>
+    {% else %}
+        <p>All timetable subjects are already categories! 🎉</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Existing Categories ({{ existing_categories|length }})</h3>
+    <ul>
+        {% for category in existing_categories %}
+            <li>{{ category }}</li>
+        {% empty %}
+            <li>No categories yet.</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <a href="{% url 'planner:manage_categories' %}">← Back to Categories</a>
+{% endblock %}

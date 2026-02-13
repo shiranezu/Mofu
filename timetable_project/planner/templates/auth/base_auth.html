@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sachi{% endblock %}</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <p style="color: red;">{{ message }}</p>
+            {% else %}
+                <p style="color: green;">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <p>Sachi &trade; | Powered by Ari Tech</p>
+    </footer>
+</body>
+</html>

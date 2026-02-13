@@ -1,62 +1,101 @@
-this is a Timetable/Schedule Planner I have been working on with the following pages
-1. Homepage (timetable done) 🌟
-2. Edit and create multiple timetables (done)🌟
-3. Edit and create schedule 🌟
-4. Download timetable and schedule 🌟
-5. Help page⭐
-6. Register page(Done)🌟
-7. Login Page (Done)🌟
-8. Study advisor & chatbot page
-9. reading section(this might involve multiple pages)
+# Sachi - A Study Productivity App
 
+A comprehensive study planner and productivity tracker built with Django.
 
-this will be the following functions:
-    On the homepage:
-        - user will be able to view their Table at the top of the page
-        - user will be able to view their schedule at the bottom of the page
-        - access other pages through the navbar
-        - logout
-    
-    On the edit pages:
-        - user will be able to update, add, and delete entries
-        - access other pages through the navbar
-    
-    On the download page:
-        - user will be able to download their timetables and schedules
-        - it will be like the homepage but with a download button at the bottom of both the timetable and schedule
-        - access other pages through the navbar
+## Features
 
-    On the advisor page:
-        - users will be able to ask the AI involved questions, and recieve answers from the app directly.
-    
-    On the Login page:
-        - user will be able to log into the website
-        - access the register page
+- **Timetable Planner** - Create and manage weekly schedules
+- **Task Manager** - Organize tasks with due dates
+- **Study Timer** - Track study sessions with categories
+- **Pomodoro Timer** - 25-minute focus sessions with breaks
+- **Statistics Dashboard** - Visualize study patterns with charts
+- **Study Streaks** - Track consecutive study days
+- **Study Goals** - Set daily/weekly targets with progress tracking
+- **Study Resources** - Quick access to study materials
+- **Session Notes** - Document what you studied
 
-    On the register page:
-        - user will be able to create an account for the website
-        - access the register page if he/she already has an active account
+## Installation
 
-    On the help page:
-        - directions on how to use the website functions will be displayed
-        - a search bar will be able to search for keywords within the page
-        - access the chatbot page
-        - My credits will be displayed at the bottom of the page
+### Prerequisites
+- Python 3.8+
+- pip
 
-    On the chatbot page:
-        - user will be able to ask for further help and directions concerning the functions 
+### Setup
 
-    on the reading section:
-        - user will have two options; simple reading and focused reading.
-        - in the simple reading;
-            . user will be able to time their reading from start to finish
-            . user will be able to save and view their reading statistics
-            . it functions as a counter. from 00:00:00 to nn:nn:nn
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/sachi.git
+cd sachi
+```
 
-        in the focused reading;
-            . user will be able to time their reading from start to finish
-            . user will be able to save and view their reading statistics
-            . user will not be able to use certain apps during the time alloted
-            . it will function as a countdown timer. from nn:nn:nn to 00:00:00 
+2. Create a virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-        Advancement: a user can create a study time session in their timetable or schedule and be alerted by the app
+3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+4. Create `.env` file
+```bash
+cp .env.example .env
+```
+
+5. Generate a new SECRET_KEY and add it to `.env`
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+6. Run migrations
+```bash
+python manage.py migrate
+```
+
+7. Create a superuser
+```bash
+python manage.py createsuperuser
+```
+
+8. Run the development server
+```bash
+python manage.py runserver
+```
+
+9. Visit `http://localhost:8000` in your browser
+
+## Usage
+
+1. Register an account or login
+2. Create your first timetable
+3. Add timeslots and courses
+4. Start tracking your study sessions with the timer
+5. Set goals and track your progress
+
+## Technologies Used
+
+- Django 5.x
+- SQLite (default database)
+- Chart.js (for statistics visualization)
+- ReportLab (PDF generation)
+- Python-decouple (environment variables)
+
+## Contributing
+
+This is a personal project, but suggestions and feedback are welcome!
+
+## License
+
+Released under the Apache License, Version 2.0
+
+## Credits
+
+Designed and developed by Ari
+Powered by Ari Tech™
+
+## Contact
+
+For inquiries, suggestions, or feedback:
+- Email: aweleoluonye@gmail.com

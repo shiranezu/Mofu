@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.title }} - Sachi{% endblock %}
+
+{% block content %}
+    <h1>{{ item.title }}</h1>
+
+    <p><strong>Status:</strong> {% if item.is_done %}✅ Completed{% else %}❌ Not Done{% endif %}</p>
+    <p><strong>Due Date:</strong> {% if item.due_date %}{{ item.due_date }}{% else %}No due date{% endif %}</p>
+
+    <hr>
+
+    <h3>Description:</h3>
+    {% if item.description %}
+        <p>{{ item.description|linebreaks }}</p>
+    {% else %}
+        <p><em>No description provided.</em></p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a> |
+    <a href="{% url 'planner:schedule_view' item.schedule.id %}">← Back to Schedule</a>
+{% endblock %}

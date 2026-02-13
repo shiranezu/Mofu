@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Pomodoro Timer - Sachi{% endblock %}
+
+{% block content %}
+    <!-- Clock Display -->
+    <div style="text-align: center; padding: 20px; border-bottom: 2px solid #ddd; margin-bottom: 20px;">
+        <div id="current-date" style="font-size: 16px; color: #666; margin-bottom: 5px;"></div>
+        <div id="current-clock" style="font-size: 32px; font-weight: bold; color: #2c3e50;"></div>
+    </div>
+
+    <h1>🍅 Pomodoro Timer</h1>
+
+    {% if active_session %}
+        <div style="text-align: center;">
+            <h2>Focus Session</h2>
+            <p><strong>Category:</strong> {% if active_session.category %}{{ active_session.category.name }}{% else %}General Study{% endif %}</p>
+            <p><strong>Pomodoros Completed:</strong> {{ active_session.pomodoros_completed }}</p>
+
+            <div style="margin: 30px 0;">
+                <div id="timer" style="font-size: 72px; font-weight: bold; color: #e74c3c;">25:00</div>
+                <div id="timer-label" style="font-size: 24px; margin-top: 10px;">Work Time</div>
+            </div>
+
+            <div style="margin: 20px auto; max-width: 600px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                <h3>Session Notes</h3>
+                <form method="post" action="{% url 'planner:update_session_notes' active_session.id %}">
+                    {% csrf_token %}
+                    <textarea name="notes" rows="4" style="width: 100%;" placeholder="What are you working on?">{{ active_session.notes|default:'' }}</textarea>
+                    <br><br>
+                    <button type="submit">Save Notes</button>
+                </form>
+            </div>
+
+            <a href="{% url 'planner:complete_pomodoro' active_session.id %}">
+                <button>✓ Complete Pomodoro</button>
+            </a>
+            <br><br>
+            <a href="{% url 'planner:stop_pomodoro' active_session.id %}">
+                <button>Stop Session</button>
+            </a>
+        </div>
+    {% else %}
+        <div style="text-align: center; margin: 50px 0;">
+            <h2>Start Your Pomodoro Session</h2>
+            <p>Work for 25 minutes, then take a 5-minute break.</p>
+            <p>After 4 pomodoros, take a longer 15-minute break.</p>
+
+            <form method="post" action="{% url 'planner:start_pomodoro' %}">
+                {% csrf_token %}
+                <label>Select Category (optional):</label><br>
+                <select name="category">
+                    <option value="">No Category</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+                <button type="submit">🍅 Start Pomodoro</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <hr>
+    <a href="{% url 'planner:study_timer' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch" viewBox="0 0 16 16">
+            <path d="M8.5 5.6a.5.5 0 1 0-1 0v2.9h-3a.5.5 0 0 0 0 1H8a.5.5 0 0 0 .5-.5z"/>
+            <path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64l.012-.013.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5M8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3"/>
+        </svg>
+        Use Regular Timer
+    </a>|
+    <a href="{% url 'planner:study_resources' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-plus" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
+            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
+        </svg>
+        Resources
+    </a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current-clock').textContent = `${h}:${m}:${s}`;
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    {% if active_session %}
+    let pomodoroSeconds = 25 * 60;
+    let breakSeconds = 5 * 60;
+    let longBreakSeconds = 15 * 60;
+    let isBreak = false;
+    let currentSeconds = pomodoroSeconds;
+    let pomodorosCompleted = {{ active_session.pomodoros_completed }};
+
+    function updatePomodoroTimer() {
+        let mins = Math.floor(currentSeconds / 60);
+        let secs = currentSeconds % 60;
+        document.getElementById('timer').textContent =
+            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+        if (currentSeconds > 0) {
+            currentSeconds--;
+        } else {
+            if (!isBreak) {
+                alert('Pomodoro completed! Take a break.');
+                currentSeconds = (pomodorosCompleted + 1) % 4 === 0 ? longBreakSeconds : breakSeconds;
+                document.getElementById('timer-label').textContent = (pomodorosCompleted + 1) % 4 === 0 ? 'Long Break (15 min)' : 'Short Break (5 min)';
+                isBreak = true;
+            } else {
+                alert('Break over! Ready for another pomodoro?');
+                currentSeconds = pomodoroSeconds;
+                document.getElementById('timer-label').textContent = 'Work Time';
+                isBreak = false;
+            }
+        }
+    }
+
+    setInterval(updatePomodoroTimer, 1000);
+    updatePomodoroTimer();
+    {% endif %}
+</script>
+{% endblock %}

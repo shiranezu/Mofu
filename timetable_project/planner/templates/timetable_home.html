@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Timetables - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Timetables</h1>
+
+    <a href="{% url 'planner:create_timetable' %}">+ Create New Timetable</a>
+
+    <hr>
+
+    <h2>Your Timetables</h2>
+    <ul>
+        {% for timetable in timetables %}
+            <li>
+                <a href="{% url 'planner:timetable_view' timetable.id %}">{{ timetable.name }}</a>
+                <a href="{% url 'planner:delete_timetable' timetable.id %}">Delete</a>
+            </li>
+        {% empty %}
+            <li>No timetables yet.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
