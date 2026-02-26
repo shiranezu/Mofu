@@ -23,4 +23,6 @@ from .study_views import (
     pomodoro_timer, start_pomodoro, complete_pomodoro, stop_pomodoro,
     study_resources, add_resource, edit_resource, delete_resource
 )
-from .general_views import home, help
+from .general_views import home, help, my_account
+
+from .dictionary import dictionary

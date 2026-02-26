@@ -37,9 +37,4 @@
     {% else %}
         <p>No goals yet. Create your first study goal!</p>
     {% endif %}
-
-    <br>
-    <a href="{% url 'planner:study_timer' %}">← Back to Timer</a> |
-    <a href="{% url 'planner:study_statistics' %}">Statistics</a> |
-    <a href="{% url 'planner:study_streaks' %}">Streaks</a>
 {% endblock %}

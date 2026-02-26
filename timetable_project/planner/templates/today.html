@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Today - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Today - {{ day_name }}, {{ today_date|date:"F d, Y" }}</h1>
+
+    <!-- Active Session Alert -->
+    {% if active_session %}
+    <div>
+        <strong>Study session in progress:</strong> 
+        {% if active_session.category %}{{ active_session.category.name }}{% else %}General Study{% endif %}
+        | <a href="{% url 'planner:study_timer' %}">Go to Timer</a>
+    </div>
+    <hr>
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <h2>Quick Stats</h2>
+    <ul>
+        <li>Study Time Today: <strong>{{ today_study_hours }}h</strong></li>
+        <li>Current Streak: <strong>{{ current_streak }} days</strong></li>
+        <li>Tasks Due: <strong>{{ today_tasks.count }}</strong></li>
+    </ul>
+
+    <hr>
+
+    <!-- Today's Goals -->
+    {% if goal_progress %}
+    <h2>Today's Goals</h2>
+    {% for item in goal_progress %}
+        <div>
+            <p>
+                <strong>
+                    {% if item.goal.category %}{{ item.goal.category.name }}{% else %}General{% endif %}
+                    - {{ item.goal.target_hours }}h
+                </strong>
+            </p>
+            <p>{{ item.progress.current_hours }}h / {{ item.progress.target_hours }}h ({{ item.progress.percentage }}%)</p>
+            <progress value="{{ item.progress.percentage }}" max="100"></progress>
+            <br><br>
+        </div>
+    {% endfor %}
+    <hr>
+    {% endif %}
+
+    <!-- Today's Classes -->
+    <h2>Today's Classes</h2>
+    {% if today_classes %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Subject</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in today_classes %}
+            <tr>
+                <td>{{ class.time }}</td>
+                <td><strong>{{ class.subject }}</strong></td>
+                <td>{{ class.location }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No classes scheduled for today.</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- Today's Tasks -->
+    <h2>Tasks Due Today (or Overdue)</h2>
+    {% if today_tasks %}
+    <ul>
+        {% for task in today_tasks %}
+        <li>
+            <strong>{{ task.title }}</strong> - {{ task.schedule.name }}
+            {% if task.due_date < today_date %}
+                <span>(Overdue)</span>
+            {% endif %}
+            | <a href="{% url 'planner:schedule_view' task.schedule.id %}">View</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No tasks due today. Great job!</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- Quick Actions -->
+    <h2>Quick Actions</h2>
+    <ul>
+        <li><a href="{% url 'planner:study_timer' %}">Start Timer</a></li>
+        <li><a href="{% url 'planner:pomodoro_timer' %}">Start Pomodoro</a></li>
+        <li><a href="{% url 'planner:schedule_home' %}">Add Task</a></li>
+        <li><a href="{% url 'planner:dictionary' %}">Dictionary</a></li>
+    </ul>
+{% endblock %}

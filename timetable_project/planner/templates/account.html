@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}My Account - Sachi{% endblock %}
+
+{% block content %}
+    <h1>My Account</h1>
+
+    <hr>
+
+    <!-- User Info -->
+    <h2>Profile Information</h2>
+    <table>
+        <tr>
+            <td><strong>Username:</strong></td>
+            <td>{{ user.username }}</td>
+        </tr>
+        <tr>
+            <td><strong>Name:</strong></td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Email:</strong></td>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <td><strong>Member Since:</strong></td>
+            <td>{{ user.date_joined|date:"F d, Y" }} ({{ account_age }} days ago)</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <!-- Study Statistics -->
+    <h2>Study Statistics</h2>
+    <table>
+        <tr>
+            <td><strong>Total Study Time:</strong></td>
+            <td>{{ total_hours }} hours</td>
+        </tr>
+        <tr>
+            <td><strong>Total Sessions:</strong></td>
+            <td>{{ total_sessions }}</td>
+        </tr>
+        <tr>
+            <td><strong>Current Streak:</strong></td>
+            <td>{{ current_streak }} days 🔥</td>
+        </tr>
+        <tr>
+            <td><strong>Longest Streak:</strong></td>
+            <td>{{ longest_streak }} days 🏆</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <!-- Content Statistics -->
+    <h2>Your Content</h2>
+    <table>
+        <tr>
+            <td><strong>Timetables:</strong></td>
+            <td>{{ timetables_count }}</td>
+        </tr>
+        <tr>
+            <td><strong>Schedules:</strong></td>
+            <td>{{ schedules_count }}</td>
+        </tr>
+        <tr>
+            <td><strong>Categories:</strong></td>
+            <td>{{ categories_count }}</td>
+        </tr>
+        <tr>
+            <td><strong>Study Resources:</strong></td>
+            <td>{{ resources_count }}</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <!-- Actions -->
+    <h2>Account Actions</h2>
+    <ul>
+        <li><a href="{% url 'planner:help' %}">Help & Support</a></li>
+        <li><a href="{% url 'planner:logout' %}">Logout</a></li>
+    </ul>
+{% endblock %}

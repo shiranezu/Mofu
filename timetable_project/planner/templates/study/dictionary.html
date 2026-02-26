@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dictionary - Sachi{% endblock %}
+
+{% block content %}
+    <h1>📖 Dictionary</h1>
+
+    <form method="get">
+        <input type="text" name="word" placeholder="Enter a word..." value="{{ search_word }}" required style="padding: 8px; font-size: 16px; width: 300px;">
+        <button type="submit" style="padding: 8px 20px; font-size: 16px;">Look Up</button>
+    </form>
+
+    <hr>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if definition_data %}
+        <div style="margin-top: 20px; padding: 20px; border: 2px solid #3498db; border-radius: 10px; background-color: #f8f9fa;">
+            <h2>{{ definition_data.word }}
+                {% if definition_data.phonetic %}
+                    <span style="color: #7f8c8d; font-size: 18px;">{{ definition_data.phonetic }}</span>
+                {% endif %}
+            </h2>
+            
+            <p><strong>Part of Speech:</strong> <em>{{ definition_data.part_of_speech }}</em></p>
+            
+            <h3>Definition:</h3>
+            <p>{{ definition_data.definition }}</p>
+            
+            {% if definition_data.example %}
+                <h3>Example:</h3>
+                <p style="font-style: italic; color: #555;">"{{ definition_data.example }}"</p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
