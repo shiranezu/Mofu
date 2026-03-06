@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Session Summary - Sachi{% endblock %}
+
+{% block content %}
+    <h1>Session Summary</h1>
+
+    <p>How did your study session go?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3>How would you describe this session?</h3>
+        <select name="session_tag">
+            <option value="">Select...</option>
+            <option value="productive">Productive</option>
+            <option value="struggled">Struggled</option>
+            <option value="review">Review</option>
+            <option value="learning">Learning New Material</option>
+            <option value="distracted">Distracted</option>
+        </select>
+
+        <h3>Productivity Rating</h3>
+        <label>
+            <input type="radio" name="productivity_rating" value="1"> 1 - Not productive
+        </label><br>
+        <label>
+            <input type="radio" name="productivity_rating" value="2"> 2 - Somewhat productive
+        </label><br>
+        <label>
+            <input type="radio" name="productivity_rating" value="3" checked> 3 - Moderately productive
+        </label><br>
+        <label>
+            <input type="radio" name="productivity_rating" value="4"> 4 - Very productive
+        </label><br>
+        <label>
+            <input type="radio" name="productivity_rating" value="5"> 5 - Extremely productive
+        </label>
+
+        <h3>Additional Notes (Optional)</h3>
+        <textarea name="notes" rows="5" style="width: 100%;" placeholder="What did you work on? Any reflections?">{{ session.notes|default:'' }}</textarea>
+
+        <br><br>
+        <button type="submit">Complete Session</button>
+        <a href="{% url 'planner:study_timer' %}">Skip & Complete</a>
+    </form>
+{% endblock %}

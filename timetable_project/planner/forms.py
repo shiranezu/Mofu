@@ -50,11 +50,10 @@ class ScheduleItemForm(forms.ModelForm):
     """Form for creating schedule items/tasks"""
     class Meta:
         model = ScheduleItem
-        fields = ["title", "description", "due_date", "is_done"]
+        fields = ["title", "description", "priority", "status", "due_date"]
         widgets = {
             "due_date": forms.DateInput(attrs={"type": "date"})
         }
-
 
 class StudyCategoryForm(forms.ModelForm):
     """Form for creating study categories"""

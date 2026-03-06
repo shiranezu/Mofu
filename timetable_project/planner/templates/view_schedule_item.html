@@ -5,8 +5,28 @@
 {% block content %}
     <h1>{{ item.title }}</h1>
 
-    <p><strong>Status:</strong> {% if item.is_done %}✅ Completed{% else %}❌ Not Done{% endif %}</p>
-    <p><strong>Due Date:</strong> {% if item.due_date %}{{ item.due_date }}{% else %}No due date{% endif %}</p>
+    <table>
+        <tr>
+            <td><strong>Priority:</strong></td>
+            <td>
+                {% if item.priority == 'high' %}
+                    <strong style="color: red;">High</strong>
+                {% elif item.priority == 'medium' %}
+                    <span style="color: orange;">Medium</span>
+                {% else %}
+                    <span style="color: green;">Low</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Status:</strong></td>
+            <td>{{ item.get_status_display }}</td>
+        </tr>
+        <tr>
+            <td><strong>Due Date:</strong></td>
+            <td>{% if item.due_date %}{{ item.due_date }}{% else %}No due date{% endif %}</td>
+        </tr>
+    </table>
 
     <hr>
 

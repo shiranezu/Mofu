@@ -13,32 +13,48 @@
 
     <h3>All Sessions</h3>
     <table border="1" style="width: 100%;">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Duration</th>
-                <th>Notes</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for session in sessions %}
-            <tr>
-                <td>{{ session.start_time|date:"M d, Y H:i" }}</td>
-                <td>{% if session.category %}{{ session.category.name }}{% else %}-{% endif %}</td>
-                <td>{{ session.get_duration_display }}</td>
-                <td>{{ session.notes|default:"-"|truncatewords:10 }}</td>
-                <td>
-                    <a href="{% url 'planner:view_session' session.id %}">View</a> |
-                    <a href="{% url 'planner:edit_session_notes' session.id %}">Edit Notes</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No study sessions yet. Start studying!</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Duration</th>
+            <th>Tag</th>
+            <th>Rating</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+        <tr>
+            <td>{{ session.start_time|date:"M d, Y H:i" }}</td>
+            <td>{% if session.category %}{{ session.category.name }}{% else %}-{% endif %}</td>
+            <td>{{ session.get_duration_display }}</td>
+            <td>
+                {% if session.session_tag %}
+                    {{ session.get_session_tag_display }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if session.productivity_rating %}
+                    {{ session.productivity_rating }}/5
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>{{ session.notes|default:"-"|truncatewords:10 }}</td>
+            <td>
+                <a href="{% url 'planner:view_session' session.id %}">View</a> |
+                <a href="{% url 'planner:edit_session_notes' session.id %}">Edit Notes</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No study sessions yet. Start studying!</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

@@ -20,7 +20,41 @@ def schedule_view(request, schedule_id):
     """View a specific schedule"""
     schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
     items = schedule.items.all().order_by("due_date", "id")
-    return render(request, "schedule_view.html", {"schedule": schedule, "items": items})
+    
+    from django.utils import timezone
+    today = timezone.now().date()
+    
+    return render(request, "schedule_view.html", {
+        "schedule": schedule, 
+        "items": items,
+        "today": today
+    })
+
+@login_required(login_url='planner:login')
+def quick_add_task(request):
+    """Quick add task from Today page"""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        priority = request.POST.get('priority', 'medium')
+        due_date = request.POST.get('due_date')
+        
+        # Get or create a default "Quick Tasks" schedule
+        schedule, created = Schedule.objects.get_or_create(
+            user=request.user,
+            name="Quick Tasks"
+        )
+        
+        ScheduleItem.objects.create(
+            schedule=schedule,
+            title=title,
+            priority=priority,
+            due_date=due_date if due_date else None,
+            status='not_started'
+        )
+        
+        messages.success(request, f"Task '{title}' added!")
+    
+    return redirect('planner:home')
 
 
 @login_required(login_url='planner:login')

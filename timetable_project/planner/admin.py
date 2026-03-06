@@ -15,3 +15,9 @@ admin.site.register(StudyCategory)
 admin.site.register(StudySession)
 admin.site.register(StudyGoal)
 admin.site.register(StudyResource)
+
+
+class StudySessionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'category', 'start_time', 'duration_seconds', 'is_active')
+    list_filter = ('user', 'is_active', 'category')
+    search_fields = ('user__username', 'notes')

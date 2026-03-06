@@ -77,9 +77,14 @@
     <ul>
         {% for task in today_tasks %}
         <li>
+            {% if task.priority == 'high' %}
+                <strong style="color: red;">[HIGH]</strong>
+            {% elif task.priority == 'medium' %}
+                <span style="color: orange;">[MED]</span>
+            {% endif %}
             <strong>{{ task.title }}</strong> - {{ task.schedule.name }}
             {% if task.due_date < today_date %}
-                <span>(Overdue)</span>
+                <span style="color: red;">(Overdue)</span>
             {% endif %}
             | <a href="{% url 'planner:schedule_view' task.schedule.id %}">View</a>
         </li>
@@ -89,14 +94,27 @@
     <p>No tasks due today. Great job!</p>
     {% endif %}
 
+
+    <h3>Quick Add Task</h3>
+    <form method="post" action="{% url 'planner:quick_add_task' %}">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Task title" required style="width: 300px;">
+        <select name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+        </select>
+        <input type="date" name="due_date">
+        <button type="submit">Add Task</button>
+    </form>
+
+
     <hr>
 
     <!-- Quick Actions -->
     <h2>Quick Actions</h2>
     <ul>
-        <li><a href="{% url 'planner:study_timer' %}">Start Timer</a></li>
         <li><a href="{% url 'planner:pomodoro_timer' %}">Start Pomodoro</a></li>
-        <li><a href="{% url 'planner:schedule_home' %}">Add Task</a></li>
         <li><a href="{% url 'planner:dictionary' %}">Dictionary</a></li>
     </ul>
 {% endblock %}

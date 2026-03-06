@@ -17,6 +17,10 @@
             <p><strong>Category:</strong> {% if active_session.category %}{{ active_session.category.name }}{% else %}General Study{% endif %}</p>
             <p><strong>Pomodoros Completed:</strong> {{ active_session.pomodoros_completed }}</p>
 
+            {% if active_session.is_paused %}
+                <p><strong style="color: orange;">⏸ PAUSED</strong></p>
+            {% endif %}
+
             <div style="margin: 30px 0;">
                 <div id="timer" style="font-size: 72px; font-weight: bold; color: #e74c3c;">25:00</div>
                 <div id="timer-label" style="font-size: 24px; margin-top: 10px;">Work Time</div>
@@ -32,9 +36,18 @@
                 </form>
             </div>
 
-            <a href="{% url 'planner:complete_pomodoro' active_session.id %}">
-                <button>✓ Complete Pomodoro</button>
-            </a>
+            {% if active_session.is_paused %}
+                <a href="{% url 'planner:resume_pomodoro' active_session.id %}">
+                    <button>▶ Resume</button>
+                </a>
+            {% else %}
+                <a href="{% url 'planner:pause_pomodoro' active_session.id %}">
+                    <button>⏸ Pause</button>
+                </a>
+                <a href="{% url 'planner:complete_pomodoro' active_session.id %}">
+                    <button>✓ Complete Pomodoro</button>
+                </a>
+            {% endif %}
             <br><br>
             <a href="{% url 'planner:stop_pomodoro' active_session.id %}">
                 <button>Stop Session</button>
@@ -68,7 +81,7 @@
             <path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64l.012-.013.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5M8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3"/>
         </svg>
         Use Regular Timer
-    </a>|
+    </a> |
     <a href="{% url 'planner:study_resources' %}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-plus" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
@@ -76,7 +89,7 @@
             <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
         </svg>
         Resources
-    </a>|
+    </a> |
     <a href="{% url 'planner:dictionary' %}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16">
             <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
@@ -101,32 +114,52 @@
     updateClock();
 
     {% if active_session %}
-    let pomodoroSeconds = 25 * 60;
-    let breakSeconds = 5 * 60;
-    let longBreakSeconds = 15 * 60;
+    const pomodoroSeconds = 25 * 60;
+    const breakSeconds = 5 * 60;
+    const longBreakSeconds = 15 * 60;
     let isBreak = false;
-    let currentSeconds = pomodoroSeconds;
     let pomodorosCompleted = {{ active_session.pomodoros_completed }};
 
-    function updatePomodoroTimer() {
-        let mins = Math.floor(currentSeconds / 60);
-        let secs = currentSeconds % 60;
-        document.getElementById('timer').textContent =
-            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    const startTime = new Date("{{ active_session.start_time|date:'c' }}");
+    const pausedSeconds = {{ active_session.paused_seconds }};
+    const isPaused = {{ active_session.is_paused|yesno:"true,false" }};
+    const pauseStartTime = {% if active_session.pause_start %}new Date("{{ active_session.pause_start|date:'c' }}"){% else %}null{% endif %};
 
-        if (currentSeconds > 0) {
-            currentSeconds--;
-        } else {
-            if (!isBreak) {
-                alert('Pomodoro completed! Take a break.');
-                currentSeconds = (pomodorosCompleted + 1) % 4 === 0 ? longBreakSeconds : breakSeconds;
-                document.getElementById('timer-label').textContent = (pomodorosCompleted + 1) % 4 === 0 ? 'Long Break (15 min)' : 'Short Break (5 min)';
-                isBreak = true;
+    function getElapsedStudySeconds() {
+        const now = new Date();
+        const totalElapsed = Math.floor((now - startTime) / 1000);
+        let currentPauseDuration = 0;
+        if (isPaused && pauseStartTime) {
+            currentPauseDuration = Math.floor((now - pauseStartTime) / 1000);
+        }
+        const totalPaused = pausedSeconds + currentPauseDuration;
+        return Math.max(totalElapsed - totalPaused - (pomodorosCompleted * 1500), 0);
+    }
+
+    let currentSeconds = Math.max(pomodoroSeconds - getElapsedStudySeconds(), 0);
+
+    function updatePomodoroTimer() {
+        if (!isPaused) {
+            const mins = Math.floor(currentSeconds / 60);
+            const secs = currentSeconds % 60;
+            document.getElementById('timer').textContent =
+                String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+            if (currentSeconds > 0) {
+                currentSeconds--;
             } else {
-                alert('Break over! Ready for another pomodoro?');
-                currentSeconds = pomodoroSeconds;
-                document.getElementById('timer-label').textContent = 'Work Time';
-                isBreak = false;
+                if (!isBreak) {
+                    alert('Pomodoro complete! Take a break.');
+                    currentSeconds = (pomodorosCompleted + 1) % 4 === 0 ? longBreakSeconds : breakSeconds;
+                    document.getElementById('timer-label').textContent =
+                        (pomodorosCompleted + 1) % 4 === 0 ? 'Long Break (15 min)' : 'Short Break (5 min)';
+                    isBreak = true;
+                } else {
+                    alert('Break over! Ready for another pomodoro?');
+                    currentSeconds = pomodoroSeconds;
+                    document.getElementById('timer-label').textContent = 'Work Time';
+                    isBreak = false;
+                }
             }
         }
     }

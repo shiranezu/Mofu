@@ -68,14 +68,36 @@ class Schedule(models.Model):
 
 class ScheduleItem(models.Model):
     """A single task in a schedule"""
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('not_started', 'Not Started'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name="items")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    is_done = models.BooleanField(default=False)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    is_done = models.BooleanField(default=False)  # Keep for backward compatibility
     due_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.title
+    
+    def save(self, *args, **kwargs):
+        # Auto-sync is_done with status
+        if self.status == 'completed':
+            self.is_done = True
+        else:
+            self.is_done = False
+        super().save(*args, **kwargs)
 
 
 class StudyCategory(models.Model):
@@ -93,12 +115,25 @@ class StudyCategory(models.Model):
 
 class StudySession(models.Model):
     """A recorded study session"""
+    SESSION_TAG_CHOICES = [
+        ('productive', 'Productive'),
+        ('struggled', 'Struggled'),
+        ('review', 'Review'),
+        ('learning', 'Learning New Material'),
+        ('distracted', 'Distracted'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(StudyCategory, on_delete=models.SET_NULL, null=True, blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True, blank=True)
     duration_seconds = models.IntegerField(default=0)
+    paused_seconds = models.IntegerField(default=0)  # time spent paused
+    is_paused = models.BooleanField(default=False)  # currently paused
+    pause_start = models.DateTimeField(null=True, blank=True)  # when pause started
     notes = models.TextField(blank=True, null=True)
+    session_tag = models.CharField(max_length=20, choices=SESSION_TAG_CHOICES, blank=True, null=True)  # NEW
+    productivity_rating = models.IntegerField(null=True, blank=True)  # 1-5 rating
     is_active = models.BooleanField(default=True)
     is_pomodoro = models.BooleanField(default=False)
     pomodoros_completed = models.IntegerField(default=0)
@@ -113,6 +148,11 @@ class StudySession(models.Model):
         minutes = (self.duration_seconds % 3600) // 60
         seconds = self.duration_seconds % 60
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    
+    def get_actual_study_time(self):
+        """Get study time minus paused time"""
+        actual_seconds = self.duration_seconds - self.paused_seconds
+        return max(actual_seconds, 0)
 
     @staticmethod
     def get_user_streak(user):

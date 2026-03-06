@@ -48,6 +48,9 @@ urlpatterns = [
     path('study/history/', views.study_history, name='study_history'),
     path('study/statistics/', views.study_statistics, name='study_statistics'),
     path('study/streaks/', views.study_streaks, name='study_streaks'),
+    path('study/pause/<int:session_id>/', views.pause_timer, name='pause_timer'),
+    path('study/resume/<int:session_id>/', views.resume_timer, name='resume_timer'),
+    path('study/stop-summary/<int:session_id>/', views.stop_timer_with_summary, name='stop_timer_with_summary'),
 
     # GOALS
     path('study/goals/', views.study_goals, name='study_goals'),
@@ -75,7 +78,12 @@ urlpatterns = [
     path('study/pomodoro/start/', views.start_pomodoro, name='start_pomodoro'),
     path('study/pomodoro/<int:session_id>/complete/', views.complete_pomodoro, name='complete_pomodoro'),
     path('study/pomodoro/<int:session_id>/stop/', views.stop_pomodoro, name='stop_pomodoro'),
+    path('study/pomodoro/<int:session_id>/pause/', views.pause_pomodoro, name='pause_pomodoro'),
+    path('study/pomodoro/<int:session_id>/resume/', views.resume_pomodoro, name='resume_pomodoro'),
 
     # DICTIONARY
     path('study/dictionary/', views.dictionary, name='dictionary'),
+
+    # QUICK ADD
+    path('schedule/quick-add/', views.quick_add_task, name='quick_add_task'),
 ]

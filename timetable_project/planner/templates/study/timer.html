@@ -3,19 +3,29 @@
 {% block title %}Study Timer - Sachi{% endblock %}
 
 {% block content %}
-    <!-- Clock Display -->
-    <div style="text-align: center; padding: 20px; border-bottom: 2px solid #ddd; margin-bottom: 20px;">
-        <div id="current-date" style="font-size: 16px; color: #666; margin-bottom: 5px;"></div>
-        <div id="current-clock" style="font-size: 32px; font-weight: bold; color: #2c3e50;"></div>
+    <div>
+        <div id="current-clock"></div>
     </div>
 
     <h1>Study Timer</h1>
 
     {% if active_session %}
+        {% if active_session.is_paused %}
+            <p>
+                <strong style="color: orange;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+                    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                 PAUSED
+                </strong>
+            </p>
+        {% endif %}
+        
         <p>Currently Studying: {% if active_session.category %}{{ active_session.category.name }}{% else %}No Category{% endif %}</p>
-        <p id="timer" style="font-size: 48px; font-weight: bold;">00:00:00</p>
+        <p id="timer">00:00:00</p>
+        <p><small>Time paused: <span id="paused-time">{{ active_session.paused_seconds }}</span>s</small></p>
 
-        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+        <div>
             <h3>Session Notes</h3>
             <form method="post" action="{% url 'planner:update_session_notes' active_session.id %}">
                 {% csrf_token %}
@@ -25,10 +35,36 @@
             </form>
         </div>
 
-        <a href="{% url 'planner:stop_timer' active_session.id %}">
-            <button style="background-color: red; color: white;">Stop Session</button>
-        </a>
-        <a href="{% url 'planner:pomodoro_timer' %}">🍅 Switch to Pomodoro Mode</a>
+        <div>
+            {% if active_session.is_paused %}
+                <a href="{% url 'planner:resume_timer' active_session.id %}">
+                    <button style="background-color: green; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+                            <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
+                        </svg>
+                         Resume
+                    </button>
+                </a>
+            {% else %}
+                <a href="{% url 'planner:pause_timer' active_session.id %}">
+                    <button style="background-color: orange; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+                            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                         Pause
+                    </button>
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'planner:stop_timer_with_summary' active_session.id %}">
+                <button style="background-color: red; color: white;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5"/>
+                    </svg>
+                     Stop Session
+                </button>
+            </a>
+        </div>
     {% else %}
         <p>Ready to study?</p>
         <form method="post" action="{% url 'planner:start_timer' %}">
@@ -41,19 +77,20 @@
                 {% endfor %}
             </select>
             <br><br>
-            <button type="submit" style="background-color: green; color: white;">Start Session</button>
+            <button type="submit">Start Session</button>
         </form>
-        <br>
-        <a href="{% url 'planner:pomodoro_timer' %}">Pomodoro Mode</a>
     {% endif %}
+<br>
+<a href="{% url 'planner:pomodoro_timer' %}">Pomodoro Mode</a>
 
-    || <a href="{% url 'planner:suggest_subjects' %}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
-            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/>
-            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/>
-        </svg>
-        Link Subjects
-    </a>
+<a href="{% url 'planner:manage_categories' %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
+        <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
+        <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
+    </svg>
+    Manage Categories
+</a>
+
 {% endblock %}
 
 {% block scripts %}
@@ -64,26 +101,37 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
         document.getElementById('current-clock').textContent = `${hours}:${minutes}:${seconds}`;
-
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
     }
 
     setInterval(updateClock, 1000);
     updateClock();
 
     {% if active_session %}
-    let startTime = new Date("{{ active_session.start_time|date:'c' }}");
+    const startTime = new Date("{{ active_session.start_time|date:'c' }}");
+    const pausedSeconds = {{ active_session.paused_seconds }};
+    const isPaused = {{ active_session.is_paused|yesno:"true,false" }};
+    const pauseStartTime = {% if active_session.pause_start %}new Date("{{ active_session.pause_start|date:'c' }}"){% else %}null{% endif %};
 
     function updateTimer() {
-        let diff = Math.floor((new Date() - startTime) / 1000);
-        let h = Math.floor(diff / 3600);
-        let m = Math.floor((diff % 3600) / 60);
-        let s = diff % 60;
+        const now = new Date();
+        const totalElapsed = Math.floor((now - startTime) / 1000);
+        let currentPauseDuration = 0;
+        if (isPaused && pauseStartTime) {
+            currentPauseDuration = Math.floor((now - pauseStartTime) / 1000);
+        }
+        const totalPaused = pausedSeconds + currentPauseDuration;
+        const actualStudyTime = Math.max(totalElapsed - totalPaused, 0);
+
+        const h = Math.floor(actualStudyTime / 3600);
+        const m = Math.floor((actualStudyTime % 3600) / 60);
+        const s = actualStudyTime % 60;
+
         document.getElementById('timer').textContent =
             String(h).padStart(2, '0') + ':' +
             String(m).padStart(2, '0') + ':' +
             String(s).padStart(2, '0');
+
+        document.getElementById('paused-time').textContent = totalPaused;
     }
 
     setInterval(updateTimer, 1000);

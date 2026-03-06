@@ -4,23 +4,71 @@
 
 {% block content %}
     <h2>{{ schedule.name }}</h2>
-    <ul>
-        {% for item in items %}
-        <li>
-            <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}" style="display:inline;">
-                {% csrf_token %}
-                <input type="checkbox" {% if item.is_done %}checked{% endif %} onchange="this.form.submit()">
-            </form>
-            {% if item.is_done %}<s>{{ item.title }}</s>{% else %}{{ item.title }}{% endif %}
-            {% if item.due_date %} (due {{ item.due_date }}){% endif %}
-            | <a href="{% url 'planner:view_schedule_item' item.id %}">View</a>
-            | <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a>
-            | <a href="{% url 'planner:delete_schedule_item' item.id %}">Delete</a>
-        </li>
-        {% endfor %}
-    </ul>
-
-    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a> |
+    
     <a href="{% url 'planner:add_schedule_item' schedule.id %}">+ Add Task</a> |
-    <a href="{% url 'planner:schedule_home' %}">← Back to Schedules</a>
+    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
+    
+    <hr>
+    
+    <h3>Tasks</h3>
+    
+    {% if items %}
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Task</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="checkbox" {% if item.is_done %}checked{% endif %} onchange="this.form.submit()">
+                        </form>
+                        {{ item.get_status_display }}
+                    </td>
+                    <td>
+                        {% if item.priority == 'high' %}
+                            <strong style="color: red;">High</strong>
+                        {% elif item.priority == 'medium' %}
+                            <span style="color: orange;">Medium</span>
+                        {% else %}
+                            <span style="color: green;">Low</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.is_done %}
+                            <s>{{ item.title }}</s>
+                        {% else %}
+                            {{ item.title }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.due_date %}
+                            {{ item.due_date }}
+                            {% if item.due_date < today and not item.is_done %}
+                                <strong style="color: red;">(Overdue)</strong>
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'planner:view_schedule_item' item.id %}">View</a> |
+                        <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a> |
+                        <a href="{% url 'planner:delete_schedule_item' item.id %}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tasks yet.</p>
+    {% endif %}
 {% endblock %}

@@ -47,12 +47,84 @@ def start_timer(request):
 
 
 @login_required(login_url='planner:login')
+def pause_timer(request, session_id):
+    """Pause an active study session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True)
+    
+    if not session.is_paused:
+        session.is_paused = True
+        session.pause_start = timezone.now()
+        session.save()
+        messages.success(request, "Timer paused")
+    
+    return redirect('planner:study_timer')
+
+
+@login_required(login_url='planner:login')
+def resume_timer(request, session_id):
+    """Resume a paused study session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True)
+    
+    if session.is_paused and session.pause_start:
+        
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+        session.is_paused = False
+        session.pause_start = None
+        session.save()
+        messages.success(request, "Timer resumed")
+    
+    return redirect('planner:study_timer')
+
+
+@login_required(login_url='planner:login')
+def stop_timer_with_summary(request, session_id):
+    """Stop timer with optional summary/feedback"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True)
+    
+    if request.method == 'POST':
+        # feedback form
+        session_tag = request.POST.get('session_tag')
+        productivity_rating = request.POST.get('productivity_rating')
+        notes = request.POST.get('notes', '')
+        
+        # Stop the session
+        session.end_time = timezone.now()
+        
+        # Calculate total elapsed time
+        elapsed = int((session.end_time - session.start_time).total_seconds())
+        
+        # If currently paused, add current pause time
+        if session.is_paused and session.pause_start:
+            pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+            session.paused_seconds += pause_duration
+        
+        session.duration_seconds = elapsed - session.paused_seconds  # Actual study time
+        session.session_tag = session_tag if session_tag else None
+        session.productivity_rating = int(productivity_rating) if productivity_rating else None
+        session.notes = notes
+        session.is_active = False
+        session.is_paused = False
+        session.save()
+        
+        messages.success(request, f"Session completed! Duration: {session.get_duration_display()}")
+        return redirect('planner:study_timer')
+    
+    return render(request, 'study/stop_session_summary.html', {'session': session})
+
+
+@login_required(login_url='planner:login')
 def stop_timer(request, session_id):
     """Stop a study session"""
     session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True)
     session.end_time = timezone.now()
-    session.duration_seconds = int((session.end_time - session.start_time).total_seconds())
+    elapsed = int((session.end_time - session.start_time).total_seconds())
+    if session.is_paused and session.pause_start:
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+    session.duration_seconds = elapsed - session.paused_seconds
     session.is_active = False
+    session.is_paused = False
     session.save()
     messages.success(request, f"Session completed! Duration: {session.get_duration_display()}")
     return redirect('planner:study_timer')
@@ -66,8 +138,9 @@ def update_session_notes(request, session_id):
         session.notes = request.POST.get('notes', '')
         session.save()
         messages.success(request, "Notes saved!")
+    if session.is_pomodoro:
+        return redirect('planner:pomodoro_timer')
     return redirect('planner:study_timer')
-
 
 @login_required(login_url='planner:login')
 def view_session(request, session_id):
@@ -366,15 +439,40 @@ def start_pomodoro(request):
 
 
 @login_required(login_url='planner:login')
+def pause_pomodoro(request, session_id):
+    """Pause an active pomodoro session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_pomodoro=True)
+    if not session.is_paused:
+        session.is_paused = True
+        session.pause_start = timezone.now()
+        session.save()
+        messages.success(request, "Pomodoro paused")
+    return redirect('planner:pomodoro_timer')
+
+
+@login_required(login_url='planner:login')
+def resume_pomodoro(request, session_id):
+    """Resume a paused pomodoro session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_pomodoro=True)
+    if session.is_paused and session.pause_start:
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+        session.is_paused = False
+        session.pause_start = None
+        session.save()
+        messages.success(request, "Pomodoro resumed")
+    return redirect('planner:pomodoro_timer')
+
+
+@login_required(login_url='planner:login')
 def complete_pomodoro(request, session_id):
-    """Complete a pomodoro"""
-    session = get_object_or_404(
-        StudySession,
-        id=session_id,
-        user=request.user,
-        is_active=True,
-        is_pomodoro=True
-    )
+    """Complete a pomodoro (mark one 25-min block done)"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_pomodoro=True)
+    if session.is_paused and session.pause_start:
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+        session.is_paused = False
+        session.pause_start = None
     session.duration_seconds += 1500
     session.pomodoros_completed += 1
     session.save()
@@ -385,23 +483,18 @@ def complete_pomodoro(request, session_id):
 @login_required(login_url='planner:login')
 def stop_pomodoro(request, session_id):
     """Stop a pomodoro session"""
-    session = get_object_or_404(
-        StudySession,
-        id=session_id,
-        user=request.user,
-        is_active=True,
-        is_pomodoro=True
-    )
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_pomodoro=True)
     session.end_time = timezone.now()
-    session.duration_seconds += int(
-        (session.end_time - session.start_time).total_seconds()
-    )
+    if session.is_paused and session.pause_start:
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+    elapsed = int((session.end_time - session.start_time).total_seconds())
+    partial_time = elapsed - session.paused_seconds - (session.pomodoros_completed * 1500)
+    session.duration_seconds += max(partial_time, 0)
     session.is_active = False
+    session.is_paused = False
     session.save()
-    messages.success(
-        request,
-        f"Session ended! {session.pomodoros_completed} pomodoros completed."
-    )
+    messages.success(request, f"Session ended! {session.pomodoros_completed} pomodoros completed.")
     return redirect('planner:pomodoro_timer')
 
 
