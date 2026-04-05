@@ -3,173 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Sachi{% endblock %}</title>
+    <title>{% block title %}Mofu{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     {% block head %}{% endblock %}
+    <style>
+        /* ─── CSS Variables ─────────────────────────────── */
+        :root {
+            --sidebar-bg:     #1e2540;
+            --sidebar-hover:  #2a3156;
+            --sidebar-active: #2e3660;
+            --sidebar-border: rgba(240, 231, 213, 0.08);
+            --accent:         #C4714A;
+            --accent-soft:    rgba(196, 113, 74, 0.15);
+
+            --cream:          #F0E7D5;
+            --cream-dark:     #e6dbc7;
+            --text-dark:      #1e2540;
+            --text-muted:     #8a8070;
+            --text-light:     #c8bfb0;
+
+            --content-bg:     #F0E7D5;
+            --card-bg:        #faf6ef;
+            --card-border:    rgba(30, 37, 64, 0.08);
+            --shadow:         0 2px 16px rgba(30, 37, 64, 0.07);
+            --shadow-md:      0 4px 24px rgba(30, 37, 64, 0.10);
+
+            --sidebar-width:     240px;
+            --sidebar-collapsed: 60px;
+            --radius:            10px;
+            --radius-sm:         6px;
+        }
+
+        /* ─── Reset ─────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--content-bg);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* ─── Sidebar ────────────────────────────────────── */
+        aside {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            border-right: 1px solid rgba(240, 231, 213, 0.05);
+            transition: width 0.25s ease;
+            overflow: hidden;
+        }
+
+        aside.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        aside.collapsed ~ main {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* Logo / User area */
+        .sidebar-top {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--sidebar-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        aside.collapsed .sidebar-top {
+            justify-content: center;
+            padding: 20px 0;
+            gap: 0;
+        }
+
+        aside.collapsed .logo-box {
+            display: none;
+        }
+
+        aside.collapsed .sidebar-username {
+            display: none;
+        }
+
+        aside.collapsed .sidebar-toggle {
+            margin-left: 0;
+        }
+
+        .logo-box {
+            width: 42px;
+            height: 42px;
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--sidebar-bg);
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-username {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--cream);
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Toggle button */
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(240, 231, 213, 0.6);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: color 0.18s ease, background 0.18s ease;
+        }
+
+        .sidebar-toggle:hover {
+            color: var(--cream);
+            background: rgba(240, 231, 213, 0.08);
+        }
+
+        /* Nav */
+        nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: calc(100vh - 90px);
+        }
+
+        nav::-webkit-scrollbar { width: 0; }
+
+        .nav-section {
+            margin-bottom: 4px;
+        }
+
+        .nav-section-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--cream);
+            padding: 10px 20px 6px;
+            display: block;
+            letter-spacing: 0.3px;
+            background: rgba(240, 231, 213, 0.05);
+            border-left: 2px solid var(--accent);
+            white-space: nowrap;
+            transition: opacity 0.2s ease, padding 0.2s ease;
+        }
+
+        aside.collapsed .nav-section-label {
+            height: 0;
+            padding: 0;
+            opacity: 0;
+            overflow: hidden;
+            border: none;
+            margin: 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0 10px 24px;
+            color: rgba(240, 231, 213, 0.65);
+            font-size: 13px;
+            font-weight: 400;
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+            border-left: 2px solid transparent;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .nav-link svg {
+            opacity: 0.7;
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            transition: opacity 0.18s ease;
+        }
+
+        .nav-link span {
+            transition: opacity 0.15s ease, width 0.15s ease;
+            overflow: hidden;
+        }
+
+        aside.collapsed .nav-link {
+            padding: 10px 0;
+            justify-content: center;
+            border-left-color: transparent !important;
+        }
+
+        aside.collapsed .nav-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        aside.collapsed nav {
+            padding: 8px 0;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: var(--cream);
+            border-left-color: var(--accent);
+        }
+
+        .nav-link:hover svg { opacity: 1; }
+
+        .nav-link.active {
+            background: var(--sidebar-active);
+            color: var(--cream);
+            border-left-color: var(--accent);
+            font-weight: 500;
+        }
+
+        .nav-link.active svg { opacity: 1; }
+
+        /* Tooltip when collapsed */
+        aside.collapsed .nav-link::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(var(--sidebar-collapsed) + 8px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--sidebar-bg);
+            color: var(--cream);
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--sidebar-border);
+            transition: opacity 0.15s ease;
+            z-index: 200;
+        }
+
+        aside.collapsed .nav-link:hover::after {
+            opacity: 1;
+        }
+
+        /* ─── Main content ───────────────────────────────── */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            padding: 36px 40px;
+            background: var(--content-bg);
+            transition: margin-left 0.25s ease;
+        }
+
+        /* ─── Messages ───────────────────────────────────── */
+        .messages {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 400;
+            border: 1px solid transparent;
+        }
+
+        .message.success {
+            background: rgba(122, 158, 126, 0.12);
+            border-color: rgba(122, 158, 126, 0.3);
+            color: #4a7a4e;
+        }
+
+        .message.error {
+            background: rgba(196, 113, 74, 0.10);
+            border-color: rgba(196, 113, 74, 0.3);
+            color: #a0482a;
+        }
+
+        .message.warning {
+            background: rgba(201, 168, 76, 0.10);
+            border-color: rgba(201, 168, 76, 0.3);
+            color: #8a6a1a;
+        }
+
+        /* ─── Typography helpers ─────────────────────────── */
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* ─── Cards ──────────────────────────────────────── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-sm {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* ─── Buttons ────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.18s ease;
+        }
+
+        .btn-primary {
+            background: var(--sidebar-bg);
+            color: var(--cream);
+        }
+
+        .btn-primary:hover {
+            background: var(--sidebar-active);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-accent:hover {
+            background: #b5623c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(196, 113, 74, 0.3);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-dark);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-ghost:hover {
+            background: var(--cream-dark);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #c0392b;
+            border: 1px solid rgba(192, 57, 43, 0.25);
+        }
+
+        .btn-danger:hover {
+            background: rgba(192, 57, 43, 0.08);
+        }
+
+        /* ─── Forms ──────────────────────────────────────── */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            color: var(--text-dark);
+            outline: none;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        /* ─── Tables ──────────────────────────────────────── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            background: transparent;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(30, 37, 64, 0.02); }
+
+        /* ─── Badges ─────────────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-high   { background: rgba(192,57,43,0.10); color: #c0392b; }
+        .badge-medium { background: rgba(201,168,76,0.12); color: #8a6a1a; }
+        .badge-low    { background: rgba(122,158,126,0.12); color: #4a7a4e; }
+        .badge-done   { background: rgba(122,158,126,0.12); color: #4a7a4e; }
+        .badge-progress { background: rgba(107,127,212,0.12); color: #4a5aa0; }
+        .badge-pending  { background: rgba(30,37,64,0.07); color: var(--text-muted); }
+
+        /* ─── Divider ─────────────────────────────────────── */
+        hr {
+            border: none;
+            border-top: 1px solid var(--card-border);
+            margin: 28px 0;
+        }
+
+        /* ─── Progress bar ───────────────────────────────── */
+        progress {
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        progress::-webkit-progress-bar {
+            background: var(--cream-dark);
+            border-radius: 10px;
+        }
+
+        progress::-webkit-progress-value {
+            background: var(--accent);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* ─── Scrollbar ───────────────────────────────────── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 10px; }
+
+        /* ─── Utility ─────────────────────────────────────── */
+        .flex { display: flex; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-center  { display: flex; align-items: center; }
+        .gap-8  { gap: 8px; }
+        .gap-12 { gap: 12px; }
+        .gap-16 { gap: 16px; }
+        .mt-8   { margin-top: 8px; }
+        .mt-16  { margin-top: 16px; }
+        .mt-24  { margin-top: 24px; }
+        .mb-16  { margin-bottom: 16px; }
+        .mb-24  { margin-bottom: 24px; }
+        .text-muted { color: var(--text-muted); font-size: 12px; }
+        .text-accent { color: var(--accent); }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
 </head>
 <body>
 
 {% if user.is_authenticated %}
-    <aside>
-        <h2>Sachi</h2>
-        <p>{{ user.username }}</p>
+<aside>
+    <div class="sidebar-top">
+        <div class="logo-box">M</div>
+        <span class="sidebar-username">{{ user.username }}</span>
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+            </svg>
+        </button>
+    </div>
 
-        <nav>
-            <h3>Main</h3>
-            <ul>
-                <li>
-                    <a href="{% url 'planner:home' %}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun" viewBox="0 0 16 16">
-                            <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/>
-                        </svg>
-                        Today
-                    </a>
-                </li>
-            </ul>
+    <nav>
+        <div class="nav-section">
+            <span class="nav-section-label">Home.</span>
+            <a href="{% url 'planner:home' %}" class="nav-link {% block nav_today %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/>
+                </svg>
+                <span>Today</span>
+            </a>
+        </div>
 
-            <h2>Plan</h2>
-    <ul>
-        <li>
-            <a href="{% url 'planner:timetable_home' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-table" viewBox="0 0 16 16">
+        <div class="nav-section">
+            <span class="nav-section-label">Plan.</span>
+            <a href="{% url 'planner:timetable_home' %}" class="nav-link {% block nav_timetable %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 2h-4v3h4zm0 4h-4v3h4zm0 4h-4v3h3a1 1 0 0 0 1-1zm-5 3v-3H6v3zm-5 0v-3H1v2a1 1 0 0 0 1 1zm-4-4h4V8H1zm0-4h4V4H1zm5-3v3h4V4zm4 4H6v3h4z"/>
                 </svg>
-                Manage Timetables
+                <span>Timetables</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:schedule_home' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-check" viewBox="0 0 16 16">
+            <a href="{% url 'planner:schedule_home' %}" class="nav-link {% block nav_schedule %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
                     <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
                 </svg>
-                Manage Schedules
+                <span>Schedules</span>
             </a>
-        </li>
-    </ul>
+        </div>
 
-    <h2>Focus</h2>
-    <ul>
-        <li>
-            <a href="{% url 'planner:study_timer' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch" viewBox="0 0 16 16">
+        <div class="nav-section">
+            <span class="nav-section-label">Focus.</span>
+            <a href="{% url 'planner:study_timer' %}" class="nav-link {% block nav_timer %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8.5 5.6a.5.5 0 1 0-1 0v2.9h-3a.5.5 0 0 0 0 1H8a.5.5 0 0 0 .5-.5z"/>
                     <path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64l.012-.013.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5M8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3"/>
                 </svg>
-                Timer
+                <span>Timer</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:dictionary' %}"> 
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16">
+            <a href="{% url 'planner:dictionary' %}" class="nav-link {% block nav_dictionary %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
                 </svg>
-                Dictionary
+                <span>Dictionary</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:study_resources' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-plus" viewBox="0 0 16 16">
+            <a href="{% url 'planner:study_resources' %}" class="nav-link {% block nav_resources %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
                     <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
                     <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
                 </svg>
-                 Resources
+                <span>Resources</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:study_goals' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16">
+            <a href="{% url 'planner:study_goals' %}" class="nav-link {% block nav_goals %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                     <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
                     <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>
                     <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
                 </svg>
-                Set Goals
+                <span>Goals</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:study_streaks' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fire" viewBox="0 0 16 16">
+            <a href="{% url 'planner:study_streaks' %}" class="nav-link {% block nav_streaks %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/>
                 </svg>
-                Streaks?
+                <span>Streaks?</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:study_statistics' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
+            <a href="{% url 'planner:study_statistics' %}" class="nav-link {% block nav_statistics %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/>
                 </svg>
-                Check Statistics
+                <span>Statistics</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:study_history' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+            <a href="{% url 'planner:study_history' %}" class="nav-link {% block nav_history %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
                 </svg>
-                View History
+                <span>History</span>
             </a>
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'planner:manage_categories' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
+            <a href="{% url 'planner:manage_categories' %}" class="nav-link {% block nav_categories %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
                     <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
                 </svg>
-                Manage Categories
+                <span>Categories</span>
             </a>
-        </li>
-    </ul>
+        </div>
 
-    <h2>Account</h2>
-    <ul>
-        <li>
-            <div class="sidebar-section">
-                <a href="{% url 'planner:my_account' %}" class="sidebar-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
-                    </svg>
-                    My Account
-                </a>
-            </div>
-        </li>
-    </ul>
-        </nav>
-    </aside>
+        <div class="nav-section">
+            <span class="nav-section-label">Account.</span>
+            <a href="{% url 'planner:my_account' %}" class="nav-link {% block nav_account %}{% endblock %}" data-tooltip="Today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                </svg>
+                <span>Me</span>
+            </a>
+        </div>
+    </nav>
+</aside>
 
-    <main>
+<main>
 {% else %}
-    <main>
+<main style="margin-left: 0;">
 {% endif %}
 
-        {% if messages %}
-        <div>
-            {% for message in messages %}
-                {% if message.tags == 'error' %}
-                    <p style="color: red;">{{ message }}</p>
-                {% elif message.tags == 'warning' %}
-                    <p style="color: orange;">{{ message }}</p>
-                {% else %}
-                    <p style="color: green;">{{ message }}</p>
-                {% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-        {% block content %}{% endblock %}
-    </main>
+    {% block content %}{% endblock %}
+
+</main>
 
 {% block scripts %}{% endblock %}
+
+<script>
+    const sidebar = document.querySelector('aside');
+    const mainEl  = document.querySelector('main');
+    const toggle  = document.getElementById('sidebarToggle');
+
+    // Persist state across pages
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        sidebar.classList.add('collapsed');
+        if (mainEl) mainEl.style.marginLeft = 'var(--sidebar-collapsed)';
+    }
+
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            if (mainEl) mainEl.style.marginLeft = isCollapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        });
+    }
+</script>
 
 </body>
 </html>

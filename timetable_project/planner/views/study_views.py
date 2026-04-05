@@ -17,8 +17,10 @@ def study_timer(request):
     categories = StudyCategory.objects.filter(user=request.user)
     active_session = StudySession.objects.filter(user=request.user, is_active=True, is_pomodoro=False).first()
     return render(request, 'study/timer.html', {
-        'categories': categories,
-        'active_session': active_session,
+    'categories': categories,
+    'active_session': active_session,
+    'show_stats_widget': True,
+    'today_study_hours': get_today_study_hours(request.user),
     })
 
 
@@ -174,9 +176,11 @@ def study_history(request):
         total=Sum('duration_seconds'))['total'] or 0
 
     return render(request, 'study/history.html', {
-        'sessions': sessions,
-        'today_total': today_total,
-        'week_total': week_total,
+    'sessions': sessions,
+    'today_total': today_total,
+    'week_total': week_total,
+    'show_stats_widget': True,
+    'today_study_hours': get_today_study_hours(request.user),
     })
 
 
@@ -232,6 +236,8 @@ def study_statistics(request):
         'daily_labels': json.dumps(last_7_days),
         'daily_data': json.dumps(daily_data),
         'category_stats': category_stats_list,
+        'show_stats_widget': True,
+        'today_study_hours': get_today_study_hours(request.user),
     })
 
 
@@ -265,7 +271,11 @@ def study_goals(request):
     """View and manage study goals"""
     goals = StudyGoal.objects.filter(user=request.user, is_active=True)
     goals_with_progress = [{'goal': g, 'progress': g.get_progress()} for g in goals]
-    return render(request, 'study/goals.html', {'goals_with_progress': goals_with_progress})
+    return render(request, 'study/goals.html', {
+    'goals_with_progress': goals_with_progress,
+    'show_stats_widget': True,
+    'today_study_hours': get_today_study_hours(request.user),
+})
 
 
 @login_required(login_url='planner:login')
@@ -409,8 +419,10 @@ def pomodoro_timer(request):
         is_pomodoro=True
     ).first()
     return render(request, 'study/pomodoro.html', {
-        'categories': categories,
-        'active_session': active_session,
+    'categories': categories,
+    'active_session': active_session,
+    'show_stats_widget': True,
+    'today_study_hours': get_today_study_hours(request.user),
     })
 
 
@@ -550,3 +562,14 @@ def delete_resource(request, resource_id):
         messages.success(request, "Resource deleted successfully!")
         return redirect('planner:study_resources')
     return render(request, 'confirm_delete.html', {'object': resource, 'type': 'resource'})
+
+
+def get_today_study_hours(user):
+    from django.utils import timezone
+    today = timezone.now().date()
+    total_seconds = StudySession.objects.filter(
+        user=user,
+        is_active=False,
+        start_time__date=today
+    ).aggregate(total=Sum('duration_seconds'))['total'] or 0
+    return round(total_seconds / 3600, 2)
