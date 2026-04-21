@@ -10,17 +10,42 @@ from ..forms import StudyResourceForm
 
 
 
-
 @login_required(login_url='planner:login')
 def study_timer(request):
     """Main timer page"""
+    from django.db.models import Sum
     categories = StudyCategory.objects.filter(user=request.user)
-    active_session = StudySession.objects.filter(user=request.user, is_active=True, is_pomodoro=False).first()
+    today = timezone.now().date()
+
+    active_session  = StudySession.objects.filter(
+        user=request.user, is_active=True,
+        is_pomodoro=False, is_countdown=False
+    ).first()
+    active_pomodoro = StudySession.objects.filter(
+        user=request.user, is_active=True, is_pomodoro=True
+    ).first()
+    active_countdown = StudySession.objects.filter(
+        user=request.user, is_active=True, is_countdown=True
+    ).first()
+
+    today_seconds = StudySession.objects.filter(
+        user=request.user, is_active=False,
+        start_time__date=today
+    ).aggregate(total=Sum('duration_seconds'))['total'] or 0
+
+    today_sessions_count = StudySession.objects.filter(
+        user=request.user, is_active=False,
+        start_time__date=today
+    ).count()
+
     return render(request, 'study/timer.html', {
-    'categories': categories,
-    'active_session': active_session,
-    'show_stats_widget': True,
-    'today_study_hours': get_today_study_hours(request.user),
+        'categories': categories,
+        'active_session': active_session,
+        'active_pomodoro': active_pomodoro,
+        'active_countdown': active_countdown,
+        'today_study_hours': round(today_seconds / 3600, 2),
+        'today_sessions_count': today_sessions_count,
+        'current_streak': StudySession.get_user_streak(request.user),
     })
 
 
@@ -269,13 +294,24 @@ def study_streaks(request):
 @login_required(login_url='planner:login')
 def study_goals(request):
     """View and manage study goals"""
-    goals = StudyGoal.objects.filter(user=request.user, is_active=True)
-    goals_with_progress = [{'goal': g, 'progress': g.get_progress()} for g in goals]
+    active_goals = StudyGoal.objects.filter(user=request.user, is_active=True)
+    inactive_goals = StudyGoal.objects.filter(user=request.user, is_active=False)
+
+    goals_with_progress = [{'goal': g, 'progress': g.get_progress()} for g in active_goals]
+    inactive_with_progress = [{'goal': g, 'progress': g.get_progress()} for g in inactive_goals]
+
+    # Average completion across active goals
+    avg_completion = 0
+    if goals_with_progress:
+        avg_completion = round(
+            sum(item['progress']['percentage'] for item in goals_with_progress) / len(goals_with_progress)
+        )
+
     return render(request, 'study/goals.html', {
-    'goals_with_progress': goals_with_progress,
-    'show_stats_widget': True,
-    'today_study_hours': get_today_study_hours(request.user),
-})
+        'goals_with_progress': goals_with_progress,
+        'inactive_goals': inactive_with_progress,
+        'avg_completion': avg_completion,
+    })
 
 
 @login_required(login_url='planner:login')
@@ -418,11 +454,18 @@ def pomodoro_timer(request):
         is_active=True,
         is_pomodoro=True
     ).first()
+
+    # Ring color shifts darker with each completed pomodoro
+    ring_colors = ['#C4714A', '#8B4A2F', '#5C2E18', '#422a20']
+    ring_color = '#C4714A'
+    if active_session:
+        idx = min(active_session.pomodoros_completed, len(ring_colors) - 1)
+        ring_color = ring_colors[idx]
+
     return render(request, 'study/pomodoro.html', {
-    'categories': categories,
-    'active_session': active_session,
-    'show_stats_widget': True,
-    'today_study_hours': get_today_study_hours(request.user),
+        'categories': categories,
+        'active_session': active_session,
+        'ring_color': ring_color,
     })
 
 
@@ -573,3 +616,67 @@ def get_today_study_hours(user):
         start_time__date=today
     ).aggregate(total=Sum('duration_seconds'))['total'] or 0
     return round(total_seconds / 3600, 2)
+
+
+@login_required(login_url='planner:login')
+def start_countdown(request):
+    """Start a countdown timer session"""
+    if request.method == 'POST':
+        category_id = request.POST.get('category')
+        hours = int(request.POST.get('hours', 0) or 0)
+        minutes = int(request.POST.get('minutes', 0) or 0)
+        target_seconds = (hours * 3600) + (minutes * 60)
+
+        if target_seconds <= 0:
+            messages.error(request, "Please set a valid duration.")
+            return redirect('planner:study_timer')
+
+        if StudySession.objects.filter(user=request.user, is_active=True).exists():
+            messages.warning(request, "You already have an active session!")
+            return redirect('planner:study_timer')
+
+        category = None
+        if category_id:
+            category = StudyCategory.objects.get(id=category_id, user=request.user)
+
+        StudySession.objects.create(
+            user=request.user,
+            category=category,
+            start_time=timezone.now(),
+            is_active=True,
+            is_countdown=True,
+            countdown_target_seconds=target_seconds
+        )
+        messages.success(request, "Countdown started!")
+    return redirect('planner:study_timer')
+
+
+# countdown timer
+@login_required(login_url='planner:login')
+def stop_countdown(request, session_id):
+    """Stop a countdown session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_countdown=True)
+    session.end_time = timezone.now()
+    elapsed = int((session.end_time - session.start_time).total_seconds())
+    if session.is_paused and session.pause_start:
+        pause_duration = int((timezone.now() - session.pause_start).total_seconds())
+        session.paused_seconds += pause_duration
+    session.duration_seconds = max(elapsed - session.paused_seconds, 0)
+    session.is_active = False
+    session.is_paused = False
+    session.save()
+    messages.success(request, f"Countdown ended! Studied for {session.get_duration_display()}")
+    return redirect('planner:study_timer')
+
+
+@login_required(login_url='planner:login')
+def complete_countdown(request, session_id):
+    """Mark countdown as naturally completed (reached zero)"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user, is_active=True, is_countdown=True)
+    session.end_time = timezone.now()
+    session.duration_seconds = session.countdown_target_seconds
+    session.is_active = False
+    session.is_paused = False
+    session.save()
+    messages.success(request, "Countdown complete! Great work.")
+    return redirect('planner:study_timer')

@@ -1,141 +1,885 @@
 {% extends 'base.html' %}
 
-{% block title %}Study Timer - Sachi{% endblock %}
+{% block title %}Timer — Mofu{% endblock %}
+{% block nav_timer %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Page Layout ────────────────────────────────── */
+    .timer-page {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
+        align-items: start;
+        margin-bottom: 20px;
+    }
+
+    /* ─── Mode Tabs ──────────────────────────────────── */
+    .timer-tabs {
+        display: flex;
+        gap: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 4px;
+        margin-bottom: 24px;
+        width: fit-content;
+    }
+
+    .timer-tab {
+        padding: 8px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--text-muted);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 400;
+    }
+
+    .timer-tab.active {
+        background: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+    }
+
+    /* ─── Timer Card ─────────────────────────────────── */
+    .timer-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        height: 520px;
+        justify-content: center;
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    /* ─── Ring Timer ─────────────────────────────────── */
+    .ring-wrap {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        margin-bottom: 28px;
+    }
+
+    .ring-svg {
+        width: 220px;
+        height: 220px;
+        transform: rotate(-90deg);
+    }
+
+    .ring-track {
+        fill: none;
+        stroke: var(--cream-dark, #e6dbc7);
+        stroke-width: 8;
+    }
+
+    .ring-progress {
+        fill: none;
+        stroke: var(--accent, #C4714A);
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1s linear;
+    }
+
+    .ring-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .ring-time {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 42px;
+        font-weight: 400;
+        color: var(--text-dark);
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+    .ring-label {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    /* ─── Status line ────────────────────────────────── */
+    .timer-status {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+    .timer-status strong {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .timer-paused-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(201, 168, 76, 0.12);
+        color: #8a6a1a;
+        border: 1px solid rgba(201, 168, 76, 0.3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    /* ─── Timer Controls ─────────────────────────────── */
+    .timer-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .ctrl-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1.5px solid var(--card-border);
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.18s ease;
+        text-decoration: none;
+    }
+
+    .ctrl-btn:hover {
+        border-color: var(--text-dark);
+        color: var(--text-dark);
+        background: rgba(30, 37, 64, 0.04);
+    }
+
+    .ctrl-btn.primary {
+        width: 54px;
+        height: 54px;
+        background: var(--sidebar-bg, #1e2540);
+        border-color: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+    }
+
+    .ctrl-btn.primary:hover {
+        background: #2a3156;
+        border-color: #2a3156;
+        color: var(--cream);
+    }
+
+    .ctrl-btn.danger {
+        border-color: rgba(192, 57, 43, 0.3);
+        color: #c0392b;
+    }
+
+    .ctrl-btn.danger:hover {
+        background: rgba(192, 57, 43, 0.08);
+        border-color: #c0392b;
+    }
+
+    /* ─── Start Form ─────────────────────────────────── */
+    .start-form {
+        width: 100%;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .start-form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        text-align: left;
+    }
+
+    .start-form-row label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+    }
+
+    .duration-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .duration-input-wrap {
+        position: relative;
+    }
+
+    .duration-input-wrap input {
+        text-align: center;
+        padding-right: 32px !important;
+    }
+
+    .duration-unit {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    .start-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        margin-top: 4px;
+    }
+
+    .start-btn:hover {
+        background: #2a3156;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+    }
+
+    /* ─── Pomodoro count ─────────────────────────────── */
+    .pomodoro-dots {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .pom-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--cream-dark);
+        border: 1.5px solid rgba(30, 37, 64, 0.15);
+    }
+
+    .pom-dot.done {
+        background: var(--accent);
+        border-color: var(--accent);
+    }
+
+    /* ─── Side Panel ─────────────────────────────────── */
+    .side-panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .side-notes-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        height: 520px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+    }
+
+    .side-notes-card .side-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .side-notes-card .notes-textarea {
+        flex: 1;
+        min-height: 0 !important;
+    }
+
+    .quick-links-bar {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 16px 24px;
+    }
+
+    .quick-links-bar-label {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-right: 8px;
+        white-space: nowrap;
+    }
+
+    .quick-links-bar a {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.15s;
+        white-space: nowrap;
+    }
+
+    .quick-links-bar a:hover { color: var(--accent); }
+
+    .side-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .side-card-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--card-border);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .side-card-body { padding: 16px 18px; }
+
+    /* Notes textarea */
+    .notes-textarea {
+        width: 100%;
+        min-height: 100px;
+        resize: vertical;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1.5px solid rgba(30, 37, 64, 0.15) !important;
+        border-radius: 0 !important;
+        font-size: 13px !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        padding: 4px 0 8px !important;
+        font-family: 'DM Sans', sans-serif !important;
+    }
+
+    .notes-textarea:focus {
+        border-bottom-color: var(--accent) !important;
+        box-shadow: none !important;
+    }
+
+    .notes-save-btn {
+        margin-top: 10px;
+        padding: 7px 16px;
+        background: transparent;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.18s;
+    }
+
+    .notes-save-btn:hover {
+        background: var(--cream-dark);
+        color: var(--text-dark);
+    }
+
+    /* Quick stats in side panel */
+    .quick-stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        font-size: 12px;
+    }
+
+    .quick-stat-row:last-child { border-bottom: none; }
+    .quick-stat-label { color: var(--text-muted); }
+    .quick-stat-value { font-weight: 500; color: var(--text-dark); }
+
+    /* Mode panels */
+    .mode-panel { display: none; }
+    .mode-panel.active { display: block; }
+
+{% endblock %}
 
 {% block content %}
-    <div>
-        <div id="current-clock"></div>
+
+    <!-- Page Title -->
+    <div style="border-left: 3px solid var(--accent); padding-left: 16px; margin-bottom: 28px;">
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:var(--text-dark);letter-spacing:-0.3px;line-height:1.1;margin-bottom:4px;">Timer.</h1>
+        <p style="font-size:12px;color:var(--text-muted);">Track your study sessions</p>
     </div>
 
-    <h1>Study Timer</h1>
+    <!-- Mode Tabs — only show if no active session -->
+    {% if not active_session and not active_pomodoro and not active_countdown %}
+    <div class="timer-tabs" style="margin-bottom: 24px;">
+        <button class="timer-tab active" onclick="switchMode('regular', this)">Regular</button>
+        <button class="timer-tab" onclick="switchMode('countdown', this)">Countdown</button>
+        <button class="timer-tab" onclick="switchMode('pomodoro', this)">Pomodoro</button>
+    </div>
+    {% endif %}
 
-    {% if active_session %}
-        {% if active_session.is_paused %}
-            <p>
-                <strong style="color: orange;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
-                    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
-                </svg>
-                 PAUSED
-                </strong>
-            </p>
-        {% endif %}
-        
-        <p>Currently Studying: {% if active_session.category %}{{ active_session.category.name }}{% else %}No Category{% endif %}</p>
-        <p id="timer">00:00:00</p>
-        <p><small>Time paused: <span id="paused-time">{{ active_session.paused_seconds }}</span>s</small></p>
-
+    <div class="timer-page">
         <div>
-            <h3>Session Notes</h3>
-            <form method="post" action="{% url 'planner:update_session_notes' active_session.id %}">
-                {% csrf_token %}
-                <textarea name="notes" rows="5" style="width: 100%;" placeholder="Add notes about what you're studying...">{{ active_session.notes|default:'' }}</textarea>
-                <br><br>
-                <button type="submit">Save Notes</button>
-            </form>
-        </div>
 
-        <div>
-            {% if active_session.is_paused %}
-                <a href="{% url 'planner:resume_timer' active_session.id %}">
-                    <button style="background-color: green; color: white;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-                            <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
-                        </svg>
-                         Resume
-                    </button>
-                </a>
-            {% else %}
-                <a href="{% url 'planner:pause_timer' active_session.id %}">
-                    <button style="background-color: orange; color: white;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+            <div class="timer-card">
+
+                <!-- ══ REGULAR TIMER ══ -->
+                {% if active_session %}
+                    {% if active_session.is_paused %}
+                    <div class="timer-paused-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
                         </svg>
-                         Pause
-                    </button>
-                </a>
-            {% endif %}
-            
-            <a href="{% url 'planner:stop_timer_with_summary' active_session.id %}">
-                <button style="background-color: red; color: white;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stop-fill" viewBox="0 0 16 16">
-                        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5"/>
-                    </svg>
-                     Stop Session
-                </button>
-            </a>
-        </div>
-    {% else %}
-        <p>Ready to study?</p>
-        <form method="post" action="{% url 'planner:start_timer' %}">
-            {% csrf_token %}
-            <label for="category">Select Category (optional):</label>
-            <select name="category">
-                <option value="">No Category</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}">{{ cat.name }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
-            <button type="submit">Start Session</button>
-        </form>
-    {% endif %}
-<br>
-<a href="{% url 'planner:pomodoro_timer' %}">Pomodoro Mode</a>
+                        Paused
+                    </div>
+                    {% endif %}
 
-<a href="{% url 'planner:manage_categories' %}">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
-        <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
-        <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
-    </svg>
-    Manage Categories
-</a>
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 220 220">
+                            <circle class="ring-track" cx="110" cy="110" r="96"/>
+                            <circle class="ring-progress" id="regularRing" cx="110" cy="110" r="96"
+                                stroke-dasharray="603" stroke-dashoffset="0"/>
+                        </svg>
+                        <div class="ring-center">
+                            <span class="ring-time" id="regularTimer">00:00:00</span>
+                            <span class="ring-label">{% if active_session.is_paused %}paused{% else %}studying{% endif %}</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-status">
+                        Studying: <strong>{% if active_session.category %}{{ active_session.category.name }}{% else %}General{% endif %}</strong>
+                    </div>
+
+                    <div class="timer-controls">
+                        {% if active_session.is_paused %}
+                            <a href="{% url 'planner:resume_timer' active_session.id %}" class="ctrl-btn primary" title="Resume">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'planner:pause_timer' active_session.id %}" class="ctrl-btn" title="Pause">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'planner:stop_timer_with_summary' active_session.id %}" class="ctrl-btn danger" title="Stop">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                <!-- ══ COUNTDOWN TIMER ══ -->
+                {% elif active_countdown %}
+                    {% if active_countdown.is_paused %}
+                    <div class="timer-paused-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                        Paused
+                    </div>
+                    {% endif %}
+
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 220 220">
+                            <circle class="ring-track" cx="110" cy="110" r="96"/>
+                            <circle class="ring-progress" id="countdownRing" cx="110" cy="110" r="96"
+                                stroke-dasharray="603"
+                                stroke-dashoffset="0"/>
+                        </svg>
+                        <div class="ring-center">
+                            <span class="ring-time" id="countdownTimer">--:--:--</span>
+                            <span class="ring-label">remaining</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-status">
+                        Countdown: <strong>{% if active_countdown.category %}{{ active_countdown.category.name }}{% else %}General{% endif %}</strong>
+                    </div>
+
+                    <div class="timer-controls">
+                        {% if active_countdown.is_paused %}
+                            <a href="{% url 'planner:resume_timer' active_countdown.id %}" class="ctrl-btn primary" title="Resume">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'planner:pause_timer' active_countdown.id %}" class="ctrl-btn" title="Pause">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'planner:stop_countdown' active_countdown.id %}" class="ctrl-btn danger" title="Stop">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                <!-- POMODORO TIMER -->
+                {% elif active_pomodoro %}
+                    {% if active_pomodoro.is_paused %}
+                    <div class="timer-paused-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                        Paused
+                    </div>
+                    {% endif %}
+
+                    <!-- Pomodoro dots -->
+                    <div class="pomodoro-dots">
+                        {% for i in "1234" %}
+                        <div class="pom-dot {% if forloop.counter <= active_pomodoro.pomodoros_completed %}done{% endif %}"></div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="ring-wrap">
+                        <svg class="ring-svg" viewBox="0 0 220 220">
+                            <circle class="ring-track" cx="110" cy="110" r="96"/>
+                            <circle class="ring-progress" id="pomodoroRing" cx="110" cy="110" r="96"
+                                stroke-dasharray="603" stroke-dashoffset="0"/>
+                        </svg>
+                        <div class="ring-center">
+                            <span class="ring-time" id="pomodoroTimer">25:00</span>
+                            <span class="ring-label" id="pomodoroLabel">work time</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-status">
+                        Focus: <strong>{% if active_pomodoro.category %}{{ active_pomodoro.category.name }}{% else %}General{% endif %}</strong>
+                        &nbsp;·&nbsp; <strong>{{ active_pomodoro.pomodoros_completed }}</strong> completed
+                    </div>
+
+                    <div class="timer-controls">
+                        {% if active_pomodoro.is_paused %}
+                            <a href="{% url 'planner:resume_pomodoro' active_pomodoro.id %}" class="ctrl-btn primary" title="Resume">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'planner:pause_pomodoro' active_pomodoro.id %}" class="ctrl-btn" title="Pause">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </a>
+                            <a href="{% url 'planner:complete_pomodoro' active_pomodoro.id %}" class="ctrl-btn primary" title="Complete Pomodoro">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'planner:stop_pomodoro' active_pomodoro.id %}" class="ctrl-btn danger" title="End Session">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                <!-- ══ START FORMS ══ -->
+                {% else %}
+
+                    <!-- Regular -->
+                    <div class="mode-panel active" id="panel-regular">
+                        <p style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text-dark);margin-bottom:24px;">Start a session</p>
+                        <form method="post" action="{% url 'planner:start_timer' %}" class="start-form">
+                            {% csrf_token %}
+                            <div class="start-form-row">
+                                <label>Category (optional)</label>
+                                <select name="category">
+                                    <option value="">No Category</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="start-btn">Start Timer</button>
+                        </form>
+                    </div>
+
+                    <!-- Countdown -->
+                    <div class="mode-panel" id="panel-countdown">
+                        <p style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text-dark);margin-bottom:24px;">Set a countdown</p>
+                        <form method="post" action="{% url 'planner:start_countdown' %}" class="start-form">
+                            {% csrf_token %}
+                            <div class="start-form-row">
+                                <label>Duration</label>
+                                <div class="duration-inputs">
+                                    <div class="duration-input-wrap">
+                                        <input type="number" name="hours" min="0" max="12" value="0" placeholder="0">
+                                        <span class="duration-unit">hr</span>
+                                    </div>
+                                    <div class="duration-input-wrap">
+                                        <input type="number" name="minutes" min="0" max="59" value="25" placeholder="25">
+                                        <span class="duration-unit">min</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="start-form-row">
+                                <label>Category (optional)</label>
+                                <select name="category">
+                                    <option value="">No Category</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="start-btn">Start Countdown</button>
+                        </form>
+                    </div>
+
+                    <!-- Pomodoro -->
+                    <div class="mode-panel" id="panel-pomodoro">
+                        <p style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text-dark);margin-bottom:8px;">Pomodoro</p>
+                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:24px;">25 min work · 5 min break · 15 min long break</p>
+                        <form method="post" action="{% url 'planner:start_pomodoro' %}" class="start-form">
+                            {% csrf_token %}
+                            <div class="start-form-row">
+                                <label>Category (optional)</label>
+                                <select name="category">
+                                    <option value="">No Category</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="start-btn">Start Pomodoro</button>
+                        </form>
+                    </div>
+
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- RIGHT — Notes Panel -->
+        <div class="side-panel">
+            <div class="side-notes-card">
+                <div class="side-card-header">Session Notes</div>
+                <div class="side-card-body" style="padding:16px 18px;flex:1;display:flex;flex-direction:column;">
+                    {% if active_session or active_countdown or active_pomodoro %}
+                    {% with session=active_session|default:active_countdown|default:active_pomodoro %}
+                    <form method="post" action="{% url 'planner:update_session_notes' session.id %}" style="flex:1;display:flex;flex-direction:column;">
+                        {% csrf_token %}
+                        <textarea name="notes" class="notes-textarea" style="flex:1;min-height:240px;"
+                            placeholder="What are you working on? Jot down thoughts, progress, or anything worth remembering...">{{ session.notes|default:'' }}</textarea>
+                        <button type="submit" class="notes-save-btn" style="align-self:flex-start;margin-top:12px;">Save Notes</button>
+                    </form>
+                    {% endwith %}
+                    {% else %}
+                    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+                        <p style="font-size:12px;color:var(--text-muted);text-align:center;">Start a session to add notes.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links Bar — full width below -->
+    <div class="quick-links-bar">
+        <span class="quick-links-bar-label">Quick Links</span>
+        <a href="{% url 'planner:study_history' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/></svg>
+            View History
+        </a>
+        <a href="{% url 'planner:study_statistics' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/></svg>
+            Statistics
+        </a>
+        <a href="{% url 'planner:manage_categories' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/><path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/></svg>
+            Categories
+        </a>
+        <a href="{% url 'planner:study_goals' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/></svg>
+            Goals
+        </a>
+        <a href="{% url 'planner:dictionary' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/></svg>
+            Dictionary
+        </a>
+    </div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        document.getElementById('current-clock').textContent = `${hours}:${minutes}:${seconds}`;
+    const CIRCUMFERENCE = 603;
+
+    // ── Mode switching ────────────────────────────────
+    function switchMode(mode, btn) {
+        document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + mode).classList.add('active');
+        localStorage.setItem('timerMode', mode);
     }
 
-    setInterval(updateClock, 1000);
-    updateClock();
+    const savedMode = localStorage.getItem('timerMode');
+    if (savedMode) {
+        const btn = document.querySelector(`.timer-tab[onclick*="${savedMode}"]`);
+        if (btn) switchMode(savedMode, btn);
+    }
 
+    function setRingProgress(ringId, fraction) {
+        const ring = document.getElementById(ringId);
+        if (!ring) return;
+        const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, fraction)));
+        ring.style.strokeDashoffset = offset;
+    }
+
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    // ── Regular Timer ─────────────────────────────────
     {% if active_session %}
-    const startTime = new Date("{{ active_session.start_time|date:'c' }}");
-    const pausedSeconds = {{ active_session.paused_seconds }};
-    const isPaused = {{ active_session.is_paused|yesno:"true,false" }};
-    const pauseStartTime = {% if active_session.pause_start %}new Date("{{ active_session.pause_start|date:'c' }}"){% else %}null{% endif %};
+    const regStart    = new Date("{{ active_session.start_time|date:'c' }}");
+    const regPaused   = {{ active_session.paused_seconds }};
+    const regIsPaused = {{ active_session.is_paused|yesno:"true,false" }};
+    const regPauseStart = {% if active_session.pause_start %}new Date("{{ active_session.pause_start|date:'c' }}"){% else %}null{% endif %};
 
-    function updateTimer() {
+    function updateRegular() {
         const now = new Date();
-        const totalElapsed = Math.floor((now - startTime) / 1000);
-        let currentPauseDuration = 0;
-        if (isPaused && pauseStartTime) {
-            currentPauseDuration = Math.floor((now - pauseStartTime) / 1000);
+        const elapsed = Math.floor((now - regStart) / 1000);
+        let pausedExtra = 0;
+        if (regIsPaused && regPauseStart) {
+            pausedExtra = Math.floor((now - regPauseStart) / 1000);
         }
-        const totalPaused = pausedSeconds + currentPauseDuration;
-        const actualStudyTime = Math.max(totalElapsed - totalPaused, 0);
+        const actual = Math.max(elapsed - regPaused - pausedExtra, 0);
+        document.getElementById('regularTimer').textContent = formatTime(actual);
+        // Ring slowly fills — cap at 2 hours for visual
+        setRingProgress('regularRing', actual / 7200);
+    }
+    setInterval(updateRegular, 1000);
+    updateRegular();
+    {% endif %}
 
-        const h = Math.floor(actualStudyTime / 3600);
-        const m = Math.floor((actualStudyTime % 3600) / 60);
-        const s = actualStudyTime % 60;
+    // ── Countdown Timer ───────────────────────────────
+    {% if active_countdown %}
+    const cdStart    = new Date("{{ active_countdown.start_time|date:'c' }}");
+    const cdPaused   = {{ active_countdown.paused_seconds }};
+    const cdIsPaused = {{ active_countdown.is_paused|yesno:"true,false" }};
+    const cdPauseStart = {% if active_countdown.pause_start %}new Date("{{ active_countdown.pause_start|date:'c' }}"){% else %}null{% endif %};
+    const cdTarget   = {{ active_countdown.countdown_target_seconds }};
 
-        document.getElementById('timer').textContent =
-            String(h).padStart(2, '0') + ':' +
-            String(m).padStart(2, '0') + ':' +
-            String(s).padStart(2, '0');
+    function updateCountdown() {
+        const now = new Date();
+        const elapsed = Math.floor((now - cdStart) / 1000);
+        let pausedExtra = 0;
+        if (cdIsPaused && cdPauseStart) {
+            pausedExtra = Math.floor((now - cdPauseStart) / 1000);
+        }
+        const actual = Math.max(elapsed - cdPaused - pausedExtra, 0);
+        const remaining = Math.max(cdTarget - actual, 0);
+        document.getElementById('countdownTimer').textContent = formatTime(remaining);
+        setRingProgress('countdownRing', remaining / cdTarget);
 
-        document.getElementById('paused-time').textContent = totalPaused;
+        if (remaining === 0 && !cdIsPaused) {
+            document.getElementById('countdownTimer').textContent = '00:00:00';
+            if (!window._cdAlerted) {
+                window._cdAlerted = true;
+                alert("Countdown complete! Great work.");
+                window.location.href = "{% url 'planner:complete_countdown' active_countdown.id %}";
+            }
+        }
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    {% endif %}
+
+    // ── Pomodoro Timer ────────────────────────────────
+    {% if active_pomodoro %}
+    const pomStart    = new Date("{{ active_pomodoro.start_time|date:'c' }}");
+    const pomPaused   = {{ active_pomodoro.paused_seconds }};
+    const pomIsPaused = {{ active_pomodoro.is_paused|yesno:"true,false" }};
+    const pomPauseStart = {% if active_pomodoro.pause_start %}new Date("{{ active_pomodoro.pause_start|date:'c' }}"){% else %}null{% endif %};
+    let pomCompleted  = {{ active_pomodoro.pomodoros_completed }};
+
+    const POM_WORK  = 25 * 60;
+    const POM_SHORT = 5  * 60;
+    const POM_LONG  = 15 * 60;
+
+    let isBreak = false;
+    let breakSeconds = 0;
+
+    function getElapsed() {
+        const now = new Date();
+        const total = Math.floor((now - pomStart) / 1000);
+        let extra = 0;
+        if (pomIsPaused && pomPauseStart) {
+            extra = Math.floor((now - pomPauseStart) / 1000);
+        }
+        return Math.max(total - pomPaused - extra - (pomCompleted * POM_WORK), 0);
     }
 
-    setInterval(updateTimer, 1000);
-    updateTimer();
+    let currentPomSeconds = Math.max(POM_WORK - getElapsed(), 0);
+
+    function updatePomodoro() {
+        if (pomIsPaused) return;
+
+        const mins = Math.floor(currentPomSeconds / 60);
+        const secs = currentPomSeconds % 60;
+        document.getElementById('pomodoroTimer').textContent =
+            String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+
+        if (!isBreak) {
+            setRingProgress('pomodoroRing', currentPomSeconds / POM_WORK);
+        } else {
+            const breakTotal = (pomCompleted % 4 === 0) ? POM_LONG : POM_SHORT;
+            setRingProgress('pomodoroRing', currentPomSeconds / breakTotal);
+        }
+
+        if (currentPomSeconds > 0) {
+            currentPomSeconds--;
+        } else {
+            if (!isBreak) {
+                alert('Pomodoro complete! Take a break.');
+                isBreak = true;
+                currentPomSeconds = (pomCompleted + 1) % 4 === 0 ? POM_LONG : POM_SHORT;
+                document.getElementById('pomodoroLabel').textContent = (pomCompleted + 1) % 4 === 0 ? 'long break' : 'short break';
+            } else {
+                alert('Break over! Ready for another?');
+                isBreak = false;
+                currentPomSeconds = POM_WORK;
+                document.getElementById('pomodoroLabel').textContent = 'work time';
+            }
+        }
+    }
+    setInterval(updatePomodoro, 1000);
+    updatePomodoro();
     {% endif %}
 </script>
 {% endblock %}

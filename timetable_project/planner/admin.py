@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Subject_and_location, Timeslot, TimetableEntry, Timetable,
     Schedule, ScheduleItem, StudyCategory, StudySession,
-    StudyGoal, StudyResource
+    StudyGoal, StudyResource, DictionaryHistory
 )
 
 admin.site.register(Subject_and_location)
@@ -15,6 +15,7 @@ admin.site.register(StudyCategory)
 admin.site.register(StudySession)
 admin.site.register(StudyGoal)
 admin.site.register(StudyResource)
+admin.site.register(DictionaryHistory)
 
 
 class StudySessionAdmin(admin.ModelAdmin):

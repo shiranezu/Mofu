@@ -432,7 +432,7 @@
                 <strong>{% if active_session.category %}{{ active_session.category.name }}{% else %}General Study{% endif %}</strong>
             </span>
         </div>
-        <a href="{% url 'planner:study_timer' %}">Go to Timer →</a>
+        <a href="{% url 'planner:study_timer' %}">Go to Timer</a>
     </div>
     {% endif %}
 
@@ -462,7 +462,7 @@
         <div class="section-card">
             <div class="section-card-header">
                 <span class="section-card-title">Today's Classes</span>
-                <a href="{% url 'planner:timetable_home' %}" class="section-card-link">View all →</a>
+                <a href="{% url 'planner:timetable_home' %}" class="section-card-link">View all</a>
             </div>
             <div class="section-card-body">
                 {% if today_classes %}
@@ -496,7 +496,7 @@
             <div class="section-card" style="margin-bottom: 16px;">
                 <div class="section-card-header">
                     <span class="section-card-title">Tasks Due</span>
-                    <a href="{% url 'planner:schedule_home' %}" class="section-card-link">View all →</a>
+                    <a href="{% url 'planner:schedule_home' %}" class="section-card-link">View all</a>
                 </div>
                 <div class="section-card-body">
                     {% if today_tasks %}
@@ -557,7 +557,7 @@
     <div class="section-card" style="margin-bottom: 20px;">
         <div class="section-card-header">
             <span class="section-card-title">Daily Goals</span>
-            <a href="{% url 'planner:study_goals' %}" class="section-card-link">Manage →</a>
+            <a href="{% url 'planner:study_goals' %}" class="section-card-link">Manage</a>
         </div>
         <div class="section-card-body">
             <div class="goals-row" style="padding: 16px 20px;">

@@ -3,12 +3,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import (
     Subject_and_location, Timeslot, ScheduleItem, Schedule,
-    StudyCategory, StudyGoal, StudyResource, DAYS_OF_WEEK
+    StudyCategory, StudyGoal, StudyResource, DAYS_OF_WEEK,
 )
 
 
 class Subject_and_locationForm(forms.ModelForm):
-    """Form for adding subjects and locations to timetable"""
     day = forms.ChoiceField(choices=DAYS_OF_WEEK)
 
     def __init__(self, *args, **kwargs):
@@ -19,10 +18,14 @@ class Subject_and_locationForm(forms.ModelForm):
             self.fields['timeslot'] = forms.ModelChoiceField(
                 queryset=Timeslot.objects.filter(timetable=timetable)
             )
+        if user:
+            self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
+            self.fields['category'].required = False
+            self.fields['category'].empty_label = "No Category"
 
     class Meta:
         model = Subject_and_location
-        fields = ['subject', 'location']
+        fields = ['subject', 'location', 'category']
 
 
 class TimeslotForm(forms.ModelForm):
@@ -69,7 +72,7 @@ class StudyGoalForm(forms.ModelForm):
     """Form for creating study goals"""
     class Meta:
         model = StudyGoal
-        fields = ['goal_type', 'target_hours', 'category']
+        fields = ['name', 'goal_type', 'target_hours', 'category']
         widgets = {
             'target_hours': forms.NumberInput(attrs={'step': '0.5', 'min': '0.5'})
         }

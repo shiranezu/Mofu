@@ -1,63 +1,501 @@
 {% extends 'base.html' %}
 
-{% block title %}Study Resources - Sachi{% endblock %}
+{% block title %}Resources — Mofu{% endblock %}
+{% block nav_resources %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Page Layout ────────────────────────────────── */
+    .res-page {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 40px;
+        align-items: start;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .res-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        gap: 16px;
+    }
+
+    .res-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
+    .res-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .res-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Resource Grid ──────────────────────────────── */
+    .res-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    /* ─── Resource Card ──────────────────────────────── */
+    .res-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        position: relative;
+    }
+
+    .res-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .res-card-top {
+        height: 3px;
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    .res-card-body {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .res-card-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 3px 8px;
+        border-radius: 20px;
+        width: fit-content;
+    }
+
+    .res-card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.3;
+        text-decoration: none;
+        transition: color 0.15s;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .res-card-title:hover {
+        color: var(--accent);
+    }
+
+    .res-card-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .res-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 8px 16px;
+        border-top: 1px solid var(--card-border);
+        background: rgba(30, 37, 64, 0.02);
+        min-height: 36px;
+    }
+
+    .res-card-link {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        transition: color 0.15s;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .res-card-link:hover { color: var(--accent); }
+
+    .res-card-actions {
+        display: flex;
+        gap: 10px;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .res-card:hover .res-card-actions { opacity: 1; }
+
+    .res-card-link {
+        margin-top: auto;
+    }
+
+    .res-action {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .res-action:hover { color: var(--accent); }
+    .res-action.delete:hover { color: #c0392b; }
+
+    /* ─── Empty State ────────────────────────────────── */
+    .res-empty {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 40px;
+        text-align: center;
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        gap: 12px;
+    }
+
+    .res-empty-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        opacity: 0.4;
+    }
+
+    .res-empty-text {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Filter Panel ───────────────────────────────── */
+    .res-filter {
+        position: sticky;
+        top: 20px;
+    }
+
+    .res-filter-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+        display: block;
+    }
+
+    .res-filter-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .res-filter-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background 0.15s;
+        font-size: 13px;
+        color: var(--text-dark);
+        border: none;
+        background: transparent;
+        font-family: 'DM Sans', sans-serif;
+        text-align: left;
+        width: 100%;
+    }
+
+    .res-filter-item:hover {
+        background: rgba(30, 37, 64, 0.04);
+    }
+
+    .res-filter-item.active {
+        background: rgba(30, 37, 64, 0.06);
+        font-weight: 500;
+    }
+
+    .res-filter-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .res-filter-count {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .res-filter-divider {
+        border: none;
+        border-top: 1px solid var(--card-border);
+        margin: 8px 0;
+    }
+
+    .res-filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .res-filter-header .res-filter-label {
+        margin-bottom: 0;
+    }
+
+    .res-filter-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        transition: color 0.15s, transform 0.2s;
+    }
+
+    .res-filter-toggle:hover { color: var(--text-dark); }
+
+    .res-filter-toggle.collapsed svg {
+        transform: rotate(-90deg);
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16">
-            <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
-        </svg>
-        Resources
-    </h1>
 
-    <a href="{% url 'planner:add_resource' %}">+ Add New Resource</a>
+    <!-- Header -->
+    <div class="res-header">
+        <div class="res-header-left">
+            <h1 class="res-title">Resources.</h1>
+            <p class="res-subtitle">{{ resources|length }} resource{{ resources|length|pluralize }}</p>
+        </div>
+        <a href="{% url 'planner:add_resource' %}" class="btn btn-primary">+ Add Resource</a>
+    </div>
 
-    <hr>
+    <div class="res-page">
 
-    <!-- Filter by Category -->
-    <form method="get">
-        <label>Filter by Category:</label>
-        <select name="category" onchange="this.form.submit()">
-            <option value="">All Categories</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-            {% endfor %}
-        </select>
-    </form>
-
-    <hr>
-
-    {% if resources %}
-        <table border="1" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- LEFT — Resource Grid -->
+        <div>
+            <div class="res-grid" id="resGrid">
                 {% for resource in resources %}
-                <tr>
-                    <td>
-                        <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer">
-                            {{ resource.title }} 🔗
+                <div class="res-card"
+                     data-category="{{ resource.category.id|default:'none' }}"
+                     id="res-{{ resource.id }}">
+
+                    <!-- Color top bar -->
+                    <div class="res-card-top"
+                         style="background: {{ resource.category.color|default:'#1e2540' }};"></div>
+
+                    <div class="res-card-body">
+                        <!-- Category badge -->
+                        {% if resource.category %}
+                        <span class="res-card-category"
+                              style="background: {{ resource.category.color }}18; color: {{ resource.category.color }};">
+                            {{ resource.category.name }}
+                        </span>
+                        {% else %}
+                        <span class="res-card-category"
+                              style="background: rgba(30,37,64,0.06); color: var(--text-muted);">
+                            Uncategorised
+                        </span>
+                        {% endif %}
+
+                        <!-- Title (clickable link) -->
+                        <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
+                           class="res-card-title">{{ resource.title }}</a>
+
+                        <!-- Description -->
+                        {% if resource.description %}
+                        <p class="res-card-desc">{{ resource.description }}</p>
+                        {% endif %}
+
+                        <!-- URL preview in body -->
+                        <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
+                           class="res-card-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/>
+                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/>
+                            </svg>
+                            {{ resource.url|truncatechars:35 }}
                         </a>
-                    </td>
-                    <td>{% if resource.category %}{{ resource.category.name }}{% else %}-{% endif %}</td>
-                    <td>{{ resource.description|default:"-"|truncatewords:10 }}</td>
-                    <td>
-                        <a href="{% url 'planner:edit_resource' resource.id %}">Edit</a> |
-                        <a href="{% url 'planner:delete_resource' resource.id %}">Delete</a>
-                    </td>
-                </tr>
+                    </div>
+
+                    <div class="res-card-footer">
+                        <!-- Actions (hover) — full width now -->
+                        <div class="res-card-actions" style="margin-left:auto;">
+                            <a href="{% url 'planner:edit_resource' resource.id %}" class="res-action">Edit</a>
+                            <a href="{% url 'planner:delete_resource' resource.id %}" class="res-action delete">Delete</a>
+                        </div>
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="res-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" style="opacity:0.15;" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+                        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
+                        <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
+                    </svg>
+                    <p class="res-empty-title">No resources yet</p>
+                    <p class="res-empty-text">Add links to your study materials, videos, and articles.</p>
+                    <a href="{% url 'planner:add_resource' %}" class="btn btn-primary" style="margin-top:8px;">+ Add Resource</a>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No resources yet. Add links to your materials!</p>
-    {% endif %}
+            </div>
+        </div>
+
+        <!-- RIGHT — Filter Panel -->
+        <div class="res-filter">
+            <div class="res-filter-header">
+                <span class="res-filter-label">Filter</span>
+                <button class="res-filter-toggle" id="filterToggle" onclick="toggleFilter()" title="Collapse filter">
+                    <svg id="filterChevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="res-filter-list" id="filterList">
+
+                <!-- All -->
+                <button class="res-filter-item active" onclick="filterResources('all', this)">
+                    <span class="res-filter-dot" style="background: var(--text-dark); opacity: 0.3;"></span>
+                    All
+                    <span class="res-filter-count">{{ resources|length }}</span>
+                </button>
+
+                {% if categories %}
+                <hr class="res-filter-divider">
+                {% for category in categories %}
+                <button class="res-filter-item"
+                        onclick="filterResources('{{ category.id }}', this)"
+                        data-cat-id="{{ category.id }}">
+                    <span class="res-filter-dot" style="background: {{ category.color }};"></span>
+                    {{ category.name }}
+                    <span class="res-filter-count">
+                        {{ resources|length }}
+                    </span>
+                </button>
+                {% endfor %}
+
+                <!-- Uncategorised -->
+                <button class="res-filter-item" onclick="filterResources('none', this)">
+                    <span class="res-filter-dot" style="background: var(--text-muted); opacity:0.4;"></span>
+                    Uncategorised
+                </button>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ── Category filter counts ────────────────────────
+    const cards = document.querySelectorAll('.res-card');
+
+    // Count per category
+    document.querySelectorAll('.res-filter-item[data-cat-id]').forEach(btn => {
+        const catId = btn.getAttribute('data-cat-id');
+        const count = [...cards].filter(c => c.dataset.category === catId).length;
+        btn.querySelector('.res-filter-count').textContent = count;
+    });
+
+    // Count uncategorised
+    const uncatBtn = document.querySelector('.res-filter-item:last-child');
+    if (uncatBtn) {
+        const uncatCount = [...cards].filter(c => c.dataset.category === 'none').length;
+        if (!uncatBtn.querySelector('.res-filter-count')) {
+            const span = document.createElement('span');
+            span.className = 'res-filter-count';
+            uncatBtn.appendChild(span);
+        }
+        uncatBtn.querySelector('.res-filter-count').textContent = uncatCount;
+    }
+
+    // ── Filter function ───────────────────────────────
+    function filterResources(catId, btn) {
+        // Update active state
+        document.querySelectorAll('.res-filter-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Show/hide cards
+        cards.forEach(card => {
+            if (catId === 'all') {
+                card.style.display = '';
+            } else {
+                card.style.display = card.dataset.category === catId ? '' : 'none';
+            }
+        });
+
+        // Show empty state if no visible cards
+        const grid = document.getElementById('resGrid');
+        const visibleCards = [...cards].filter(c => c.style.display !== 'none');
+        let emptyMsg = grid.querySelector('.res-filter-empty');
+
+        if (visibleCards.length === 0) {
+            if (!emptyMsg) {
+                emptyMsg = document.createElement('div');
+                emptyMsg.className = 'res-empty res-filter-empty';
+                emptyMsg.innerHTML = '<p class="res-empty-title">No resources here</p><p class="res-empty-text">No resources in this category yet.</p>';
+                grid.appendChild(emptyMsg);
+            }
+            emptyMsg.style.display = 'flex';
+        } else if (emptyMsg) {
+            emptyMsg.style.display = 'none';
+        }
+    }
+
+    // ── Filter collapse ───────────────────────────────
+    function toggleFilter() {
+        const list   = document.getElementById('filterList');
+        const toggle = document.getElementById('filterToggle');
+        const isCollapsed = list.style.display === 'none';
+        list.style.display = isCollapsed ? '' : 'none';
+        toggle.classList.toggle('collapsed', !isCollapsed);
+        localStorage.setItem('resFilterCollapsed', !isCollapsed);
+    }
+
+    // Restore state
+    if (localStorage.getItem('resFilterCollapsed') === 'true') {
+        document.getElementById('filterList').style.display = 'none';
+        document.getElementById('filterToggle').classList.add('collapsed');
+    }
+</script>
 {% endblock %}

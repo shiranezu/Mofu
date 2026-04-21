@@ -25,6 +25,7 @@ urlpatterns = [
     path('edit/<int:entry_id>/', views.edit_entry, name='edit_entry'),
     path('delete/<int:entry_id>/', views.delete_entry, name='delete_entry'),
     path('timeslot/<int:timeslot_id>/delete/', views.delete_timeslot, name='delete_timeslot'),
+    path('timetable/<int:timetable_id>/toggle-days/', views.toggle_days_mode, name='toggle_days_mode'),
 
     # SCHEDULES
     path('schedules/', views.schedule_home, name='schedule_home'),
@@ -81,8 +82,14 @@ urlpatterns = [
     path('study/pomodoro/<int:session_id>/pause/', views.pause_pomodoro, name='pause_pomodoro'),
     path('study/pomodoro/<int:session_id>/resume/', views.resume_pomodoro, name='resume_pomodoro'),
 
+    # COUNTDOWN TIMER
+    path('study/countdown/start/', views.start_countdown, name='start_countdown'),
+path('study/countdown/<int:session_id>/stop/', views.stop_countdown, name='stop_countdown'),
+path('study/countdown/<int:session_id>/complete/', views.complete_countdown, name='complete_countdown'),
+
     # DICTIONARY
     path('study/dictionary/', views.dictionary, name='dictionary'),
+    path('study/dictionary/clear/', views.clear_dictionary_history, name='clear_dictionary_history'),
 
     # QUICK ADD
     path('schedule/quick-add/', views.quick_add_task, name='quick_add_task'),

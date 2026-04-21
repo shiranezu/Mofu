@@ -1,38 +1,390 @@
 {% extends 'base.html' %}
 
-{% block title %}Dictionary - Sachi{% endblock %}
+{% block title %}Dictionary — Mofu{% endblock %}
+{% block nav_dictionary %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Page Layout ────────────────────────────────── */
+    .dict-page {
+        display: grid;
+        grid-template-columns: 1fr 240px;
+        gap: 48px;
+        align-items: start;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .dict-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 40px;
+    }
+
+    .dict-header h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .dict-header p {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Search ─────────────────────────────────────── */
+    .dict-search-wrap {
+        margin-bottom: 48px;
+    }
+
+    .dict-search-form {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        border-bottom: 2px solid var(--text-dark);
+        padding-bottom: 8px;
+    }
+
+    .dict-search-input {
+        flex: 1;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 4px 0 !important;
+        font-family: 'Cormorant Garamond', serif !important;
+        font-size: 28px !important;
+        font-weight: 400 !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        outline: none !important;
+        letter-spacing: -0.5px;
+    }
+
+    .dict-search-input::placeholder {
+        color: rgba(30, 37, 64, 0.2) !important;
+        font-style: italic;
+    }
+
+    .dict-search-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 4px 0 4px 12px;
+        display: flex;
+        align-items: center;
+        transition: color 0.18s;
+    }
+
+    .dict-search-btn:hover { color: var(--text-dark); }
+
+    /* ─── Error ──────────────────────────────────────── */
+    .dict-error {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+        margin-top: 16px;
+    }
+
+    /* ─── Definition Card ────────────────────────────── */
+    .dict-result {
+        padding: 0;
+    }
+
+    /* Word */
+    .dict-word {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 64px;
+        font-weight: 600;
+        color: var(--text-dark);
+        letter-spacing: -2px;
+        line-height: 1;
+        margin-bottom: 12px;
+    }
+
+    /* Phonetic + POS + Language row */
+    .dict-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .dict-phonetic {
+        font-size: 15px;
+        color: var(--text-muted);
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+    }
+
+    .dict-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        opacity: 0.4;
+        flex-shrink: 0;
+    }
+
+    .dict-pos {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .dict-lang {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* Divider */
+    .dict-divider {
+        border: none;
+        border-top: 1px solid rgba(30, 37, 64, 0.15);
+        margin: 20px 0 24px;
+    }
+
+    /* Definition text */
+    .dict-definition {
+        font-size: 16px;
+        color: var(--text-dark);
+        line-height: 1.8;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 300;
+        max-width: 560px;
+        margin-bottom: 20px;
+    }
+
+    /* Example */
+    .dict-example {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-style: italic;
+        line-height: 1.7;
+        padding-left: 16px;
+        border-left: 2px solid var(--accent);
+        max-width: 480px;
+    }
+
+    /* ─── Empty State ────────────────────────────────── */
+    .dict-empty {
+        padding: 60px 0;
+    }
+
+    .dict-empty-word {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 64px;
+        font-weight: 600;
+        color: rgba(30, 37, 64, 0.06);
+        letter-spacing: -2px;
+        line-height: 1;
+        margin-bottom: 16px;
+        user-select: none;
+    }
+
+    .dict-empty-text {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* ─── Recent Words Panel ─────────────────────────── */
+    .dict-recent {
+        padding-top: 8px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .dict-recent-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .dict-recent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .dict-recent-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.06);
+        text-decoration: none;
+        transition: all 0.15s;
+        group: true;
+    }
+
+    .dict-recent-item:last-child {
+        border-bottom: none;
+    }
+
+    .dict-recent-word {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--text-dark);
+        transition: color 0.15s;
+    }
+
+    .dict-recent-item:hover .dict-recent-word {
+        color: var(--accent);
+    }
+
+    .dict-recent-arrow {
+        color: var(--text-muted);
+        opacity: 0;
+        transition: opacity 0.15s;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .dict-recent-item:hover .dict-recent-arrow {
+        opacity: 1;
+    }
+
+    .dict-recent-empty {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .dict-recent-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .dict-recent-header .dict-recent-label {
+        margin-bottom: 0;
+    }
+
+    .dict-clear-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.3px;
+        padding: 0;
+        transition: color 0.15s;
+    }
+
+    .dict-clear-btn:hover {
+        color: #c0392b;
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>📖 Dictionary</h1>
 
-    <form method="get">
-        <input type="text" name="word" placeholder="Enter a word..." value="{{ search_word }}" required style="padding: 8px; font-size: 16px; width: 300px;">
-        <button type="submit" style="padding: 8px 20px; font-size: 16px;">Look Up</button>
-    </form>
+    <!-- Header -->
+    <div class="dict-header">
+        <h1>Dictionary.</h1>
+        <p>Look up words while you study</p>
+    </div>
 
-    <hr>
+    <div class="dict-page">
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+        <!-- LEFT — Search + Result -->
+        <div>
+            <!-- Search -->
+            <div class="dict-search-wrap">
+                <form method="get" class="dict-search-form">
+                    <input
+                        type="text"
+                        name="word"
+                        class="dict-search-input"
+                        placeholder="Search a word..."
+                        value="{% if not definition_data %}{{ search_word }}{% endif %}"
+                        autofocus
+                        autocomplete="off">
+                    <button type="submit" class="dict-search-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
 
-    {% if definition_data %}
-        <div style="margin-top: 20px; padding: 20px; border: 2px solid #3498db; border-radius: 10px; background-color: #f8f9fa;">
-            <h2>{{ definition_data.word }}
-                {% if definition_data.phonetic %}
-                    <span style="color: #7f8c8d; font-size: 18px;">{{ definition_data.phonetic }}</span>
+            <!-- Error -->
+            {% if error %}
+                <p class="dict-error">{{ error }}</p>
+            {% endif %}
+
+            <!-- Result -->
+            {% if definition_data %}
+            <div class="dict-result">
+
+                <div class="dict-word">{{ definition_data.word }}</div>
+
+                <div class="dict-meta">
+                    {% if definition_data.phonetic %}
+                        <span class="dict-phonetic">{{ definition_data.phonetic }}</span>
+                        <span class="dict-dot"></span>
+                    {% endif %}
+                    <span class="dict-pos">{{ definition_data.part_of_speech }}</span>
+                    <span class="dict-dot"></span>
+                    <span class="dict-lang">English</span>
+                </div>
+
+                <hr class="dict-divider">
+
+                <p class="dict-definition">{{ definition_data.definition }}</p>
+
+                {% if definition_data.example %}
+                <p class="dict-example">"{{ definition_data.example }}"</p>
                 {% endif %}
-            </h2>
-            
-            <p><strong>Part of Speech:</strong> <em>{{ definition_data.part_of_speech }}</em></p>
-            
-            <h3>Definition:</h3>
-            <p>{{ definition_data.definition }}</p>
-            
-            {% if definition_data.example %}
-                <h3>Example:</h3>
-                <p style="font-style: italic; color: #555;">"{{ definition_data.example }}"</p>
+
+            </div>
+
+            {% elif not error %}
+            <div class="dict-empty">
+                <div class="dict-empty-word">word.</div>
+                <p class="dict-empty-text">Type a word above to see its definition.</p>
+            </div>
             {% endif %}
         </div>
-    {% endif %}
+
+        <!-- RIGHT — Recent Words -->
+        <div class="dict-recent">
+            <div class="dict-recent-header">
+                <span class="dict-recent-label">Recent</span>
+                {% if recent_words %}
+                <form method="post" action="{% url 'planner:clear_dictionary_history' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="dict-clear-btn">Clear</button>
+                </form>
+                {% endif %}
+            </div>
+            <div class="dict-recent-list">
+                {% if recent_words %}
+                    {% for item in recent_words %}
+                    <a href="?word={{ item.word }}" class="dict-recent-item">
+                        <span class="dict-recent-word">{{ item.word }}</span>
+                        <span class="dict-recent-arrow">.  .  .</span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="dict-recent-empty">No recent searches yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
 {% endblock %}

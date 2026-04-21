@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
-from ..models import Timetable, TimetableEntry, Timeslot
+from ..models import Timetable, TimetableEntry, Timeslot, StudyCategory
 from ..forms import Subject_and_locationForm, TimeslotForm
 
 
@@ -15,12 +16,15 @@ def timetable_home(request):
     return render(request, 'timetable_home.html', {'timetables': timetables})
 
 
+WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+FULL_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 @login_required(login_url='planner:login')
 def timetable_view(request, timetable_id):
-    """View a specific timetable"""
     timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    days = FULL_WEEK if timetable.days_mode == 'full_week' else WEEKDAYS
     timeslots = Timeslot.objects.filter(timetable=timetable).order_by('start_time')
+    all_timetables = Timetable.objects.filter(user=request.user)
+    today_day = timezone.now().strftime('%A')
 
     grid = []
     for day in days:
@@ -34,12 +38,22 @@ def timetable_view(request, timetable_id):
             row.append((entry, timeslot))
         grid.append((day, row))
 
+    # Collect categories used in this timetable for the legend
+    category_ids = TimetableEntry.objects.filter(
+        timetable=timetable
+    ).exclude(
+        subjectInfo__category=None
+    ).values_list('subjectInfo__category', flat=True).distinct()
+    categories_used = StudyCategory.objects.filter(id__in=category_ids)
+
     return render(request, 'index.html', {
         'timetable': timetable,
         'grid': grid,
-        'timeslots': timeslots
+        'timeslots': timeslots,
+        'all_timetables': all_timetables,
+        'today_day': today_day,
+        'categories_used': categories_used,
     })
-
 
 @login_required(login_url='planner:login')
 def create_timetable(request):
@@ -217,3 +231,12 @@ def export_timetable_pdf(request, timetable_id):
     p.showPage()
     p.save()
     return response
+
+
+@login_required(login_url='planner:login')
+def toggle_days_mode(request, timetable_id):
+    """Toggle timetable between weekdays and full week"""
+    timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
+    timetable.days_mode = 'full_week' if timetable.days_mode == 'weekdays' else 'weekdays'
+    timetable.save()
+    return redirect('planner:timetable_view', timetable_id=timetable_id)

@@ -1,54 +1,426 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ timetable.name }} - Sachi{% endblock %}
+{% block title %}{{ timetable.name }} — Mofu{% endblock %}
+{% block nav_timetable %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Page Header ────────────────────────────────── */
+    .tt-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .tt-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .tt-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+    }
+
+    .tt-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .tt-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* ─── Switcher ───────────────────────────────────── */
+    .tt-switcher {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 4px;
+    }
+
+    .tt-switcher-btn {
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--text-muted);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .tt-switcher-btn:hover {
+        background: var(--cream-dark);
+        color: var(--text-dark);
+    }
+
+    .tt-switcher-btn.active {
+        background: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+    }
+
+    /* ─── Timetable Grid ─────────────────────────────── */
+    .tt-wrapper {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+    }
+
+    .tt-grid {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    /* Header row — timeslots */
+    .tt-grid thead tr th {
+        padding: 12px 8px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--card-border);
+        text-align: center;
+        background: transparent;
+    }
+
+    .tt-grid thead tr th:first-child {
+        width: 90px;
+        text-align: left;
+        padding-left: 20px;
+    }
+
+    /* Day rows */
+    .tt-grid tbody tr td {
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        border-right: 1px solid rgba(30, 37, 64, 0.05);
+        vertical-align: top;
+        padding: 8px;
+    }
+
+    .tt-grid tbody tr td:first-child {
+        padding: 12px 20px;
+        border-right: 1px solid var(--card-border);
+        white-space: nowrap;
+    }
+
+    .tt-grid tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .tt-grid tbody tr td:last-child {
+        border-right: none;
+    }
+
+    /* Day label */
+    .tt-day-label {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-dark);
+        display: block;
+    }
+
+    .tt-day-label.today {
+        color: var(--accent);
+    }
+
+    /* ─── Subject Card ───────────────────────────────── */
+    .tt-cell {
+        min-height: 64px;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .tt-subject-card {
+        flex: 1;
+        border-radius: var(--radius-sm);
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        position: relative;
+        overflow: hidden;
+        border-left: 3px solid transparent;
+    }
+
+    .tt-subject-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.3;
+    }
+
+    .tt-subject-location {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .tt-subject-actions {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        display: none;
+        gap: 4px;
+    }
+
+    .tt-subject-card:hover .tt-subject-actions {
+        display: flex;
+    }
+
+    .tt-action-btn {
+        background: rgba(255,255,255,0.8);
+        border: none;
+        border-radius: 3px;
+        padding: 2px 4px;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 10px;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+    }
+
+    .tt-action-btn:hover { color: var(--text-dark); background: white; }
+    .tt-action-btn.delete:hover { color: #c0392b; }
+
+    /* ─── Empty cell ─────────────────────────────────── */
+    .tt-empty-cell {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 64px;
+        border-radius: var(--radius-sm);
+        transition: background 0.15s;
+    }
+
+    .tt-empty-cell:hover {
+        background: rgba(30, 37, 64, 0.03);
+    }
+
+    .tt-add-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1.5px dashed rgba(30, 37, 64, 0.2);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.15s;
+        text-decoration: none;
+        line-height: 1;
+    }
+
+    .tt-empty-cell:hover .tt-add-btn {
+        opacity: 1;
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    /* ─── Bottom Bar ─────────────────────────────────── */
+    .tt-bottom-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tt-legend {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .tt-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .tt-legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>{{ timetable.name }}</h1>
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Day/Time</th>
-                {% for slot in timeslots %}
-                    <th>{{ slot.start_time }} - {{ slot.end_time }}
-                        <a href="{% url 'planner:delete_timeslot' slot.id %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                            </svg>
-                        </a>
+    <!-- Header -->
+    <div class="tt-header">
+        <div class="tt-header-left">
+            <h1 class="tt-title">{{ timetable.name }}</h1>
+            <span class="tt-subtitle">{{ timeslots.count }} timeslot{{ timeslots.count|pluralize }} &middot; {% if timetable.days_mode == 'full_week' %}Sun – Sat{% else %}Mon – Fri{% endif %}</span>
+        </div>
+
+        <div class="tt-header-actions">
+            <!-- Timetable Switcher -->
+            {% if all_timetables.count > 1 %}
+            <div class="tt-switcher">
+                {% for tt in all_timetables %}
+                    <a href="{% url 'planner:timetable_view' tt.id %}"
+                       class="tt-switcher-btn {% if tt.id == timetable.id %}active{% endif %}">
+                        {{ tt.name }}
+                    </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Days Mode Toggle -->
+            <a href="{% url 'planner:toggle_days_mode' timetable.id %}"
+               class="btn btn-ghost" style="font-size:12px;"
+               title="Switch between Mon–Fri and Sun–Sat">
+                {% if timetable.days_mode == 'full_week' %}
+                    Sun – Sat
+                {% else %}
+                    Mon – Fri
+                {% endif %}
+            </a>
+
+            <!-- Actions -->
+            <a href="{% url 'planner:add_timeslot' %}?timetable={{ timetable.id }}" class="btn btn-ghost" style="font-size:12px;">
+                + Timeslot
+            </a>
+            <a href="{% url 'planner:export_timetable_pdf' timetable.id %}" class="btn btn-ghost" style="font-size:12px;" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                </svg>
+                Export
+            </a>
+            <a href="{% url 'planner:timetable_home' %}" class="btn btn-ghost" style="font-size:12px;">← Back</a>
+        </div>
+    </div>
+
+    <!-- Timetable Grid -->
+    <div class="tt-wrapper">
+        <table class="tt-grid">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    {% for slot in timeslots %}
+                    <th>
+                        {{ slot.start_time|time:"H:i" }} — {{ slot.end_time|time:"H:i" }}
+                        <a href="{% url 'planner:delete_timeslot' slot.id %}"
+                           style="margin-left:4px; color:rgba(30,37,64,0.2); font-size:10px; vertical-align:middle;"
+                           onclick="return confirm('Delete this timeslot?');"
+                           title="Delete timeslot">✕</a>
                     </th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for day, row in grid %}
-            <tr>
-                <td>{{ day }}</td>
-                {% for entry, timeslot in row %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for day, row in grid %}
+                <tr>
                     <td>
-                        {% if entry %}
-                            <a href="{% url 'planner:edit_entry' entry.id %}">{{ entry.subjectInfo.subject }}</a>
-                            <form action="{% url 'planner:delete_entry' entry.id %}" method="POST" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" onclick="return confirm('Delete this entry?');">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                                    </svg>
-                                </button>
-                            </form>
-                        {% else %}
-                            <a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}&day={{ day }}&timeslot={{ timeslot.id }}">+</a>
-                        {% endif %}
+                        <span class="tt-day-label {% if day == today_day %}today{% endif %}">
+                            {{ day }}
+                        </span>
                     </td>
+                    {% for entry, timeslot in row %}
+                    <td>
+                        <div class="tt-cell">
+                            {% if entry %}
+                                {% with color=entry.subjectInfo.category.color|default:"#1e2540" %}
+                                <div class="tt-subject-card"
+                                     style="background: {{ color }}18; border-left-color: {{ color }};">
+                                    <span class="tt-subject-name">{{ entry.subjectInfo.subject }}</span>
+                                    <span class="tt-subject-location">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                                        </svg>
+                                        {{ entry.subjectInfo.location }}
+                                    </span>
+                                    <div class="tt-subject-actions">
+                                        <a href="{% url 'planner:edit_entry' entry.id %}" class="tt-action-btn" title="Edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                            </svg>
+                                        </a>
+                                        <form method="POST" action="{% url 'planner:delete_entry' entry.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="tt-action-btn delete" title="Delete"
+                                                onclick="return confirm('Delete this entry?');">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            {% else %}
+                                <div class="tt-empty-cell">
+                                    <a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}&day={{ day }}&timeslot={{ timeslot.id }}"
+                                       class="tt-add-btn" title="Add class">+</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 
-    <br>
-    <a href="{% url 'planner:export_timetable_pdf' timetable.id %}" target="_blank">Download Timetable</a> |
-    <a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}">Add Course</a> |
-    <a href="{% url 'planner:add_timeslot' %}?timetable={{ timetable.id }}">Add Timeslot</a>|
-    <a href="{% url 'planner:timetable_home' %}">← Back to Timetables</a>
+    <!-- Bottom Bar -->
+    <div class="tt-bottom-bar">
+        <!-- Legend -->
+        {% if categories_used %}
+        <div class="tt-legend">
+            {% for cat in categories_used %}
+            <div class="tt-legend-item">
+                <span class="tt-legend-dot" style="background: {{ cat.color }};"></span>
+                {{ cat.name }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <span class="text-muted">Tip: Link subjects to categories to get colour coding.</span>
+        {% endif %}
+
+        <a href="{% url 'planner:delete_timetable' timetable.id %}" class="btn btn-danger" style="font-size:12px;">
+            Delete Timetable
+        </a>
+    </div>
+
 {% endblock %}

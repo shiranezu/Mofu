@@ -1,23 +1,254 @@
 {% extends 'base.html' %}
 
-{% block title %}Schedules - Sachi{% endblock %}
+{% block title %}Schedules — Mofu{% endblock %}
+{% block nav_schedule %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Header ─────────────────────────────────────── */
+    .sh-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        gap: 16px;
+    }
+
+    .sh-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .sh-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Schedule Cards Grid ────────────────────────── */
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .schedule-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .schedule-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 3px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.2s ease;
+    }
+
+    .schedule-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .schedule-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .schedule-card-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.2;
+    }
+
+    .schedule-card-meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .schedule-card-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .schedule-card-stat-value {
+        font-size: 22px;
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1;
+    }
+
+    .schedule-card-stat-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+    }
+
+    .schedule-card-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .schedule-card-progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .schedule-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .schedule-card-link {
+        font-size: 12px;
+        color: var(--accent);
+        font-weight: 500;
+        transition: opacity 0.18s;
+    }
+
+    .schedule-card-link:hover { opacity: 0.7; }
+
+    .schedule-card-delete {
+        font-size: 11px;
+        color: var(--text-muted);
+        transition: color 0.18s;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .schedule-card-delete:hover { color: #c0392b; }
+
+    /* ─── Empty State ────────────────────────────────── */
+    .empty-state-full {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 40px;
+        text-align: center;
+        background: var(--card-bg);
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        gap: 12px;
+    }
+
+    .empty-state-full svg {
+        opacity: 0.2;
+        margin-bottom: 8px;
+    }
+
+    .empty-state-full h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        opacity: 0.5;
+    }
+
+    .empty-state-full p {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Schedules</h1>
 
-    <a href="{% url 'planner:create_schedule' %}">+ Create New Schedule</a>
+    <div class="sh-header">
+        <div>
+            <h1 class="sh-title">Schedules.</h1>
+            <p class="sh-subtitle">{{ schedules.count }} schedule{{ schedules.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary">
+            Create New Schedule
+        </a>
+    </div>
 
-    <hr>
+    <div class="schedule-grid">
+        {% for item in schedules_data %}
+        <div class="schedule-card">
+            <div>
+                <div class="schedule-card-name">{{ item.schedule.name }}</div>
+            </div>
 
-    <h2>Your Schedules</h2>
-    <ul>
-        {% for schedule in schedules %}
-            <li>
-                <a href="{% url 'planner:schedule_view' schedule.id %}">{{ schedule.name }}</a>
-                | <a href="{% url 'planner:delete_schedule' schedule.id %}">Delete</a>
-            </li>
+            <div class="schedule-card-meta">
+                <div class="schedule-card-stat">
+                    <span class="schedule-card-stat-value">{{ item.total }}</span>
+                    <span class="schedule-card-stat-label">Total Tasks</span>
+                </div>
+                <div class="schedule-card-stat">
+                    <span class="schedule-card-stat-value">{{ item.completed }}</span>
+                    <span class="schedule-card-stat-label">Completed</span>
+                </div>
+                <div class="schedule-card-stat">
+                    <span class="schedule-card-stat-value">{{ item.pending }}</span>
+                    <span class="schedule-card-stat-label">Pending</span>
+                </div>
+            </div>
+
+            <div class="schedule-card-progress">
+                <div class="schedule-card-progress-label">
+                    <span>Progress</span>
+                    <span>{{ item.completed }} / {{ item.total }}</span>
+                </div>
+                <progress value="{{ item.percentage }}" max="100"></progress>
+            </div>
+
+            <div class="schedule-card-footer">
+                <a href="{% url 'planner:schedule_view' item.schedule.id %}" class="schedule-card-link">
+                    Open Schedule
+                </a>
+                <a href="{% url 'planner:delete_schedule' item.schedule.id %}" class="schedule-card-delete">
+                    Delete
+                </a>
+            </div>
+        </div>
         {% empty %}
-            <li>No schedules yet.</li>
+            <div class="empty-state-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                </svg>
+                <h3>No schedules yet</h3>
+                <p>Create your first schedule to start tracking tasks.</p>
+                <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary" style="margin-top: 8px;">
+                    Create New Schedule
+                </a>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
+
 {% endblock %}

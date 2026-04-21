@@ -12,7 +12,25 @@ from ..forms import ScheduleForm, ScheduleItemForm
 def schedule_home(request):
     """View all schedules"""
     schedules = Schedule.objects.filter(user=request.user)
-    return render(request, 'schedule_home.html', {'schedules': schedules})
+    
+    schedules_data = []
+    for schedule in schedules:
+        total = schedule.items.count()
+        completed = schedule.items.filter(status='completed').count()
+        pending = total - completed
+        percentage = int((completed / total * 100)) if total > 0 else 0
+        schedules_data.append({
+            'schedule': schedule,
+            'total': total,
+            'completed': completed,
+            'pending': pending,
+            'percentage': percentage,
+        })
+    
+    return render(request, 'schedule_home.html', {
+        'schedules_data': schedules_data,
+        'schedules': schedules,
+    })
 
 
 @login_required(login_url='planner:login')
@@ -113,8 +131,11 @@ def delete_schedule_item(request, item_id):
 def toggle_schedule_item(request, item_id):
     """Toggle schedule item completion"""
     item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    item.is_done = not item.is_done
-    item.save()
+    if item.status == 'completed':
+        item.status = 'not_started'
+    else:
+        item.status = 'completed'
+    item.save()  # save() will auto-sync is_done from status
     return redirect("planner:schedule_view", item.schedule.id)
 
 

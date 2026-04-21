@@ -13,9 +13,14 @@ DAYS_OF_WEEK = [
 
 
 class Subject_and_location(models.Model):
-    """Represents a subject and its location"""
     subject = models.CharField(max_length=1000)
     location = models.CharField(max_length=100)
+    category = models.ForeignKey(
+        'StudyCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.subject} at {self.location}"
@@ -32,13 +37,19 @@ class Timeslot(models.Model):
 
 
 class Timetable(models.Model):
-    """A user's timetable (e.g., Semester 1, Semester 2)"""
+    DAYS_MODE_CHOICES = [
+        ('weekdays', 'Mon – Fri'),
+        ('full_week', 'Sun – Sat'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    days_mode = models.CharField(
+        max_length=10,
+        choices=DAYS_MODE_CHOICES,
+        default='weekdays'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
 
 
 class TimetableEntry(models.Model):
@@ -138,6 +149,8 @@ class StudySession(models.Model):
     is_pomodoro = models.BooleanField(default=False)
     pomodoros_completed = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_countdown = models.BooleanField(default=False)
+    countdown_target_seconds = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username} - {self.category} - {self.duration_seconds}s"
@@ -230,11 +243,13 @@ class StudyGoal(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, blank=True, null=True)
     goal_type = models.CharField(max_length=10, choices=GOAL_TYPE_CHOICES)
     target_hours = models.DecimalField(max_digits=5, decimal_places=2)
     category = models.ForeignKey(StudyCategory, on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         category_str = f" - {self.category.name}" if self.category else ""
@@ -302,3 +317,15 @@ class StudyResource(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class DictionaryHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    word = models.CharField(max_length=200)
+    searched_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-searched_at']
+
+    def __str__(self):
+        return f"{self.user.username} — {self.word}"

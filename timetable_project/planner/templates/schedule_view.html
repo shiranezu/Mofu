@@ -1,74 +1,823 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ schedule.name }} - Sachi{% endblock %}
+{% block title %}{{ schedule.name }} — Mofu{% endblock %}
+{% block nav_schedule %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Header ─────────────────────────────────────── */
+    .sv-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .sv-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .sv-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .sv-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* ─── View Toggle ────────────────────────────────── */
+    .view-toggle {
+        display: flex;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .view-toggle-btn {
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        color: var(--text-muted);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .view-toggle-btn.active {
+        background: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+    }
+
+    /* ─── Sort Bar ───────────────────────────────────── */
+    .sort-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .sort-label {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .sort-btn {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        border: 1px solid var(--card-border);
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.18s;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .sort-btn.active {
+        background: var(--text-dark);
+        color: var(--cream);
+        border-color: var(--text-dark);
+    }
+
+    /* ════════════════════════════════════════════════════
+       LIST VIEW
+    ════════════════════════════════════════════════════ */
+    .list-view { display: block; }
+    .board-view { display: none; }
+
+    .list-view.hidden { display: none; }
+    .board-view.hidden { display: none; }
+    .board-view.visible { display: flex; }
+    .list-view.visible { display: block; }
+
+    /* ─── Status Group ───────────────────────────────── */
+    .status-group {
+        margin-bottom: 24px;
+    }
+
+    .status-group-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .status-group-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-group-count {
+        font-size: 11px;
+        color: var(--text-muted);
+        background: var(--cream-dark);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    .status-group-chevron {
+        margin-left: auto;
+        color: var(--text-muted);
+        transition: transform 0.2s;
+    }
+
+    .status-group.collapsed .status-group-chevron {
+        transform: rotate(-90deg);
+    }
+
+    /* ─── Task Table ─────────────────────────────────── */
+    .task-table-wrap {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .task-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .task-table thead th {
+        padding: 10px 16px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--card-border);
+        text-align: left;
+        background: transparent;
+    }
+
+    .task-table tbody td {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        vertical-align: middle;
+        font-size: 13px;
+        color: var(--text-dark);
+    }
+
+    .task-table tbody tr:last-child td { border-bottom: none; }
+
+    .task-table tbody tr:hover td {
+        background: rgba(30, 37, 64, 0.02);
+    }
+
+    /* Checkbox */
+    .task-check {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    /* Task title */
+    .task-name { font-weight: 400; }
+    .task-name.done {
+        text-decoration: line-through;
+        color: var(--text-muted);
+    }
+
+    /* Due date */
+    .task-due { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .task-due.overdue { color: #c0392b; font-weight: 500; }
+
+    /* Actions */
+    .task-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .task-table tbody tr:hover .task-actions { opacity: 1; }
+
+    .task-action-link {
+        font-size: 11px;
+        color: var(--text-muted);
+        transition: color 0.15s;
+        white-space: nowrap;
+    }
+
+    .task-action-link:hover { color: var(--accent); }
+    .task-action-link.delete:hover { color: #c0392b; }
+
+    /* ════════════════════════════════════════════════════
+       BOARD VIEW
+    ════════════════════════════════════════════════════ */
+    .board-view {
+        gap: 20px;
+        align-items: start;
+    }
+
+    .board-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .board-col-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px;
+        margin-bottom: 4px;
+    }
+
+    .board-col-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .board-col-count {
+        font-size: 11px;
+        color: var(--text-muted);
+        background: var(--cream-dark);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    /* ─── Board Task Card ────────────────────────────── */
+    .board-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: all 0.18s ease;
+        position: relative;
+    }
+
+    .board-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+    }
+
+    .board-card-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.4;
+    }
+
+    .board-card-title.done {
+        text-decoration: line-through;
+        color: var(--text-muted);
+    }
+
+    .board-card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .board-card-due {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .board-card-due.overdue { color: #c0392b; }
+
+    .board-card-actions {
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.15s;
+        padding-top: 8px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .board-card:hover .board-card-actions { opacity: 1; }
+
+    /* ─── Board Empty ────────────────────────────────── */
+    .board-empty {
+        background: var(--card-bg);
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        padding: 24px 16px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Col accent lines ───────────────────────────── */
+    .board-col-not-started .board-col-title::before {
+        content: '';
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #8a8070;
+    }
+
+    .board-col-in-progress .board-col-title::before {
+        content: '';
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #6B7FD4;
+    }
+
+    .board-col-completed .board-col-title::before {
+        content: '';
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #7A9E7E;
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h2>{{ schedule.name }}</h2>
-    
-    <a href="{% url 'planner:add_schedule_item' schedule.id %}">+ Add Task</a> |
-    <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" target="_blank">Download Schedule</a>
-    
-    <hr>
-    
-    <h3>Tasks</h3>
-    
-    {% if items %}
-        <table border="1" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Task</th>
-                    <th>Due Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr>
-                    <td>
-                        <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <input type="checkbox" {% if item.is_done %}checked{% endif %} onchange="this.form.submit()">
-                        </form>
-                        {{ item.get_status_display }}
-                    </td>
-                    <td>
-                        {% if item.priority == 'high' %}
-                            <strong style="color: red;">High</strong>
-                        {% elif item.priority == 'medium' %}
-                            <span style="color: orange;">Medium</span>
-                        {% else %}
-                            <span style="color: green;">Low</span>
+
+    <!-- Header -->
+    <div class="sv-header">
+        <div>
+            <h1 class="sv-title">{{ schedule.name }}</h1>
+            <p class="sv-subtitle">{{ items.count }} task{{ items.count|pluralize }}</p>
+        </div>
+        <div class="sv-header-actions">
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-toggle-btn active" id="listViewBtn" onclick="switchView('list')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                    List
+                </button>
+                <button class="view-toggle-btn" id="boardViewBtn" onclick="switchView('board')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5z"/>
+                    </svg>
+                    Board
+                </button>
+            </div>
+
+            <a href="{% url 'planner:add_schedule_item' schedule.id %}" class="btn btn-primary">+ Add Task</a>
+            <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" class="btn btn-ghost" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                </svg>
+                Export
+            </a>
+            <a href="{% url 'planner:schedule_home' %}" class="btn btn-ghost"> Back</a>
+        </div>
+    </div>
+
+    <!-- Sort Bar (List View only) -->
+    <div class="sort-bar" id="sortBar">
+        <span class="sort-label">Sort by:</span>
+        <button class="sort-btn active" onclick="sortTasks('status', this)">Status</button>
+        <button class="sort-btn" onclick="sortTasks('due_date', this)">Due Date</button>
+        <button class="sort-btn" onclick="sortTasks('priority', this)">Priority</button>
+    </div>
+
+    <!-- ══════════════ LIST VIEW ══════════════ -->
+    <div class="list-view visible" id="listView">
+
+        <!-- Not Started -->
+        {% with not_started=items|dictsort:"title" %}
+        <div class="status-group" id="group-not-started">
+            <div class="status-group-header" onclick="toggleGroup('group-not-started')">
+                <span class="status-group-label">
+                    Not Started
+                    <!-- <span class="status-group-count">
+                        {% for item in items %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                    </span> -->
+                </span>
+                <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </div>
+            <div class="task-table-wrap group-body">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;"></th>
+                            <th>Task</th>
+                            <th>Due Date</th>
+                            <th>Priority</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        {% if item.status == 'not_started' %}
+                        <tr>
+                            <td>
+                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                    {% csrf_token %}
+                                    <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
+                                </form>
+                            </td>
+                            <td><span class="task-name {% if item.is_done %}done{% endif %}">{{ item.title }}</span></td>
+                            <td>
+                                {% if item.due_date %}
+                                    <span class="task-due {% if item.due_date < today and not item.is_done %}overdue{% endif %}">
+                                        {% if item.due_date < today and not item.is_done %}⚠ {% endif %}
+                                        {{ item.due_date|date:"M d, Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="task-due">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                                {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                                {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="task-actions">
+                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td>
-                        {% if item.is_done %}
-                            <s>{{ item.title }}</s>
-                        {% else %}
-                            {{ item.title }}
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 20px;">No tasks here.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endwith %}
+
+        <!-- In Progress -->
+        <div class="status-group" id="group-in-progress">
+            <div class="status-group-header" onclick="toggleGroup('group-in-progress')">
+                <span class="status-group-label">
+                    In Progress
+                    <!-- <span class="status-group-count">
+                        {% for item in items %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                    </span> -->
+                </span>
+                <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </div>
+            <div class="task-table-wrap group-body">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;"></th>
+                            <th>Task</th>
+                            <th>Due Date</th>
+                            <th>Priority</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        {% if item.status == 'in_progress' %}
+                        <tr>
+                            <td>
+                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                    {% csrf_token %}
+                                    <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
+                                </form>
+                            </td>
+                            <td><span class="task-name {% if item.is_done %}done{% endif %}">{{ item.title }}</span></td>
+                            <td>
+                                {% if item.due_date %}
+                                    <span class="task-due {% if item.due_date < today and not item.is_done %}overdue{% endif %}">
+                                        {% if item.due_date < today and not item.is_done %}⚠ {% endif %}
+                                        {{ item.due_date|date:"M d, Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="task-due">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                                {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                                {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="task-actions">
+                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td>
-                        {% if item.due_date %}
-                            {{ item.due_date }}
-                            {% if item.due_date < today and not item.is_done %}
-                                <strong style="color: red;">(Overdue)</strong>
-                            {% endif %}
-                        {% else %}
-                            -
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 20px;">No tasks here.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="status-group" id="group-completed">
+            <div class="status-group-header" onclick="toggleGroup('group-completed')">
+                <span class="status-group-label">
+                    Completed
+                    <!-- <span class="status-group-count">
+                        {% for item in items %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                    </span> -->
+                </span>
+                <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </div>
+            <div class="task-table-wrap group-body">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;"></th>
+                            <th>Task</th>
+                            <th>Due Date</th>
+                            <th>Priority</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        {% if item.status == 'completed' %}
+                        <tr>
+                            <td>
+                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                    {% csrf_token %}
+                                    <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
+                                </form>
+                            </td>
+                            <td><span class="task-name done">{{ item.title }}</span></td>
+                            <td>
+                                {% if item.due_date %}
+                                    <span class="task-due">{{ item.due_date|date:"M d, Y" }}</span>
+                                {% else %}
+                                    <span class="task-due">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                                {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                                {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="task-actions">
+                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'planner:view_schedule_item' item.id %}">View</a> |
-                        <a href="{% url 'planner:edit_schedule_item' item.id %}">Edit</a> |
-                        <a href="{% url 'planner:delete_schedule_item' item.id %}">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No tasks yet.</p>
-    {% endif %}
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 20px;">No tasks here.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══════════════ BOARD VIEW ══════════════ -->
+    <div class="board-view hidden" id="boardView">
+
+        <!-- Not Started -->
+        <div class="board-col board-col-not-started">
+            <div class="board-col-header">
+                <span class="board-col-title">
+                    Not Started
+                    <span class="board-col-count">{% for item in items %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                </span>
+            </div>
+            {% for item in items %}
+            {% if item.status == 'not_started' %}
+            <div class="board-card">
+                <span class="board-card-title {% if item.is_done %}done{% endif %}">{{ item.title }}</span>
+                <div class="board-card-meta">
+                    {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                    {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                    {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                    {% if item.due_date %}
+                    <span class="board-card-due {% if item.due_date < today %}overdue{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                        </svg>
+                        {{ item.due_date|date:"M d" }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="board-card-actions">
+                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="board-empty">No tasks</div>
+            {% endfor %}
+        </div>
+
+        <!-- In Progress -->
+        <div class="board-col board-col-in-progress">
+            <div class="board-col-header">
+                <span class="board-col-title">
+                    In Progress
+                    <span class="board-col-count">{% for item in items %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                </span>
+            </div>
+            {% for item in items %}
+            {% if item.status == 'in_progress' %}
+            <div class="board-card">
+                <span class="board-card-title">{{ item.title }}</span>
+                <div class="board-card-meta">
+                    {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                    {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                    {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                    {% if item.due_date %}
+                    <span class="board-card-due {% if item.due_date < today %}overdue{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                        </svg>
+                        {{ item.due_date|date:"M d" }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="board-card-actions">
+                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="board-empty">No tasks</div>
+            {% endfor %}
+        </div>
+
+        <!-- Completed -->
+        <div class="board-col board-col-completed">
+            <div class="board-col-header">
+                <span class="board-col-title">
+                    Completed
+                    <span class="board-col-count">{% for item in items %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                </span>
+            </div>
+            {% for item in items %}
+            {% if item.status == 'completed' %}
+            <div class="board-card">
+                <span class="board-card-title done">{{ item.title }}</span>
+                <div class="board-card-meta">
+                    {% if item.priority == 'high' %}<span class="badge badge-high">High</span>
+                    {% elif item.priority == 'medium' %}<span class="badge badge-medium">Med</span>
+                    {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                    {% if item.due_date %}
+                    <span class="board-card-due">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                        </svg>
+                        {{ item.due_date|date:"M d" }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="board-card-actions">
+                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="board-empty">No tasks</div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ── View Toggle ──────────────────────────────────
+    function switchView(view) {
+        const listView  = document.getElementById('listView');
+        const boardView = document.getElementById('boardView');
+        const listBtn   = document.getElementById('listViewBtn');
+        const boardBtn  = document.getElementById('boardViewBtn');
+        const sortBar   = document.getElementById('sortBar');
+
+        if (view === 'list') {
+            listView.classList.remove('hidden');
+            listView.classList.add('visible');
+            boardView.classList.remove('visible');
+            boardView.classList.add('hidden');
+            listBtn.classList.add('active');
+            boardBtn.classList.remove('active');
+            sortBar.style.display = 'flex';
+        } else {
+            boardView.classList.remove('hidden');
+            boardView.classList.add('visible');
+            listView.classList.remove('visible');
+            listView.classList.add('hidden');
+            boardBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            sortBar.style.display = 'none';
+        }
+        localStorage.setItem('scheduleView_{{ schedule.id }}', view);
+    }
+
+    // ── Restore saved view ───────────────────────────
+    const savedView = localStorage.getItem('scheduleView_{{ schedule.id }}');
+    if (savedView === 'board') switchView('board');
+
+    // ── Group collapse ───────────────────────────────
+    function toggleGroup(groupId) {
+        const group = document.getElementById(groupId);
+        group.classList.toggle('collapsed');
+        const body = group.querySelector('.group-body');
+        if (group.classList.contains('collapsed')) {
+            body.style.display = 'none';
+        } else {
+            body.style.display = 'block';
+        }
+    }
+
+    // ── Sort buttons ─────────────────────────────────
+    function sortTasks(by, btn) {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const priorityOrder = { 'High': 0, 'Med': 1, 'Low': 2 };
+        const groups = ['group-not-started', 'group-in-progress', 'group-completed'];
+
+        groups.forEach(groupId => {
+            const group = document.getElementById(groupId);
+            if (!group) return;
+            const tbody = group.querySelector('tbody');
+            if (!tbody) return;
+
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            if (rows.length <= 1) return;
+
+            rows.sort((a, b) => {
+                if (by === 'due_date') {
+                    const aText = a.querySelector('.task-due')?.textContent.trim().replace('⚠ ', '') || '';
+                    const bText = b.querySelector('.task-due')?.textContent.trim().replace('⚠ ', '') || '';
+                    if (!aText || aText === '—') return 1;
+                    if (!bText || bText === '—') return -1;
+                    return new Date(aText) - new Date(bText);
+                }
+                if (by === 'priority') {
+                    const aP = a.querySelector('.badge')?.textContent.trim() || 'Low';
+                    const bP = b.querySelector('.badge')?.textContent.trim() || 'Low';
+                    return (priorityOrder[aP] ?? 2) - (priorityOrder[bP] ?? 2);
+                }
+                return 0;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    }
+</script>
 {% endblock %}
