@@ -39,7 +39,7 @@ urlpatterns = [
     path('schedule/<int:schedule_id>/delete/', views.delete_schedule, name='delete_schedule'),
     path('schedule/<int:schedule_id>/export/pdf/', views.export_schedule_pdf, name='export_schedule_pdf'),
 
-    # TIMER
+    # focus
     path('study/timer/', views.study_timer, name='study_timer'),
     path('study/start/', views.start_timer, name='start_timer'),
     path('study/stop/<int:session_id>/', views.stop_timer, name='stop_timer'),
@@ -52,6 +52,8 @@ urlpatterns = [
     path('study/pause/<int:session_id>/', views.pause_timer, name='pause_timer'),
     path('study/resume/<int:session_id>/', views.resume_timer, name='resume_timer'),
     path('study/stop-summary/<int:session_id>/', views.stop_timer_with_summary, name='stop_timer_with_summary'),
+    path('study/session/<int:session_id>/delete/', views.delete_session, name='delete_session'),
+    path('study/history/clear/', views.clear_all_history, name='clear_all_history'),
 
     # GOALS
     path('study/goals/', views.study_goals, name='study_goals'),

@@ -22,7 +22,8 @@ from .study_views import (
     manage_categories, add_category, delete_category,
     suggest_subjects, quick_add_category, bulk_add_categories,
     pomodoro_timer, start_pomodoro, pause_pomodoro, resume_pomodoro, complete_pomodoro, stop_pomodoro,
-    study_resources, add_resource, edit_resource, delete_resource, start_countdown, stop_countdown, complete_countdown,
+    study_resources, add_resource, edit_resource, delete_resource, start_countdown, stop_countdown,
+    complete_countdown, delete_session, clear_all_history,
 )
 from .general_views import home, help, my_account
 

@@ -51,6 +51,9 @@ class Timetable(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
 
 class TimetableEntry(models.Model):
     """A single entry in a timetable (subject at a specific day/time)"""

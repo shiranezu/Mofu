@@ -1,120 +1,451 @@
 {% extends 'base.html' %}
 
-{% block title %}Study Statistics - Sachi{% endblock %}
+{% block title %}Statistics — Mofu{% endblock %}
+{% block nav_statistics %}active{% endblock %}
 
 {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 {% endblock %}
 
+{% block extra_styles %}
+
+    /* ─── Header ─────────────────────────────────────── */
+    .stats-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        gap: 16px;
+    }
+
+    .stats-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
+    .stats-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .stats-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Stat Strip ─────────────────────────────────── */
+    .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .stats-strip-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        border-left: 3px solid var(--accent);
+    }
+
+    .stats-strip-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .stats-strip-value {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 36px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1;
+        letter-spacing: -1px;
+    }
+
+    .stats-strip-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* ─── Charts Row ─────────────────────────────────── */
+    .stats-charts-row {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        margin-bottom: 24px;
+        align-items: start;
+    }
+
+    /* ─── Chart Card ─────────────────────────────────── */
+    .stats-chart-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 28px;
+        overflow: hidden;
+    }
+
+    .stats-chart-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+
+    .stats-chart-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        display: block;
+    }
+
+    .stats-chart-wrap {
+        position: relative;
+        height: 240px;
+    }
+
+    .stats-doughnut-wrap {
+        position: relative;
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ─── Category Table ─────────────────────────────── */
+    .stats-table-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .stats-table-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .stats-table-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .stats-table-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .stats-cat-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .stats-cat-table thead th {
+        padding: 10px 24px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--card-border);
+        text-align: left;
+        background: transparent;
+    }
+
+    .stats-cat-table tbody td {
+        padding: 14px 24px;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        font-size: 13px;
+        color: var(--text-dark);
+        vertical-align: middle;
+    }
+
+    .stats-cat-table tbody tr:last-child td { border-bottom: none; }
+    .stats-cat-table tbody tr:hover td { background: rgba(30, 37, 64, 0.02); }
+
+    .stats-cat-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    .stats-cat-name {
+        vertical-align: middle;
+        font-weight: 400;
+    }
+
+    /* Bar inside table */
+    .stats-cat-bar-wrap {
+        width: 120px;
+        height: 4px;
+        background: var(--cream-dark);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .stats-cat-bar-fill {
+        height: 100%;
+        border-radius: 10px;
+    }
+
+    /* Empty state */
+    .stats-empty {
+        padding: 48px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+{% endblock %}
+
 {% block content %}
-    <h1>📊 Study Statistics</h1>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; text-align: center;">
-            <p>Total Study Time</p>
-            <h2>{{ total_hours }}h</h2>
-        </div>
-        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; text-align: center;">
-            <p>Total Sessions</p>
-            <h2>{{ total_sessions }}</h2>
-        </div>
-        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; text-align: center;">
-            <p>Current Streak</p>
-            <h2>{{ current_streak }} 
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fire" viewBox="0 0 16 16">
-                    <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/>
-                </svg>
-            </h2>
-        </div>
-        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; text-align: center;">
-            <p>This Week</p>
-            <h2>{{ week_seconds }} seconds</h2>
+    <!-- Header -->
+    <div class="stats-header">
+        <div class="stats-header-left">
+            <h1 class="stats-title">Statistics.</h1>
+            <p class="stats-subtitle">Your study performance at a glance</p>
         </div>
     </div>
 
-    <div style="margin-bottom: 30px;">
-        <h2>Study Time - Last 7 Days</h2>
-        <div style="position: relative; height: 300px;">
-            <canvas id="dailyChart"></canvas>
+    <!-- Stat Strip -->
+    <div class="stats-strip">
+        <div class="stats-strip-card">
+            <span class="stats-strip-label">Total Hours</span>
+            <span class="stats-strip-value">{{ total_hours }}</span>
+            <span class="stats-strip-sub">hours studied</span>
+        </div>
+        <div class="stats-strip-card">
+            <span class="stats-strip-label">Total Sessions</span>
+            <span class="stats-strip-value">{{ total_sessions }}</span>
+            <span class="stats-strip-sub">sessions completed</span>
+        </div>
+        <div class="stats-strip-card">
+            <span class="stats-strip-label">This Week</span>
+            <span class="stats-strip-value">{{ week_hours }}</span>
+            <span class="stats-strip-sub">hours this week</span>
+        </div>
+        <div class="stats-strip-card">
+            <span class="stats-strip-label">Current Streak</span>
+            <span class="stats-strip-value">{{ current_streak }}</span>
+            <span class="stats-strip-sub">days in a row</span>
         </div>
     </div>
 
-    <div style="margin-bottom: 30px;">
-        <h2>Study Time by Category</h2>
-        <div style="position: relative; height: 300px;">
-            <canvas id="categoryChart"></canvas>
+    <!-- Charts Row -->
+    <div class="stats-charts-row">
+
+        <!-- Line Chart -->
+        <div class="stats-chart-card">
+            <div class="stats-chart-title">Daily Study Time</div>
+            <span class="stats-chart-sub">Last 7 days in hours</span>
+            <div class="stats-chart-wrap">
+                <canvas id="dailyChart"></canvas>
+            </div>
         </div>
+
+        <!-- Doughnut Chart -->
+        <div class="stats-chart-card">
+            <div class="stats-chart-title">By Category</div>
+            <span class="stats-chart-sub">Time distribution</span>
+            <div class="stats-doughnut-wrap">
+                {% if category_data != '[]' %}
+                    <canvas id="categoryChart"></canvas>
+                {% else %}
+                    <p style="font-size:12px;color:var(--text-muted);font-style:italic;">No category data yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
-    <h2>Category Breakdown</h2>
-    <table border="1" style="width: 100%;">
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Total Hours</th>
-                <th>Sessions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stat in category_stats %}
-            <tr>
-                <td>
-                    <span class="category-color" data-color="{{ stat.category__color|default:'#95a5a6' }}"></span>
-                    {{ stat.category__name|default:"No Category" }}
-                </td>
-                <td>{{ stat.total_hours }}h</td>
-                <td>{{ stat.session_count }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No study sessions yet</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Category Breakdown Table -->
+    <div class="stats-table-card">
+        <div class="stats-table-header">
+            <span class="stats-table-title">Category Breakdown</span>
+            <span class="stats-table-sub">{{ category_stats|length }} categor{{ category_stats|length|pluralize:"y,ies" }}</span>
+        </div>
+
+        {% if category_stats %}
+        {% with max_hours=category_stats.0.total_hours %}
+        <table class="stats-cat-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Hours</th>
+                    <th>Sessions</th>
+                    <th>Distribution</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in category_stats %}
+                <tr>
+                    <td>
+                        <span class="stats-cat-dot"
+                              style="background: {{ stat.category__color|default:'#95a5a6' }};"></span>
+                        <span class="stats-cat-name">
+                            {{ stat.category__name|default:"No Category" }}
+                        </span>
+                    </td>
+                    <td>{{ stat.total_hours }}h</td>
+                    <td>{{ stat.session_count }}</td>
+                    <td>
+                        <div class="stats-cat-bar-wrap">
+                            <div class="stats-cat-bar-fill"
+                                 style="width: {% if max_hours > 0 %}{% widthratio stat.total_hours max_hours 100 %}{% else %}0{% endif %}%;
+                                        background: {{ stat.category__color|default:'#95a5a6' }};"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endwith %}
+        {% else %}
+            <div class="stats-empty">No study sessions recorded yet.</div>
+        {% endif %}
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const dailyLabels = JSON.parse('{{ daily_labels|safe }}');
-    const dailyData = JSON.parse('{{ daily_data|safe }}');
-    const categoryLabels = JSON.parse('{{ category_labels|safe }}');
-    const categoryData = JSON.parse('{{ category_data|safe }}');
-    const categoryColors = JSON.parse('{{ category_colors|safe }}');
+    const cream     = getComputedStyle(document.documentElement).getPropertyValue('--cream-dark').trim() || '#e6dbc7';
+    const accent    = '#C4714A';
+    const textMuted = '#8a8070';
+    const navy      = '#1e2540';
 
-    new Chart(document.getElementById('dailyChart').getContext('2d'), {
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    Chart.defaults.color       = textMuted;
+
+    // ── Daily Line Chart ──────────────────────────────
+    const dailyLabels = {{ daily_labels|safe }};
+    const dailyData   = {{ daily_data|safe }};
+
+    new Chart(document.getElementById('dailyChart'), {
         type: 'line',
         data: {
             labels: dailyLabels,
             datasets: [{
-                label: 'StudyHours',
+                label: 'Hours',
                 data: dailyData,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                borderColor: accent,
+                backgroundColor: 'rgba(196, 113, 74, 0.08)',
                 borderWidth: 2,
                 fill: true,
-                tension: 0.4
-                }]
+                tension: 0.4,
+                pointBackgroundColor: accent,
+                pointBorderColor: '#faf6ef',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+            }]
         },
         options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours' } } }
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: navy,
+                    titleColor: '#F0E7D5',
+                    bodyColor: 'rgba(240,231,213,0.7)',
+                    padding: 10,
+                    callbacks: {
+                        label: ctx => ` ${ctx.parsed.y}h`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { font: { size: 11 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(30, 37, 64, 0.05)',
+                        drawBorder: false
+                    },
+                    border: { display: false },
+                    ticks: {
+                        font: { size: 11 },
+                        callback: val => val + 'h'
+                    }
+                }
+            }
         }
+    });
 
-        });
-        new Chart(document.getElementById('categoryChart').getContext('2d'), {
+    // ── Doughnut Chart ────────────────────────────────
+    const catLabels = {{ category_labels|safe }};
+    const catData   = {{ category_data|safe }};
+    const catColors = {{ category_colors|safe }};
+
+    if (catData.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
             type: 'doughnut',
             data: {
-                labels: categoryLabels,
-                datasets: [{ data: categoryData, backgroundColor: categoryColors, borderWidth: 2, borderColor: '#fff' }]
+                labels: catLabels,
+                datasets: [{
+                    data: catData,
+                    backgroundColor: catColors,
+                    borderColor: '#faf6ef',
+                    borderWidth: 3,
+                    hoverOffset: 6,
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            font: { size: 11 },
+                            usePointStyle: true,
+                            pointStyleWidth: 8,
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: navy,
+                        titleColor: '#F0E7D5',
+                        bodyColor: 'rgba(240,231,213,0.7)',
+                        padding: 10,
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed}h`
+                        }
+                    }
+                }
+            }
         });
-
-        document.querySelectorAll('.category-color').forEach(el => {
-            el.style.cssText = 'display:inline-block; width:15px; height:15px; border-radius:3px; margin-right:8px; vertical-align:middle;';
-            el.style.backgroundColor = el.dataset.color;
-        });
-        </script>
+    }
+</script>
 {% endblock %}

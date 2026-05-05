@@ -191,22 +191,81 @@ def edit_session_notes(request, session_id):
 @login_required(login_url='planner:login')
 def study_history(request):
     """View all past study sessions"""
+    from django.core.paginator import Paginator
+
     sessions = StudySession.objects.filter(user=request.user, is_active=False)
     today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
 
-    today_total = sessions.filter(start_time__date=today).aggregate(
-        total=Sum('duration_seconds'))['total'] or 0
-    week_start = today - timedelta(days=today.weekday())
-    week_total = sessions.filter(start_time__date__gte=week_start).aggregate(
-        total=Sum('duration_seconds'))['total'] or 0
+    # Filters
+    category_id = request.GET.get('category', '')
+    session_type = request.GET.get('type', '')
+    sort_by = request.GET.get('sort', 'newest')
+
+    if category_id:
+        sessions = sessions.filter(category__id=category_id)
+    if session_type == 'regular':
+        sessions = sessions.filter(is_pomodoro=False, is_countdown=False)
+    elif session_type == 'pomodoro':
+        sessions = sessions.filter(is_pomodoro=True)
+    elif session_type == 'countdown':
+        sessions = sessions.filter(is_countdown=True)
+
+    if sort_by == 'oldest':
+        sessions = sessions.order_by('start_time')
+    elif sort_by == 'longest':
+        sessions = sessions.order_by('-duration_seconds')
+    elif sort_by == 'shortest':
+        sessions = sessions.order_by('duration_seconds')
+    else:
+        sessions = sessions.order_by('-start_time')
+
+    # Paginate
+    paginator = Paginator(sessions, 15)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    # Group by date
+    from itertools import groupby
+    grouped = []
+    for date, group in groupby(page_obj, key=lambda s: s.start_time.date()):
+        grouped.append({'date': date, 'sessions': list(group)})
+
+    # Categories for filter dropdown
+    categories = StudyCategory.objects.filter(user=request.user)
+
+    today_total = StudySession.objects.filter(
+        user=request.user, is_active=False, start_time__date=today
+    ).aggregate(total=Sum('duration_seconds'))['total'] or 0
 
     return render(request, 'study/history.html', {
-    'sessions': sessions,
-    'today_total': today_total,
-    'week_total': week_total,
-    'show_stats_widget': True,
-    'today_study_hours': get_today_study_hours(request.user),
+        'grouped_sessions': grouped,
+        'page_obj': page_obj,
+        'categories': categories,
+        'total_count': paginator.count,
+        'today_total': round(today_total / 3600, 2),
+        'selected_category': category_id,
+        'selected_type': session_type,
+        'selected_sort': sort_by,
+        'today': today,
+        'yesterday': yesterday, 
     })
+
+@login_required(login_url='planner:login')
+def delete_session(request, session_id):
+    """Delete a study session"""
+    session = get_object_or_404(StudySession, id=session_id, user=request.user)
+    session.delete()
+    return redirect('planner:study_history')
+
+
+@login_required(login_url='planner:login')
+def clear_all_history(request):
+    """Delete all study sessions"""
+    if request.method == 'POST':
+        StudySession.objects.filter(user=request.user, is_active=False).delete()
+        messages.success(request, "Study history cleared.")
+    return redirect('planner:study_history')
 
 
 @login_required(login_url='planner:login')
@@ -250,44 +309,57 @@ def study_statistics(request):
         daily_data.append(round(day_seconds / 3600, 2))
 
     return render(request, 'study/statistics.html', {
-        'total_sessions': total_sessions,
-        'total_hours': total_hours,
-        'today_seconds': today_seconds,
-        'week_seconds': week_seconds,
-        'current_streak': current_streak,
-        'category_labels': json.dumps(category_labels),
-        'category_data': json.dumps(category_data),
-        'category_colors': json.dumps(category_colors),
-        'daily_labels': json.dumps(last_7_days),
-        'daily_data': json.dumps(daily_data),
-        'category_stats': category_stats_list,
-        'show_stats_widget': True,
-        'today_study_hours': get_today_study_hours(request.user),
-    })
+    'total_sessions': total_sessions,
+    'total_hours': total_hours,
+    'today_hours': round(today_seconds / 3600, 2),
+    'week_hours': round(week_seconds / 3600, 2),
+    'current_streak': current_streak,
+    'category_labels': json.dumps(category_labels),
+    'category_data': json.dumps(category_data),
+    'category_colors': json.dumps(category_colors),
+    'daily_labels': json.dumps(last_7_days),
+    'daily_data': json.dumps(daily_data),
+    'category_stats': category_stats_list,
+})
 
 
 @login_required(login_url='planner:login')
 def study_streaks(request):
-    """View study streaks"""
-    today = timezone.now().date()
+    from datetime import date, timedelta
+    today = date.today()
     sessions = StudySession.objects.filter(user=request.user, is_active=False)
     study_dates = set(session.start_time.date() for session in sessions)
 
-    calendar_data = []
-    for i in range(29, -1, -1):
-        date = today - timedelta(days=i)
-        calendar_data.append({
-            'date': date,
-            'studied': date in study_dates,
-            'day': date.strftime('%a'),
-            'day_num': date.day
+    # Build Sun–Sat week
+    days_since_sunday = (today.weekday() + 1) % 7
+    week_start = today - timedelta(days=days_since_sunday)
+
+    week_days = []
+    day_abbrs = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    days_studied_this_week = 0
+    for i in range(7):
+        d = week_start + timedelta(days=i)
+        studied = d in study_dates
+        if studied and d <= today:
+            days_studied_this_week += 1
+        week_days.append({
+            'date': d,
+            'abbr': day_abbrs[i],
+            'studied': studied,
+            'today': d == today,
+            'future': d > today,
         })
+
+    # Days elapsed this week (including today)
+    days_elapsed = days_since_sunday + 1
+    week_percentage = round((days_studied_this_week / days_elapsed) * 100) if days_elapsed > 0 else 0
 
     return render(request, 'study/streaks.html', {
         'current_streak': StudySession.get_user_streak(request.user),
         'longest_streak': StudySession.get_longest_streak(request.user),
         'total_study_days': len(study_dates),
-        'calendar_data': calendar_data,
+        'week_days': week_days,
+        'week_percentage': week_percentage,
     })
 
 
@@ -365,8 +437,14 @@ def toggle_goal(request, goal_id):
 @login_required(login_url='planner:login')
 def manage_categories(request):
     """Manage study categories"""
-    categories = StudyCategory.objects.filter(user=request.user)
-    return render(request, 'study/categories.html', {'categories': categories})
+    from django.db.models import Sum, Count
+    categories = StudyCategory.objects.filter(user=request.user).annotate(
+        total_sessions=Count('studysession'),
+        total_hours=Sum('studysession__duration_seconds')
+    )
+    return render(request, 'study/categories.html', {
+        'categories': categories,
+    })
 
 
 @login_required(login_url='planner:login')

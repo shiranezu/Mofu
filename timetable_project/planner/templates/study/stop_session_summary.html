@@ -1,47 +1,313 @@
 {% extends 'base.html' %}
 
-{% block title %}Session Summary - Sachi{% endblock %}
+{% block title %}Session Summary — Mofu{% endblock %}
+
+{% block extra_styles %}
+
+    .summary-page {
+        max-width: 560px;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .summary-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 36px;
+    }
+
+    .summary-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .summary-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Duration Hero ──────────────────────────────── */
+    .summary-duration {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 32px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .summary-duration-num {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 64px;
+        font-weight: 400;
+        color: var(--accent);
+        line-height: 1;
+        letter-spacing: -2px;
+    }
+
+    .summary-duration-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .summary-duration-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+    }
+
+    .summary-duration-cat {
+        font-size: 13px;
+        color: var(--text-dark);
+        font-weight: 400;
+    }
+
+    /* ─── Form Sections ──────────────────────────────── */
+    .summary-form {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .summary-section {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .summary-section-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        display: block;
+    }
+
+    /* ─── Session Tag Pills ──────────────────────────── */
+    .tag-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tag-pill {
+        position: relative;
+    }
+
+    .tag-pill input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .tag-pill label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.18s;
+        background: var(--card-bg);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        user-select: none;
+    }
+
+    .tag-pill input[type="radio"]:checked + label {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(196, 113, 74, 0.08);
+        font-weight: 500;
+    }
+
+    .tag-pill label:hover {
+        border-color: var(--text-dark);
+        color: var(--text-dark);
+    }
+
+    /* ─── Star Rating ────────────────────────────────── */
+    .star-rating {
+        display: flex;
+        gap: 8px;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    .star-rating input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating label {
+        font-size: 28px;
+        color: var(--cream-dark);
+        cursor: pointer;
+        transition: color 0.15s, transform 0.15s;
+        line-height: 1;
+        padding: 0 2px;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input[type="radio"]:checked ~ label {
+        color: var(--accent);
+    }
+
+    .star-rating label:hover {
+        transform: scale(1.15);
+    }
+
+    /* ─── Notes ──────────────────────────────────────── */
+    .summary-notes {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1.5px solid rgba(30, 37, 64, 0.2) !important;
+        border-radius: 0 !important;
+        padding: 8px 0 !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 14px !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        outline: none !important;
+        resize: none;
+        min-height: 80px;
+        width: 100%;
+        transition: border-color 0.18s !important;
+    }
+
+    .summary-notes:focus {
+        border-bottom-color: var(--accent) !important;
+        box-shadow: none !important;
+    }
+
+    .summary-notes::placeholder {
+        color: rgba(30, 37, 64, 0.25) !important;
+    }
+
+    /* ─── Actions ────────────────────────────────────── */
+    .summary-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-top: 24px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .summary-skip {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: auto;
+        transition: color 0.15s;
+    }
+
+    .summary-skip:hover { color: var(--text-dark); }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Session Summary</h1>
 
-    <p>How did your study session go?</p>
+<div class="summary-page">
 
-    <form method="post">
+    <!-- Header -->
+    <div class="summary-header">
+        <h1 class="summary-title">Session Summary.</h1>
+        <p class="summary-subtitle">How did it go?</p>
+    </div>
+
+    <!-- Duration Hero -->
+    <div class="summary-duration">
+        <span class="summary-duration-num">{{ session.get_duration_display }}</span>
+        <div class="summary-duration-meta">
+            <span class="summary-duration-label">Time Studied</span>
+            <span class="summary-duration-cat">
+                {% if session.category %}{{ session.category.name }}{% else %}General Study{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="summary-form">
         {% csrf_token %}
-        
-        <h3>How would you describe this session?</h3>
-        <select name="session_tag">
-            <option value="">Select...</option>
-            <option value="productive">Productive</option>
-            <option value="struggled">Struggled</option>
-            <option value="review">Review</option>
-            <option value="learning">Learning New Material</option>
-            <option value="distracted">Distracted</option>
-        </select>
 
-        <h3>Productivity Rating</h3>
-        <label>
-            <input type="radio" name="productivity_rating" value="1"> 1 - Not productive
-        </label><br>
-        <label>
-            <input type="radio" name="productivity_rating" value="2"> 2 - Somewhat productive
-        </label><br>
-        <label>
-            <input type="radio" name="productivity_rating" value="3" checked> 3 - Moderately productive
-        </label><br>
-        <label>
-            <input type="radio" name="productivity_rating" value="4"> 4 - Very productive
-        </label><br>
-        <label>
-            <input type="radio" name="productivity_rating" value="5"> 5 - Extremely productive
-        </label>
+        <!-- Session Tag -->
+        <div class="summary-section">
+            <span class="summary-section-label">How would you describe this session?</span>
+            <div class="tag-grid">
+                <div class="tag-pill">
+                    <input type="radio" name="session_tag" id="tag_productive" value="productive">
+                    <label for="tag_productive">Productive</label>
+                </div>
+                <div class="tag-pill">
+                    <input type="radio" name="session_tag" id="tag_struggled" value="struggled">
+                    <label for="tag_struggled">Struggled</label>
+                </div>
+                <div class="tag-pill">
+                    <input type="radio" name="session_tag" id="tag_review" value="review">
+                    <label for="tag_review">Review</label>
+                </div>
+                <div class="tag-pill">
+                    <input type="radio" name="session_tag" id="tag_learning" value="learning">
+                    <label for="tag_learning">Learning New Material</label>
+                </div>
+                <div class="tag-pill">
+                    <input type="radio" name="session_tag" id="tag_distracted" value="distracted">
+                    <label for="tag_distracted">Distracted</label>
+                </div>
+            </div>
+        </div>
 
-        <h3>Additional Notes (Optional)</h3>
-        <textarea name="notes" rows="5" style="width: 100%;" placeholder="What did you work on? Any reflections?">{{ session.notes|default:'' }}</textarea>
+        <!-- Productivity Rating -->
+        <div class="summary-section">
+            <span class="summary-section-label">Productivity Rating</span>
+            <div class="star-rating">
+                <input type="radio" name="productivity_rating" id="star5" value="5">
+                <label for="star5" title="5 — Extremely productive">★</label>
 
-        <br><br>
-        <button type="submit">Complete Session</button>
-        <a href="{% url 'planner:study_timer' %}">Skip & Complete</a>
+                <input type="radio" name="productivity_rating" id="star4" value="4">
+                <label for="star4" title="4 — Very productive">★</label>
+
+                <input type="radio" name="productivity_rating" id="star3" value="3" checked>
+                <label for="star3" title="3 — Moderately productive">★</label>
+
+                <input type="radio" name="productivity_rating" id="star2" value="2">
+                <label for="star2" title="2 — Somewhat productive">★</label>
+
+                <input type="radio" name="productivity_rating" id="star1" value="1">
+                <label for="star1" title="1 — Not productive">★</label>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="summary-section">
+            <span class="summary-section-label">Notes (Optional)</span>
+            <textarea
+                name="notes"
+                class="summary-notes"
+                placeholder="What did you work on? Any reflections...">{{ session.notes|default:'' }}</textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="summary-actions">
+            <button type="submit" class="btn btn-primary">Complete Session</button>
+            <a href="{% url 'planner:study_timer' %}" class="summary-skip">back</a>
+        </div>
+
     </form>
+
+</div>
+
 {% endblock %}

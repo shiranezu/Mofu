@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 from ..models import Timetable, TimetableEntry, Timeslot, StudyCategory
-from ..forms import Subject_and_locationForm, TimeslotForm
+from ..forms import Subject_and_locationForm, TimeslotForm, TimetableForm
 
 
 @login_required(login_url='planner:login')
@@ -57,12 +57,16 @@ def timetable_view(request, timetable_id):
 
 @login_required(login_url='planner:login')
 def create_timetable(request):
-    """Create a new timetable"""
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        Timetable.objects.create(user=request.user, name=name)
+    form = TimetableForm(request.POST or None)
+    if form.is_valid():
+        timetable = form.save(commit=False)
+        timetable.user = request.user
+        timetable.save()
         return redirect('planner:timetable_home')
-    return render(request, 'create_timetable.html')
+    return render(request, 'add_generic.html', {
+        'form': form,
+        'title': 'Create Timetable'
+    })
 
 
 @login_required(login_url='planner:login')

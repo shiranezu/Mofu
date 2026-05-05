@@ -111,11 +111,13 @@ def edit_schedule_item(request, item_id):
     return render(request, "add_generic.html", {"form": form, "title": "Edit Task"})
 
 
-@login_required(login_url='planner:login')
+from django.utils import timezone
 def view_schedule_item(request, item_id):
-    """View a schedule item"""
     item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    return render(request, 'view_schedule_item.html', {'item': item})
+    return render(request, 'view_schedule_item.html', {
+        'item': item,
+        'today': timezone.now().date(),
+    })
 
 
 @login_required(login_url='planner:login')

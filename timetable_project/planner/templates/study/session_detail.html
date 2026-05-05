@@ -1,28 +1,261 @@
 {% extends 'base.html' %}
 
-{% block title %}Session Details - Sachi{% endblock %}
+{% block title %}Session Details — Mofu{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .session-page {
+        max-width: 620px;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .session-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 36px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .session-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .session-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Duration Hero ──────────────────────────────── */
+    .session-hero {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 32px;
+    }
+
+    .session-duration {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 72px;
+        font-weight: 400;
+        color: var(--accent);
+        line-height: 1;
+        letter-spacing: -3px;
+        flex-shrink: 0;
+    }
+
+    .session-hero-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .session-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-dark);
+    }
+
+    .session-meta-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        min-width: 80px;
+    }
+
+    .session-cat-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* ─── Badges Row ─────────────────────────────────── */
+    .session-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+    }
+
+    /* ─── Rating ─────────────────────────────────────── */
+    .session-rating {
+        font-size: 22px;
+        color: var(--accent);
+        letter-spacing: 3px;
+    }
+
+    .session-rating .empty {
+        color: var(--cream-dark);
+    }
+
+    /* ─── Pomodoro Info ──────────────────────────────── */
+    .session-pomodoro {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 32px;
+    }
+
+    /* ─── Notes ──────────────────────────────────────── */
+    .session-notes-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+        display: block;
+    }
+
+    .session-notes-text {
+        font-size: 14px;
+        color: var(--text-dark);
+        line-height: 1.8;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+
+    .session-notes-empty {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+
+    /* ─── Actions ────────────────────────────────────── */
+    .session-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .session-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: auto;
+        transition: color 0.15s;
+    }
+
+    .session-back:hover { color: var(--text-dark); }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Study Session Details</h1>
 
-    <p><strong>Date:</strong> {{ session.start_time|date:"l, F d, Y" }}</p>
-    <p><strong>Time:</strong> {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</p>
-    <p><strong>Duration:</strong> {{ session.get_duration_display }}</p>
-    <p><strong>Category:</strong> {% if session.category %}{{ session.category.name }}{% else %}No Category{% endif %}</p>
-    {% if session.is_pomodoro %}
-        <p><strong>Pomodoros Completed:</strong> {{ session.pomodoros_completed }}</p>
+<div class="session-page">
+
+    <!-- Header -->
+    <div class="session-header">
+        <div>
+            <h1 class="session-title">Session Details.</h1>
+            <p class="session-subtitle">{{ session.start_time|date:"l, F d, Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Duration Hero -->
+    <div class="session-hero">
+        <span class="session-duration">{{ session.get_duration_display }}</span>
+        <div class="session-hero-meta">
+            <div class="session-meta-row">
+                <span class="session-meta-label">Time</span>
+                {{ session.start_time|date:"g:i A" }}
+                {% if session.end_time %}
+                    — {{ session.end_time|date:"g:i A" }}
+                {% endif %}
+            </div>
+            <div class="session-meta-row">
+                <span class="session-meta-label">Category</span>
+                {% if session.category %}
+                    <span class="session-cat-dot" style="background: {{ session.category.color }};"></span>
+                    {{ session.category.name }}
+                {% else %}
+                    <span style="color: var(--text-muted);">No Category</span>
+                {% endif %}
+            </div>
+            <div class="session-meta-row">
+                <span class="session-meta-label">Type</span>
+                {% if session.is_pomodoro %}
+                    <span class="badge badge-progress">Pomodoro</span>
+                {% elif session.is_countdown %}
+                    <span class="badge" style="background:rgba(107,127,212,0.1);color:#2e3a8a;">Countdown</span>
+                {% else %}
+                    <span class="badge badge-pending">Regular</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="session-badges">
+        {% if session.session_tag %}
+            <span class="badge
+                {% if session.session_tag == 'productive' %}badge-done
+                {% elif session.session_tag == 'struggled' %}badge-high
+                {% elif session.session_tag == 'review' %}badge-medium
+                {% elif session.session_tag == 'learning' %}badge-progress
+                {% else %}badge-pending{% endif %}">
+                {{ session.get_session_tag_display }}
+            </span>
+        {% endif %}
+
+        {% if session.is_pomodoro %}
+            <span class="badge badge-pending">
+                {{ session.pomodoros_completed }} pomodoro{{ session.pomodoros_completed|pluralize }} completed
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Rating -->
+    {% if session.productivity_rating %}
+    <div style="margin-bottom: 28px;">
+        <span class="session-notes-label">Productivity</span>
+        <div class="session-rating">
+            {% for i in "12345" %}
+                {% if forloop.counter <= session.productivity_rating %}
+                    ★
+                {% else %}
+                    <span class="empty">★</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
     {% endif %}
 
-    <hr>
-
-    <h3>Notes:</h3>
+    <!-- Notes -->
+    <span class="session-notes-label">Notes</span>
     {% if session.notes %}
-        <p>{{ session.notes|linebreaks }}</p>
+        <div class="session-notes-text">{{ session.notes|linebreaks }}</div>
     {% else %}
-        <p><em>No notes for this session.</em></p>
+        <p class="session-notes-empty">No notes for this session.</p>
     {% endif %}
 
-    <br>
-    <a href="{% url 'planner:edit_session_notes' session.id %}">Edit Notes</a> |
-    <a href="{% url 'planner:study_history' %}">← Back to History</a>
+    <!-- Actions -->
+    <div class="session-actions">
+        <a href="{% url 'planner:edit_session_notes' session.id %}" class="btn btn-primary">Edit Notes</a>
+        <a href="{% url 'planner:study_history' %}" class="session-back">← Back to History</a>
+    </div>
+
+</div>
+
 {% endblock %}

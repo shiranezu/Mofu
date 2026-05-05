@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import (
     Subject_and_location, Timeslot, ScheduleItem, Schedule,
-    StudyCategory, StudyGoal, StudyResource, DAYS_OF_WEEK,
+    StudyCategory, StudyGoal, StudyResource, DAYS_OF_WEEK, Timetable
 )
 
 
@@ -27,6 +27,10 @@ class Subject_and_locationForm(forms.ModelForm):
         model = Subject_and_location
         fields = ['subject', 'location', 'category']
 
+class TimetableForm(forms.ModelForm):
+    class Meta:
+        model = Timetable
+        fields = ['name']
 
 class TimeslotForm(forms.ModelForm):
     """Form for creating timeslots"""

@@ -1,60 +1,484 @@
 {% extends 'base.html' %}
 
-{% block title %}Study History - Sachi{% endblock %}
+{% block title %}History — Mofu{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Header ─────────────────────────────────────── */
+    .hist-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        gap: 16px;
+    }
+
+    .hist-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
+    .hist-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .hist-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Filter Bar ─────────────────────────────────── */
+    .hist-filter-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .hist-filter-bar select {
+        font-size: 12px;
+        padding: 7px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-dark);
+        cursor: pointer;
+        width: auto;
+    }
+
+    .hist-filter-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-left: auto;
+    }
+
+    /* ─── Table Card ─────────────────────────────────── */
+    .hist-table-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    /* ─── Table Head ─────────────────────────────────── */
+    .hist-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .hist-table thead th {
+        padding: 10px 20px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--card-border);
+        text-align: left;
+        background: rgba(30, 37, 64, 0.02);
+    }
+
+    /* Column widths */
+    .hist-table colgroup col:nth-child(1) { width: 12%; }
+    .hist-table colgroup col:nth-child(2) { width: 18%; }
+    .hist-table colgroup col:nth-child(3) { width: 12%; }
+    .hist-table colgroup col:nth-child(4) { width: 11%; }
+    .hist-table colgroup col:nth-child(5) { width: 13%; }
+    .hist-table colgroup col:nth-child(6) { width: 20%; }
+
+    /* ─── Date Group Row ─────────────────────────────── */
+    .hist-group-row td {
+        padding: 8px 20px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        background: rgba(30, 37, 64, 0.025);
+        border-bottom: 1px solid var(--card-border);
+        border-top: 1px solid var(--card-border);
+    }
+
+    .hist-group-row:first-child td {
+        border-top: none;
+    }
+
+    /* ─── Session Row ────────────────────────────────── */
+    .hist-table tbody tr.session-row td {
+        padding: 13px 20px;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        font-size: 13px;
+        color: var(--text-dark);
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hist-table tbody tr.session-row:last-child td {
+        border-bottom: none;
+    }
+
+    .hist-table tbody tr.session-row:hover td {
+        background: rgba(30, 37, 64, 0.02);
+    }
+
+    /* ─── Cell styles ────────────────────────────────── */
+    .hist-time {
+        font-size: 13px;
+        color: var(--text-dark);
+    }
+
+    .hist-cat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-dark);
+    }
+
+    .hist-cat-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .hist-duration {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        font-family: 'DM Sans', monospace;
+    }
+
+    /* Type badges */
+    .hist-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .hist-badge-regular {
+        background: rgba(30, 37, 64, 0.07);
+        color: var(--text-muted);
+    }
+
+    .hist-badge-pomodoro {
+        background: rgba(196, 113, 74, 0.10);
+        color: #8a3a1a;
+    }
+
+    .hist-badge-countdown {
+        background: rgba(107, 127, 212, 0.10);
+        color: #2e3a8a;
+    }
+
+    /* Tag badges */
+    .hist-tag-productive  { background: rgba(122,158,126,0.12); color: #2e6e36; }
+    .hist-tag-struggled   { background: rgba(192,57,43,0.08);   color: #8a1a1a; }
+    .hist-tag-review      { background: rgba(201,168,76,0.12);  color: #6a4a00; }
+    .hist-tag-learning    { background: rgba(107,127,212,0.10); color: #2e3a8a; }
+    .hist-tag-distracted  { background: rgba(30,37,64,0.07);    color: var(--text-muted); }
+
+    /* Actions */
+    .hist-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .hist-table tbody tr.session-row:hover .hist-actions {
+        opacity: 1;
+    }
+
+    .hist-action-link {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+        white-space: nowrap;
+    }
+
+    .hist-action-link:hover { color: var(--accent); }
+
+    /* Rating stars */
+    .hist-rating {
+        font-size: 11px;
+        color: var(--accent);
+        letter-spacing: 1px;
+    }
+
+    /* ─── Empty State ────────────────────────────────── */
+    .hist-empty {
+        padding: 60px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* ─── Pagination ─────────────────────────────────── */
+    .hist-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px;
+    }
+
+    .hist-page-info {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .hist-page-btns {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .hist-page-btn {
+        padding: 6px 14px;
+        font-size: 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-dark);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        text-decoration: none;
+        transition: all 0.15s;
+        display: inline-block;
+    }
+
+    .hist-page-btn:hover {
+        background: var(--cream-dark);
+    }
+
+    .hist-page-btn.current {
+        background: var(--sidebar-bg, #1e2540);
+        color: var(--cream, #F0E7D5);
+        border-color: var(--sidebar-bg, #1e2540);
+        cursor: default;
+    }
+
+    .hist-page-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Study History</h1>
 
-    <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0;">
-        <h3>Statistics</h3>
-        <p><strong>Today:</strong> {{ today_total }} seconds</p>
-        <p><strong>This Week:</strong> {{ week_total }} seconds</p>
+    <!-- Header -->
+    <div class="hist-header">
+        <div class="hist-header-left">
+            <h1 class="hist-title">History.</h1>
+            <p class="hist-subtitle">{{ total_count }} session{{ total_count|pluralize }} recorded</p>
+        </div>
+        {% if total_count > 0 %}
+        <form method="post" action="{% url 'planner:clear_all_history' %}"
+              onsubmit="return confirm('Are you sure? This will delete all your session history.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="font-size:12px;">Clear All History</button>
+        </form>
+        {% endif %}
     </div>
 
-    <h3>All Sessions</h3>
-    <table border="1" style="width: 100%;">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Duration</th>
-            <th>Tag</th>
-            <th>Rating</th>
-            <th>Notes</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for session in sessions %}
-        <tr>
-            <td>{{ session.start_time|date:"M d, Y H:i" }}</td>
-            <td>{% if session.category %}{{ session.category.name }}{% else %}-{% endif %}</td>
-            <td>{{ session.get_duration_display }}</td>
-            <td>
-                {% if session.session_tag %}
-                    {{ session.get_session_tag_display }}
-                {% else %}
-                    -
+    <!-- Filter Bar -->
+    <form method="get" class="hist-filter-bar" id="filterForm">
+        <select name="category" onchange="document.getElementById('filterForm').submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="type" onchange="document.getElementById('filterForm').submit()">
+            <option value="" {% if not selected_type %}selected{% endif %}>All Types</option>
+            <option value="regular"   {% if selected_type == 'regular' %}selected{% endif %}>Regular</option>
+            <option value="pomodoro"  {% if selected_type == 'pomodoro' %}selected{% endif %}>Pomodoro</option>
+            <option value="countdown" {% if selected_type == 'countdown' %}selected{% endif %}>Countdown</option>
+        </select>
+
+        <select name="sort" onchange="document.getElementById('filterForm').submit()">
+            <option value="newest"   {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest"   {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            <option value="longest"  {% if selected_sort == 'longest' %}selected{% endif %}>Longest First</option>
+            <option value="shortest" {% if selected_sort == 'shortest' %}selected{% endif %}>Shortest First</option>
+        </select>
+
+        <span class="hist-filter-count">
+            Today: <strong>{{ today_total }}h</strong>
+        </span>
+    </form>
+
+    <!-- Table -->
+    <div class="hist-table-card">
+        {% if grouped_sessions %}
+        <table class="hist-table">
+            <colgroup>
+                <col><col><col><col><col><col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Category</th>
+                    <th>Duration</th>
+                    <th>Type</th>
+                    <th>Tag</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in grouped_sessions %}
+
+                <!-- Date header -->
+                <tr class="hist-group-row">
+                    <td colspan="6">
+                        {% if group.date == today %}
+                            Today — {{ group.date|date:"M d" }}
+                        {% elif group.date == yesterday %}
+                            Yesterday — {{ group.date|date:"M d" }}
+                        {% else %}
+                            {{ group.date|date:"l, M d, Y" }}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- Sessions for this date -->
+                {% for session in group.sessions %}
+                <tr class="session-row">
+                    <!-- Time -->
+                    <td>
+                        <span class="hist-time">{{ session.start_time|date:"g:i A" }}</span>
+                    </td>
+
+                    <!-- Category -->
+                    <td>
+                        <div class="hist-cat">
+                            <span class="hist-cat-dot"
+                                  style="background: {{ session.category.color|default:'#95a5a6' }};"></span>
+                            {{ session.category.name|default:"No Category" }}
+                        </div>
+                    </td>
+
+                    <!-- Duration -->
+                    <td>
+                        <span class="hist-duration">{{ session.get_duration_display }}</span>
+                    </td>
+
+                    <!-- Type -->
+                    <td>
+                        {% if session.is_pomodoro %}
+                            <span class="hist-badge hist-badge-pomodoro">Pomodoro</span>
+                        {% elif session.is_countdown %}
+                            <span class="hist-badge hist-badge-countdown">Countdown</span>
+                        {% else %}
+                            <span class="hist-badge hist-badge-regular">Regular</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Tag -->
+                    <td>
+                        {% if session.session_tag %}
+                            <span class="hist-badge hist-tag-{{ session.session_tag }}">
+                                {{ session.get_session_tag_display }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 13px;">—</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                        <div class="hist-actions">
+                            {% if session.productivity_rating %}
+                            <span class="hist-rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= session.productivity_rating %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                            <a href="{% url 'planner:view_session' session.id %}" class="hist-action-link">View</a>
+                            <a href="{% url 'planner:edit_session_notes' session.id %}" class="hist-action-link">Notes</a>
+                            <a href="{% url 'planner:delete_session' session.id %}"
+                               class="hist-action-link"
+                               style="color: #c0392b;"
+                               onclick="return confirm('Delete this session?');">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+            <div class="hist-empty">
+                No study sessions recorded yet. Start a timer to begin tracking!
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="hist-pagination">
+        <span class="hist-page-info">
+            Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ total_count }} sessions
+        </span>
+        <div class="hist-page-btns">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&category={{ selected_category }}&type={{ selected_type }}&sort={{ selected_sort }}"
+                   class="hist-page-btn">← Prev</a>
+            {% else %}
+                <span class="hist-page-btn disabled">← Prev</span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="hist-page-btn current">{{ num }}</span>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                    <a href="?page={{ num }}&category={{ selected_category }}&type={{ selected_type }}&sort={{ selected_sort }}"
+                       class="hist-page-btn">{{ num }}</a>
                 {% endif %}
-            </td>
-            <td>
-                {% if session.productivity_rating %}
-                    {{ session.productivity_rating }}/5
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>{{ session.notes|default:"-"|truncatewords:10 }}</td>
-            <td>
-                <a href="{% url 'planner:view_session' session.id %}">View</a> |
-                <a href="{% url 'planner:edit_session_notes' session.id %}">Edit Notes</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7">No study sessions yet. Start studying!</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&category={{ selected_category }}&type={{ selected_type }}&sort={{ selected_sort }}"
+                   class="hist-page-btn">Next →</a>
+            {% else %}
+                <span class="hist-page-btn disabled">Next →</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Pass today's date for template comparison
+    const todayStr = new Date().toISOString().split('T')[0];
+</script>
 {% endblock %}

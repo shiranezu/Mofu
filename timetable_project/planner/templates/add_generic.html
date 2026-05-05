@@ -1,11 +1,311 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Sachi{% endblock %}
+{% block title %}{{ title }} — Mofu{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Page Layout ────────────────────────────────── */
+    .form-page {
+        max-width: 560px;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .form-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 40px;
+    }
+
+    .form-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .form-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Form Fields ────────────────────────────────── */
+    .form-body {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-field label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 0;
+    }
+
+    /* Underline inputs */
+    .form-field input[type="text"],
+    .form-field input[type="email"],
+    .form-field input[type="number"],
+    .form-field input[type="url"],
+    .form-field input[type="date"],
+    .form-field input[type="time"],
+    .form-field textarea {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1.5px solid rgba(30, 37, 64, 0.2) !important;
+        border-radius: 0 !important;
+        padding: 8px 0 !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 15px !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        outline: none !important;
+        transition: border-color 0.18s ease !important;
+        width: 100%;
+    }
+
+    .form-field input:focus,
+    .form-field textarea:focus {
+        border-bottom-color: var(--accent) !important;
+        box-shadow: none !important;
+    }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+        color: rgba(30, 37, 64, 0.25) !important;
+        font-size: 14px !important;
+    }
+
+    /* Select fields — keep boxed but styled */
+    .form-field select {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 10px 14px !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 13px !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        cursor: pointer;
+        width: 100%;
+        transition: border-color 0.18s;
+    }
+
+    .form-field select:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(196, 113, 74, 0.08) !important;
+        outline: none !important;
+    }
+
+    /* Color input — hidden, replaced by custom swatch */
+    .form-field input[type="color"] {
+        display: none !important;
+    }
+
+    .color-swatch-wrap {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 4px;
+    }
+
+    .color-swatch {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid var(--card-border);
+        cursor: pointer;
+        transition: transform 0.18s, border-color 0.18s;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .color-swatch:hover {
+        transform: scale(1.08);
+        border-color: var(--accent);
+    }
+
+    .color-swatch-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-family: monospace;
+        letter-spacing: 0.5px;
+    }
+
+    /* ─── Color Wheel Modal ──────────────────────────── */
+    .color-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+    }
+
+    .color-modal-overlay.open { display: flex; }
+
+    .color-modal {
+        background: #1a1a2e;
+        border-radius: 20px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        min-width: 300px;
+    }
+
+    .color-modal-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.85);
+    }
+
+    #colorWheelCanvas { cursor: none; }
+
+    .color-modal-preview {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .color-modal-swatch {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.2);
+    }
+
+    .color-modal-hex {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        font-family: monospace;
+        letter-spacing: 1px;
+    }
+
+    .color-modal-btns {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .color-modal-btn {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.15s;
+    }
+
+    .color-modal-btn.confirm { background: #C4714A; color: white; }
+    .color-modal-btn.confirm:hover { background: #b5623c; }
+    .color-modal-btn.cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .color-modal-btn.cancel:hover { background: rgba(255,255,255,0.14); }
+    .color-modal-btn.reset { flex:0; padding: 10px 14px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+    .color-modal-btn.reset:hover { background: rgba(255,255,255,0.14); }
+
+    /* Checkbox */
+    .form-field input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent);
+        cursor: pointer;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    /* Textarea */
+    .form-field textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Field errors */
+    .field-error {
+        font-size: 11px;
+        color: #a0482a;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Help text */
+    .field-help {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 3px;
+        font-style: italic;
+    }
+
+    /* ─── Divider ─────────────────────────────────────── */
+    .form-divider {
+        border: none;
+        border-top: 1px solid var(--card-border);
+        margin: 8px 0;
+    }
+
+    /* ─── Actions ────────────────────────────────────── */
+    .form-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 8px;
+        padding-top: 32px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .form-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.15s;
+        margin-left: auto;
+    }
+
+    .form-back:hover { color: var(--text-dark); }
+
+{% endblock %}
 
 {% block content %}
-    <h2>{{ title }}</h2>
-    <form method="post">
+
+<div class="form-page">
+
+    <!-- Header -->
+    <div class="form-header">
+        <h1 class="form-title">{{ title }}.</h1>
+        {% if timetable %}
+        <p class="form-subtitle">{{ timetable.name }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="form-body">
         {% csrf_token %}
+
+        <!-- Hidden fields -->
         <input type="hidden" name="timetable" value="{{ timetable.id }}">
         {% if day %}
             <input type="hidden" name="day" value="{{ day }}">
@@ -13,9 +313,276 @@
         {% if timeslot_id %}
             <input type="hidden" name="timeslot" value="{{ timeslot_id }}">
         {% endif %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
+
+        <!-- Render each field -->
+        {% for field in form %}
+        <div class="form-field">
+            {{ field.label_tag }}
+
+            {{ field }}
+
+            {% if field.help_text %}
+                <span class="field-help">{{ field.help_text }}</span>
+            {% endif %}
+
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+        <div>
+            {% for error in form.non_field_errors %}
+                <span class="field-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="javascript:history.back()" class="form-back">
+                ← Back
+            </a>
+        </div>
+
     </form>
-    <br>
-    <a href="javascript:history.back()">← Back</a>
+
+</div>
+
+<!-- Color Wheel Modal -->
+<div class="color-modal-overlay" id="colorModalOverlay">
+    <div class="color-modal">
+        <div class="color-modal-title">Pick a colour</div>
+        <canvas id="colorWheelCanvas" width="240" height="240"></canvas>
+        <div class="color-modal-preview">
+            <div class="color-modal-swatch" id="modalSwatch"></div>
+            <span class="color-modal-hex" id="modalHex">#3498db</span>
+        </div>
+        <div class="color-modal-btns">
+            <button class="color-modal-btn cancel" onclick="closeColorModal()">Cancel</button>
+            <button class="color-modal-btn reset" onclick="resetColor()">Reset</button>
+            <button class="color-modal-btn confirm" onclick="confirmColor()">Apply</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let activeColorInput = null;
+    let pickedColor = '#3498db';
+    const DEFAULT_COLOR = '#3498db';
+
+    // ── Setup color swatches ──────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[type="color"]').forEach(input => {
+        const wrap = document.createElement('div');
+        wrap.className = 'color-swatch-wrap';
+
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.background = input.value || DEFAULT_COLOR;
+
+        const label = document.createElement('span');
+        label.className = 'color-swatch-label';
+        label.textContent = (input.value || DEFAULT_COLOR).toUpperCase();
+
+        swatch.addEventListener('click', () => {
+            activeColorInput = input;
+            pickedColor = input.value || DEFAULT_COLOR;
+            updateModalPreview(pickedColor);
+            document.getElementById('colorModalOverlay').classList.add('open');
+            drawWheel();
+        });
+
+        wrap.appendChild(swatch);
+        wrap.appendChild(label);
+        input.parentNode.insertBefore(wrap, input.nextSibling);
+        input._swatch = swatch;
+        input._label = label;
+    });
+    }); // end DOMContentLoaded
+
+    // ── Color Wheel ───────────────────────────────────
+    const canvas = document.getElementById('colorWheelCanvas');
+    const ctx    = canvas.getContext('2d');
+    const CX = canvas.width / 2;
+    const CY = canvas.height / 2;
+    const OUTER_R = 110;
+    const INNER_R = 68;
+
+    function drawWheel() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Outer hue ring
+        for (let angle = 0; angle < 360; angle++) {
+            const startAngle = (angle - 1) * Math.PI / 180;
+            const endAngle   = (angle + 1) * Math.PI / 180;
+            ctx.beginPath();
+            ctx.moveTo(CX, CY);
+            ctx.arc(CX, CY, OUTER_R, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = `hsl(${angle}, 100%, 50%)`;
+            ctx.fill();
+        }
+
+        // Inner circle mask
+        ctx.beginPath();
+        ctx.arc(CX, CY, INNER_R, 0, Math.PI * 2);
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fill();
+
+        // Inner brightness/saturation gradient
+        const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, INNER_R - 4);
+        grad.addColorStop(0, 'white');
+        grad.addColorStop(0.5, pickedColor);
+        grad.addColorStop(1, 'black');
+        ctx.beginPath();
+        ctx.arc(CX, CY, INNER_R - 4, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Centre reset — clean black circle
+        ctx.beginPath();
+        ctx.arc(CX, CY, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+        // Subtle ring
+        ctx.beginPath();
+        ctx.arc(CX, CY, 20, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    }
+
+    // ── Circle cursor ────────────────────────────────
+    let cursorX = 0, cursorY = 0;
+
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        cursorX = x;
+        cursorY = y;
+
+        const cx = x - CX;
+        const cy = y - CY;
+        const dist = Math.sqrt(cx*cx + cy*cy);
+
+        // Live color preview on hover
+        if (dist >= INNER_R && dist <= OUTER_R) {
+            const angle = Math.atan2(cy, cx) * 180 / Math.PI;
+            const hue   = (angle + 360) % 360;
+            const hoverColor = hslToHex(hue, 100, 50);
+            updateModalPreview(hoverColor);
+        }
+
+        // Redraw with cursor
+        drawWheel();
+        // Draw circle cursor
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        drawWheel();
+    });
+
+    canvas.addEventListener('click', e => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left - CX;
+        const y = e.clientY - rect.top  - CY;
+        const dist = Math.sqrt(x*x + y*y);
+
+        // Centre reset zone
+        if (dist < 22) {
+            resetColor();
+            return;
+        }
+
+        // Outer ring — commit hue on click
+        if (dist >= INNER_R && dist <= OUTER_R) {
+            const angle = Math.atan2(y, x) * 180 / Math.PI;
+            const hue   = (angle + 360) % 360;
+            pickedColor = hslToHex(hue, 100, 50);
+            updateModalPreview(pickedColor);
+            drawWheel();
+        }
+
+        // Inner circle — pick shade
+        if (dist < INNER_R - 4) {
+            const nx = x / (INNER_R - 4);
+            const ny = y / (INNER_R - 4);
+            const t  = Math.sqrt(nx*nx + ny*ny);
+            pickedColor = blendColors(pickedColor, t < 0.5 ? '#ffffff' : '#000000', Math.abs(t - 0.5) * 1.5);
+            updateModalPreview(pickedColor);
+            drawWheel();
+        }
+    });
+
+    function updateModalPreview(color) {
+        document.getElementById('modalSwatch').style.background = color;
+        document.getElementById('modalHex').textContent = color.toUpperCase();
+    }
+
+    function resetColor() {
+        pickedColor = DEFAULT_COLOR;
+        updateModalPreview(pickedColor);
+        drawWheel();
+    }
+
+    function confirmColor() {
+        if (activeColorInput) {
+            activeColorInput.value = pickedColor;
+            activeColorInput._swatch.style.background = pickedColor;
+            activeColorInput._label.textContent = pickedColor.toUpperCase();
+        }
+        closeColorModal();
+    }
+
+    function closeColorModal() {
+        document.getElementById('colorModalOverlay').classList.remove('open');
+        activeColorInput = null;
+    }
+
+    // Close on overlay click
+    document.getElementById('colorModalOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('colorModalOverlay')) closeColorModal();
+    });
+
+    // ── Helpers ───────────────────────────────────────
+    function hslToHex(h, s, l) {
+        s /= 100; l /= 100;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => {
+            const k = (n + h / 30) % 12;
+            const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * c).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+    }
+
+    function blendColors(c1, c2, t) {
+        const r1 = parseInt(c1.slice(1,3),16), g1 = parseInt(c1.slice(3,5),16), b1 = parseInt(c1.slice(5,7),16);
+        const r2 = parseInt(c2.slice(1,3),16), g2 = parseInt(c2.slice(3,5),16), b2 = parseInt(c2.slice(5,7),16);
+        const r  = Math.round(r1 + (r2-r1)*t).toString(16).padStart(2,'0');
+        const g  = Math.round(g1 + (g2-g1)*t).toString(16).padStart(2,'0');
+        const b  = Math.round(b1 + (b2-b1)*t).toString(16).padStart(2,'0');
+        return `#${r}${g}${b}`;
+    }
+</script>
 {% endblock %}
