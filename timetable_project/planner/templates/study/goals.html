@@ -345,7 +345,7 @@
 
             {% for item in goals_with_progress %}
             {% if item.goal.goal_type == 'daily' %}
-            {% with color=item.goal.category.color|default:'#1e2540' %}
+            {% with color=item.goal.category.color|default:'#6B7FD4' %}
             <div class="goal-card" style="border-left-color: {{ color }};">
                 <div class="goal-card-info">
                     <div class="goal-card-meta">
@@ -410,7 +410,7 @@
 
             {% for item in goals_with_progress %}
             {% if item.goal.goal_type == 'weekly' %}
-            {% with color=item.goal.category.color|default:'#1e2540' %}
+            {% with color=item.goal.category.color|default:'#6B7FD4' %}
             <div class="goal-card" style="border-left-color: {{ color }};">
                 <div class="goal-card-info">
                     <div class="goal-card-meta">
@@ -465,7 +465,7 @@
     <div id="tab-inactive" style="display:none;">
         {% if inactive_goals %}
             {% for item in inactive_goals %}
-            {% with color=item.goal.category.color|default:'#1e2540' %}
+            {% with color=item.goal.category.color|default:'#6B7FD4' %}
             <div class="goal-card inactive" style="border-left-color: {{ color }};">
                 <div class="goal-card-info">
                     <div class="goal-card-meta">

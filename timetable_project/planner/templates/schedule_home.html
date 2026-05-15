@@ -14,6 +14,11 @@
         gap: 16px;
     }
 
+    .sh-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
     .sh-title {
         font-family: 'Cormorant Garamond', serif;
         font-size: 32px;
@@ -29,30 +34,29 @@
         color: var(--text-muted);
     }
 
-    /* ─── Schedule Cards Grid ────────────────────────── */
-    .schedule-grid {
+    /* ─── Grid ───────────────────────────────────────── */
+    .sh-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
     }
 
-    .schedule-card {
+    /* ─── Schedule Card ──────────────────────────────── */
+    .sh-card {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
         border-radius: var(--radius);
         padding: 24px;
-        box-shadow: var(--shadow);
         display: flex;
         flex-direction: column;
         gap: 16px;
         transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
 
-    .schedule-card::before {
+    .sh-card::before {
         content: '';
         position: absolute;
         top: 0; left: 0;
@@ -63,95 +67,98 @@
         transition: transform 0.2s ease;
     }
 
-    .schedule-card:hover {
+    .sh-card:hover {
         box-shadow: var(--shadow-md);
         transform: translateY(-2px);
     }
 
-    .schedule-card:hover::before {
+    .sh-card:hover::before {
         transform: scaleX(1);
     }
 
-    .schedule-card-name {
+    .sh-card-name {
         font-family: 'Cormorant Garamond', serif;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 500;
         color: var(--text-dark);
         line-height: 1.2;
     }
 
-    .schedule-card-meta {
+    /* ─── Stats Row ──────────────────────────────────── */
+    .sh-card-stats {
         display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
+        gap: 20px;
     }
 
-    .schedule-card-stat {
+    .sh-card-stat {
         display: flex;
         flex-direction: column;
         gap: 2px;
     }
 
-    .schedule-card-stat-value {
-        font-size: 22px;
+    .sh-card-stat-value {
         font-family: 'Cormorant Garamond', serif;
+        font-size: 26px;
         font-weight: 500;
         color: var(--text-dark);
         line-height: 1;
     }
 
-    .schedule-card-stat-label {
+    .sh-card-stat-label {
         font-size: 10px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: var(--text-muted);
     }
 
-    .schedule-card-progress {
+    /* ─── Progress ───────────────────────────────────── */
+    .sh-card-progress {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .schedule-card-progress-label {
+    .sh-card-progress-label {
         display: flex;
         justify-content: space-between;
         font-size: 11px;
         color: var(--text-muted);
     }
 
-    .schedule-card-footer {
+    /* ─── Footer ─────────────────────────────────────── */
+    .sh-card-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding-top: 12px;
         border-top: 1px solid var(--card-border);
+        margin-top: auto;
     }
 
-    .schedule-card-link {
+    .sh-card-open {
         font-size: 12px;
         color: var(--accent);
         font-weight: 500;
+        text-decoration: none;
         transition: opacity 0.18s;
     }
 
-    .schedule-card-link:hover { opacity: 0.7; }
+    .sh-card-open:hover { opacity: 0.7; }
 
-    .schedule-card-delete {
+    .sh-card-delete {
         font-size: 11px;
         color: var(--text-muted);
+        text-decoration: none;
         transition: color 0.18s;
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-        font-family: 'DM Sans', sans-serif;
+        opacity: 0;
+        transition: opacity 0.15s, color 0.15s;
     }
 
-    .schedule-card-delete:hover { color: #c0392b; }
+    .sh-card:hover .sh-card-delete { opacity: 1; }
+    .sh-card-delete:hover { color: #c0392b; }
 
     /* ─── Empty State ────────────────────────────────── */
-    .empty-state-full {
+    .sh-empty {
         grid-column: 1 / -1;
         display: flex;
         flex-direction: column;
@@ -159,26 +166,20 @@
         justify-content: center;
         padding: 80px 40px;
         text-align: center;
-        background: var(--card-bg);
         border: 1px dashed var(--card-border);
         border-radius: var(--radius);
         gap: 12px;
     }
 
-    .empty-state-full svg {
-        opacity: 0.2;
-        margin-bottom: 8px;
-    }
-
-    .empty-state-full h3 {
+    .sh-empty-title {
         font-family: 'Cormorant Garamond', serif;
         font-size: 22px;
         font-weight: 500;
         color: var(--text-dark);
-        opacity: 0.5;
+        opacity: 0.4;
     }
 
-    .empty-state-full p {
+    .sh-empty-text {
         font-size: 13px;
         color: var(--text-muted);
     }
@@ -187,67 +188,69 @@
 
 {% block content %}
 
+    <!-- Header -->
     <div class="sh-header">
-        <div>
+        <div class="sh-header-left">
             <h1 class="sh-title">Schedules.</h1>
             <p class="sh-subtitle">{{ schedules.count }} schedule{{ schedules.count|pluralize }}</p>
         </div>
-        <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary">
-            Create New Schedule
-        </a>
+        <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary">+ New Schedule</a>
     </div>
 
-    <div class="schedule-grid">
+    <!-- Grid -->
+    <div class="sh-grid">
         {% for item in schedules_data %}
-        <div class="schedule-card">
-            <div>
-                <div class="schedule-card-name">{{ item.schedule.name }}</div>
+        <div class="sh-card">
+
+            <div class="sh-card-name">{{ item.schedule.name }}</div>
+
+            <div class="sh-card-stats">
+                <div class="sh-card-stat">
+                    <span class="sh-card-stat-value">{{ item.total }}</span>
+                    <span class="sh-card-stat-label">Total Tasks</span>
+                </div>
+                <div class="sh-card-stat">
+                    <span class="sh-card-stat-value">{{ item.completed }}</span>
+                    <span class="sh-card-stat-label">Completed</span>
+                </div>
+                <div class="sh-card-stat">
+                    <span class="sh-card-stat-value">{{ item.pending }}</span>
+                    <span class="sh-card-stat-label">Pending</span>
+                </div>
             </div>
 
-            <div class="schedule-card-meta">
-                <div class="schedule-card-stat">
-                    <span class="schedule-card-stat-value">{{ item.total }}</span>
-                    <span class="schedule-card-stat-label">Total Tasks</span>
-                </div>
-                <div class="schedule-card-stat">
-                    <span class="schedule-card-stat-value">{{ item.completed }}</span>
-                    <span class="schedule-card-stat-label">Completed</span>
-                </div>
-                <div class="schedule-card-stat">
-                    <span class="schedule-card-stat-value">{{ item.pending }}</span>
-                    <span class="schedule-card-stat-label">Pending</span>
-                </div>
-            </div>
-
-            <div class="schedule-card-progress">
-                <div class="schedule-card-progress-label">
+            <div class="sh-card-progress">
+                <div class="sh-card-progress-label">
                     <span>Progress</span>
                     <span>{{ item.completed }} / {{ item.total }}</span>
                 </div>
                 <progress value="{{ item.percentage }}" max="100"></progress>
             </div>
 
-            <div class="schedule-card-footer">
-                <a href="{% url 'planner:schedule_view' item.schedule.id %}" class="schedule-card-link">
-                    Open Schedule
+            <div class="sh-card-footer">
+                <a href="{% url 'planner:schedule_view' item.schedule.id %}" class="sh-card-open">
+                    Open Schedule →
                 </a>
-                <a href="{% url 'planner:delete_schedule' item.schedule.id %}" class="schedule-card-delete">
+                <a href="{% url 'planner:delete_schedule' item.schedule.id %}" class="sh-card-delete">
                     Delete
                 </a>
             </div>
+
         </div>
+
         {% empty %}
-            <div class="empty-state-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
-                </svg>
-                <h3>No schedules yet</h3>
-                <p>Create your first schedule to start tracking tasks.</p>
-                <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary" style="margin-top: 8px;">
-                    Create New Schedule
-                </a>
-            </div>
+        <div class="sh-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
+                 style="opacity:0.15;" viewBox="0 0 16 16">
+                <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+            </svg>
+            <p class="sh-empty-title">No schedules yet</p>
+            <p class="sh-empty-text">Create your first schedule to start tracking tasks.</p>
+            <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary" style="margin-top:8px;">
+                + New Schedule
+            </a>
+        </div>
         {% endfor %}
     </div>
 

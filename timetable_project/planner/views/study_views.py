@@ -9,6 +9,13 @@ from ..models import StudySession, StudyCategory, StudyGoal, Timetable, Timetabl
 from ..forms import StudyResourceForm
 
 
+CATEGORY_COLORS = [
+    '#3498db', '#C4714A', '#7A9E7E', '#9b59b6',
+    '#e67e22', '#1abc9c', '#e74c3c', '#2980b9',
+    '#f39c12', '#6B7FD4', '#27ae60', '#8B4A2F',
+]
+
+
 
 @login_required(login_url='planner:login')
 def study_timer(request):
@@ -487,39 +494,45 @@ def suggest_subjects(request):
         'existing_categories': existing_categories,
     })
 
-
 @login_required(login_url='planner:login')
 def quick_add_category(request, subject_name):
-    """Quick add category from timetable subject"""
-    if StudyCategory.objects.filter(user=request.user, name=subject_name).exists():
-        messages.warning(request, f"Category '{subject_name}' already exists!")
-    else:
-        StudyCategory.objects.create(user=request.user, name=subject_name, color='#3498db')
-        messages.success(request, f"Category '{subject_name}' created!")
+    """Quick add a timetable subject as a category"""
+    # Pick a color based on how many categories exist
+    count = StudyCategory.objects.filter(user=request.user).count()
+    color = CATEGORY_COLORS[count % len(CATEGORY_COLORS)]
+
+    StudyCategory.objects.get_or_create(
+        user=request.user,
+        name=subject_name,
+        defaults={'color': color}
+    )
     return redirect('planner:suggest_subjects')
+
 
 @login_required(login_url='planner:login')
 def bulk_add_categories(request):
-    """Add all timetable subjects as categories"""
+    """Bulk add all suggested subjects as categories"""
     if request.method == 'POST':
-        user_timetables = Timetable.objects.filter(user=request.user)
-        timetable_entries = TimetableEntry.objects.filter(timetable__in=user_timetables)
-        subjects = set(entry.subjectInfo.subject for entry in timetable_entries)
-        existing = set(StudyCategory.objects.filter(user=request.user).values_list('name', flat=True))
+        subjects = TimetableEntry.objects.filter(
+            timetable__user=request.user
+        ).values_list('subjectInfo__subject', flat=True).distinct()
 
-        added = 0
-        for subject in subjects - existing:
-            StudyCategory.objects.create(
-                user=request.user,
-                name=subject,
-                color='#3498db'
-            )
-            added += 1
+        existing = set(
+            StudyCategory.objects.filter(
+                user=request.user
+            ).values_list('name', flat=True)
+        )
 
-        if added > 0:
-            messages.success(request, f"Added {added} new categories!")
-        else:
-            messages.info(request, "All subjects are already categories!")
+        count = StudyCategory.objects.filter(user=request.user).count()
+        for subject in subjects:
+            if subject not in existing:
+                color = CATEGORY_COLORS[count % len(CATEGORY_COLORS)]
+                StudyCategory.objects.create(
+                    user=request.user,
+                    name=subject,
+                    color=color
+                )
+                count += 1
 
     return redirect('planner:suggest_subjects')
 

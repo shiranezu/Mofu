@@ -71,7 +71,7 @@
 
         .auth-left-footer {
             font-size: 11px;
-            color: rgba(240, 231, 213, 0.302);
+            color: rgba(240, 231, 213, 0.3);
             line-height: 1.8;
         }
 
@@ -146,9 +146,71 @@
         }
 
         {% block extra_styles %}{% endblock %}
+
+        /* ─── Dark Mode ──────────────────────────────────── */
+        [data-theme="dark"] body { background: #111; }
+
+        [data-theme="dark"] .auth-left { background: #0f0e0e; }
+
+        [data-theme="dark"] .auth-right { background: #1a1818; }
+
+        [data-theme="dark"] .auth-right-top a { color: #EEE5DA; }
+
+        [data-theme="dark"] .auth-logo { color: #EEE5DA; }
+
+        [data-theme="dark"] .auth-left-tagline,
+        [data-theme="dark"] .auth-left-footer {
+            color: rgba(238, 229, 218, 0.35);
+        }
+
+        [data-theme="dark"] .form-title { color: #EEE5DA; }
+
+        [data-theme="dark"] .input-group label {
+            color: rgba(238, 229, 218, 0.5);
+        }
+
+        [data-theme="dark"] .input-group input {
+            color: #EEE5DA !important;
+            border-bottom-color: rgba(238, 229, 218, 0.2) !important;
+        }
+
+        [data-theme="dark"] .input-group input::placeholder {
+            color: rgba(238, 229, 218, 0.2) !important;
+        }
+
+        [data-theme="dark"] .input-group input:focus {
+            border-bottom-color: #EEE5DA !important;
+        }
+
+        [data-theme="dark"] .toggle-password {
+            color: rgba(238, 229, 218, 0.3);
+        }
+
+        [data-theme="dark"] .forgot-link {
+            color: rgba(238, 229, 218, 0.4);
+        }
+
+        [data-theme="dark"] .social-label {
+            color: rgba(238, 229, 218, 0.3);
+        }
+
+        [data-theme="dark"] .btn-signin,
+        [data-theme="dark"] .btn-register {
+            background: #EEE5DA;
+            color: #1a1818;
+        }
+
+        [data-theme="dark"] .btn-signin:hover,
+        [data-theme="dark"] .btn-register:hover {
+            background: #ffffff;
+        }
     </style>
 </head>
 <body>
+<script>
+    const t = localStorage.getItem('mofuTheme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+</script>
 
 <div class="auth-wrapper">
     <!-- Left Panel -->

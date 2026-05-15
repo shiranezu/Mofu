@@ -1,23 +1,254 @@
 {% extends 'base.html' %}
 
-{% block title %}Timetables - Sachi{% endblock %}
+{% block title %}Timetables — Mofu{% endblock %}
+{% block nav_timetable %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .tt-home-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        gap: 16px;
+    }
+
+    .tt-home-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
+    .tt-home-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .tt-home-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .tt-home-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .tt-home-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        position: relative;
+    }
+
+    .tt-home-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .tt-home-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 3px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.2s ease;
+    }
+
+    .tt-home-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .tt-home-card-body {
+        padding: 20px 22px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .tt-home-card-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.2;
+        text-decoration: none;
+        transition: color 0.15s;
+        display: block;
+    }
+
+    .tt-home-card-name:hover { color: var(--accent); }
+
+    .tt-home-card-meta {
+        display: flex;
+        gap: 20px;
+    }
+
+    .tt-home-card-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .tt-home-card-stat-val {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1;
+    }
+
+    .tt-home-card-stat-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+    }
+
+    .tt-home-days-badge {
+        display: inline-flex;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 500;
+        background: rgba(196, 113, 74, 0.10);
+        color: var(--accent);
+        width: fit-content;
+    }
+
+    .tt-home-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 22px;
+        border-top: 1px solid var(--card-border);
+        background: rgba(30, 37, 64, 0.02);
+    }
+
+    .tt-home-card-link {
+        font-size: 12px;
+        color: var(--accent);
+        font-weight: 500;
+        text-decoration: none;
+        transition: opacity 0.15s;
+    }
+
+    .tt-home-card-link:hover { opacity: 0.7; }
+
+    .tt-home-card-actions {
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .tt-home-card:hover .tt-home-card-actions { opacity: 1; }
+
+    .tt-home-action {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .tt-home-action:hover { color: var(--accent); }
+    .tt-home-action.delete:hover { color: #c0392b; }
+
+    .tt-home-empty {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 40px;
+        text-align: center;
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        gap: 12px;
+    }
+
+    .tt-home-empty-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        opacity: 0.4;
+    }
+
+    .tt-home-empty-text {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Timetables</h1>
 
-    <a href="{% url 'planner:create_timetable' %}">+ Create New Timetable</a>
+    <div class="tt-home-header">
+        <div class="tt-home-header-left">
+            <h1 class="tt-home-title">Timetables.</h1>
+            <p class="tt-home-subtitle">{{ timetables.count }} timetable{{ timetables.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'planner:create_timetable' %}" class="btn btn-primary">+ New Timetable</a>
+    </div>
 
-    <hr>
-
-    <h2>Your Timetables</h2>
-    <ul>
+    <div class="tt-home-grid">
         {% for timetable in timetables %}
-            <li>
-                <a href="{% url 'planner:timetable_view' timetable.id %}">{{ timetable.name }}</a>
-                <a href="{% url 'planner:delete_timetable' timetable.id %}">Delete</a>
-            </li>
+        <div class="tt-home-card">
+            <div class="tt-home-card-body">
+                <a href="{% url 'planner:timetable_view' timetable.id %}" class="tt-home-card-name">
+                    {{ timetable.name }}
+                </a>
+                <div class="tt-home-card-meta">
+                    <div class="tt-home-card-stat">
+                        <span class="tt-home-card-stat-val">{{ timetable.timeslot_set.count }}</span>
+                        <span class="tt-home-card-stat-label">Timeslots</span>
+                    </div>
+                    <div class="tt-home-card-stat">
+                        <span class="tt-home-card-stat-val">{{ timetable.timetableentry_set.count }}</span>
+                        <span class="tt-home-card-stat-label">Entries</span>
+                    </div>
+                </div>
+                <span class="tt-home-days-badge">
+                    {% if timetable.days_mode == 'full_week' %}Sun – Sat{% else %}Mon – Fri{% endif %}
+                </span>
+            </div>
+            <div class="tt-home-card-footer">
+                <a href="{% url 'planner:timetable_view' timetable.id %}" class="tt-home-card-link">Open timetable</a>
+                <div class="tt-home-card-actions">
+                    <!-- <a href="{% url 'planner:export_timetable_pdf' timetable.id %}"
+                       class="tt-home-action" target="_blank">Export</a> -->
+                    <a href="{% url 'planner:delete_timetable' timetable.id %}"
+                       class="tt-home-action delete">Delete</a>
+                </div>
+            </div>
+        </div>
+
         {% empty %}
-            <li>No timetables yet.</li>
+        <div class="tt-home-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
+                 style="opacity:0.15;" viewBox="0 0 16 16">
+                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 2h-4v3h4zm0 4h-4v3h4zm0 4h-4v3h3a1 1 0 0 0 1-1zm-5 3v-3H6v3zm-5 0v-3H1v2a1 1 0 0 0 1 1zm-4-4h4V8H1zm0-4h4V4H1zm5-3v3h4V4zm4 4H6v3h4z"/>
+            </svg>
+            <p class="tt-home-empty-title">No timetables yet</p>
+            <p class="tt-home-empty-text">Create your first timetable to get started.</p>
+            <a href="{% url 'planner:create_timetable' %}" class="btn btn-primary" style="margin-top:8px;">
+                + New Timetable
+            </a>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
+
 {% endblock %}

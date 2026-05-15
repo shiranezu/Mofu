@@ -1,52 +1,235 @@
 {% extends 'base.html' %}
 
-{% block title %}Link Subjects - Sachi{% endblock %}
+{% block title %}Link Subjects — Mofu{% endblock %}
+{% block nav_categories %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .suggest-page {
+        max-width: 640px;
+    }
+
+    .suggest-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 36px;
+    }
+
+    .suggest-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .suggest-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Section Label ──────────────────────────────── */
+    .suggest-section-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 14px;
+    }
+
+    /* ─── Suggested Subjects ─────────────────────────── */
+    .suggest-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .suggest-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        transition: background 0.15s;
+        gap: 16px;
+    }
+
+    .suggest-row:last-child { border-bottom: none; }
+    .suggest-row:hover { background: rgba(30, 37, 64, 0.02); }
+
+    .suggest-subject-name {
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 400;
+    }
+
+    .suggest-add-link {
+        font-size: 12px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: opacity 0.15s;
+        flex-shrink: 0;
+    }
+
+    .suggest-add-link:hover { opacity: 0.7; }
+
+    /* ─── Bulk Add ───────────────────────────────────── */
+    .suggest-bulk {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-top: 1px solid var(--card-border);
+        margin-bottom: 36px;
+        gap: 16px;
+    }
+
+    .suggest-bulk-text {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ─── Existing Categories ────────────────────────── */
+    .suggest-existing {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 32px;
+    }
+
+    .suggest-existing-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        font-size: 12px;
+        color: var(--text-dark);
+        background: var(--card-bg);
+    }
+
+    .suggest-existing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* ─── All done state ─────────────────────────────── */
+    .suggest-all-done {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 40px;
+        text-align: center;
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .suggest-all-done-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        opacity: 0.5;
+    }
+
+    .suggest-all-done-text {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .suggest-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .suggest-back:hover { color: var(--text-dark); }
+
+{% endblock %}
 
 {% block content %}
-    <h1>Link Timetable Subjects to Categories</h1>
 
-    <p>Subjects from your timetables that aren't categories yet:</p>
+<div class="suggest-page">
 
-    <hr>
+    <!-- Header -->
+    <div class="suggest-header">
+        <h1 class="suggest-title">Link Subjects.</h1>
+        <p class="suggest-subtitle">Connect your timetable subjects to study categories</p>
+    </div>
 
     {% if suggested_subjects %}
-        <h2>Suggested Subjects ({{ suggested_subjects|length }})</h2>
-        <table border="1" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for subject in suggested_subjects %}
-                <tr>
-                    <td>{{ subject }}</td>
-                    <td><a href="{% url 'planner:quick_add_category' subject %}">+ Add as Category</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <br>
-        <form method="post" action="{% url 'planner:bulk_add_categories' %}">
-            {% csrf_token %}
-            <button type="submit">✓ Add All as Categories</button>
-        </form>
+
+        <!-- Suggested subjects -->
+        <span class="suggest-section-label">
+            Suggested ({{ suggested_subjects|length }})
+        </span>
+
+        <div class="suggest-list">
+            {% for subject in suggested_subjects %}
+            <div class="suggest-row">
+                <span class="suggest-subject-name">{{ subject }}</span>
+                <a href="{% url 'planner:quick_add_category' subject %}"
+                   class="suggest-add-link">+ Add as Category</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Bulk add -->
+        <div class="suggest-bulk">
+            <span class="suggest-bulk-text">Add all {{ suggested_subjects|length }} subjects as categories at once</span>
+            <form method="post" action="{% url 'planner:bulk_add_categories' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="font-size:12px;">
+                    ✓ Add All
+                </button>
+            </form>
+        </div>
+
     {% else %}
-        <p>All timetable subjects are already categories! 🎉</p>
+
+        <div class="suggest-all-done">
+            <p class="suggest-all-done-title">All linked! 🎉</p>
+            <p class="suggest-all-done-text">All your timetable subjects are already categories.</p>
+        </div>
+
     {% endif %}
 
-    <hr>
-
-    <h3>Existing Categories ({{ existing_categories|length }})</h3>
-    <ul>
+    <!-- Existing Categories -->
+    {% if existing_categories %}
+    <span class="suggest-section-label">
+        Existing Categories ({{ existing_categories|length }})
+    </span>
+    <div class="suggest-existing">
         {% for category in existing_categories %}
-            <li>{{ category }}</li>
-        {% empty %}
-            <li>No categories yet.</li>
+        <span class="suggest-existing-pill">
+            <span class="suggest-existing-dot"
+                  style="background: {{ category.color|default:'#95a5a6' }};"></span>
+            {{ category }}
+        </span>
         {% endfor %}
-    </ul>
+    </div>
+    {% endif %}
 
-    <br>
-    <a href="{% url 'planner:manage_categories' %}">← Back to Categories</a>
+    <a href="{% url 'planner:manage_categories' %}" class="suggest-back">← Back to Categories</a>
+
+</div>
+
 {% endblock %}

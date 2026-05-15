@@ -541,6 +541,85 @@
         .text-muted { color: var(--text-muted); font-size: 12px; }
         .text-accent { color: var(--accent); }
 
+
+        /* ─── Dark Mode ──────────────────────────────────── */
+        [data-theme="dark"] {
+            --sidebar-bg:     #0f0e0e;
+            --sidebar-hover:  #1a1818;
+            --sidebar-active: #242020;
+            --sidebar-border: rgba(238, 229, 218, 0.08);
+
+            --cream:          #EEE5DA;
+            --cream-dark:     #2e2b2b;
+            --text-dark:      #EEE5DA;
+            --text-muted:     #9a8f84;
+            --text-light:     #6a5f58;
+
+            --content-bg:     #1a1818;
+            --card-bg:        #262424;
+            --card-border:    rgba(238, 229, 218, 0.08);
+            --shadow:         0 2px 16px rgba(0, 0, 0, 0.3);
+            --shadow-md:      0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] body {
+            background: #1a1818;
+            color: #EEE5DA;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            color: #EEE5DA !important;
+            background: #262424 !important;
+            border-color: rgba(238, 229, 218, 0.12) !important;
+        }
+
+        [data-theme="dark"] input::placeholder,
+        [data-theme="dark"] textarea::placeholder {
+            color: rgba(238, 229, 218, 0.2) !important;
+        }
+
+        [data-theme="dark"] .btn-ghost {
+            color: #EEE5DA;
+            border-color: rgba(238, 229, 218, 0.15);
+        }
+
+        [data-theme="dark"] .btn-ghost:hover {
+            background: #2e2b2b;
+        }
+
+        [data-theme="dark"] progress::-webkit-progress-bar {
+            background: #2e2b2b;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #3a3636;
+        }
+
+        [data-theme="dark"] .goal-progress-bar-track {
+        background: #2e2b2b;
+        }
+
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(240, 231, 213, 0.5);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: color 0.18s;
+            margin-left: 4px;
+        }
+
+        .theme-toggle:hover {
+            color: var(--cream);
+        }
+
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
@@ -554,6 +633,11 @@
         <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+            </svg>
+        </button>
+        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/>
             </svg>
         </button>
     </div>
@@ -680,6 +764,37 @@
 {% block scripts %}{% endblock %}
 
 <script>
+    // ── Dark Mode ─────────────────────────────────────
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+
+    const moonIcon = `<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/>`;
+    const sunIcon  = `<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/>`;
+
+    // Apply saved theme
+    const savedTheme = localStorage.getItem('mofuTheme') || 'light';
+    if (savedTheme === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+        if (themeIcon) themeIcon.innerHTML = sunIcon;
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('mofuTheme', 'light');
+                if (themeIcon) themeIcon.innerHTML = moonIcon;
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('mofuTheme', 'dark');
+                if (themeIcon) themeIcon.innerHTML = sunIcon;
+            }
+        });
+    }
+
+    // ── Sidebar Toggle ─────────────────────────────────
     const sidebar = document.querySelector('aside');
     const mainEl  = document.querySelector('main');
     const toggle  = document.getElementById('sidebarToggle');
