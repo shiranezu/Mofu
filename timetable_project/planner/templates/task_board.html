@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ schedule.name }} — Mofu{% endblock %}
-{% block nav_schedule %}active{% endblock %}
+{% block title %}{{ task_board.name }} — Mofu{% endblock %}
+{% block nav_tasks %}active{% endblock %}
 
 {% block extra_styles %}
 
@@ -374,8 +374,8 @@
     <!-- Header -->
     <div class="sv-header">
         <div>
-            <h1 class="sv-title">{{ schedule.name }}</h1>
-            <p class="sv-subtitle">{{ items.count }} task{{ items.count|pluralize }}</p>
+            <h1 class="sv-title">{{ task_board.name }}</h1>
+            <p class="sv-subtitle">{{ tasks.count }} task{{ tasks.count|pluralize }}</p>
         </div>
         <div class="sv-header-actions">
             <!-- View Toggle -->
@@ -394,15 +394,15 @@
                 </button>
             </div>
 
-            <a href="{% url 'planner:add_schedule_item' schedule.id %}" class="btn btn-primary">+ Add Task</a>
-            <a href="{% url 'planner:export_schedule_pdf' schedule.id %}" class="btn btn-ghost" target="_blank">
+            <a href="{% url 'planner:add_task' task_board.id %}" class="btn btn-primary">+ Add Task</a>
+            <a href="{% url 'planner:export_tasks_pdf' task_board.id %}" class="btn btn-ghost" target="_blank">
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
                     <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
                 </svg>
                 Export
             </a>
-            <a href="{% url 'planner:schedule_home' %}" class="btn btn-ghost"> Back</a>
+            <a href="{% url 'planner:tasks_home' %}" class="btn btn-ghost"> Back</a>
         </div>
     </div>
 
@@ -424,7 +424,7 @@
                 <span class="status-group-label">
                     Not Started
                     <!-- <span class="status-group-count">
-                        {% for item in items %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                        {% for item in tasks %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
                     </span> -->
                 </span>
                 <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -443,11 +443,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in items %}
+                        {% for item in tasks %}
                         {% if item.status == 'not_started' %}
                         <tr>
                             <td>
-                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                <form method="post" action="{% url 'planner:toggle_task' item.id %}">
                                     {% csrf_token %}
                                     <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
                                 </form>
@@ -470,9 +470,9 @@
                             </td>
                             <td>
                                 <div class="task-actions">
-                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                                 </div>
                             </td>
                         </tr>
@@ -492,7 +492,7 @@
                 <span class="status-group-label">
                     In Progress
                     <!-- <span class="status-group-count">
-                        {% for item in items %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                        {% for item in tasks %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
                     </span> -->
                 </span>
                 <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -511,11 +511,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in items %}
+                        {% for item in tasks %}
                         {% if item.status == 'in_progress' %}
                         <tr>
                             <td>
-                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                <form method="post" action="{% url 'planner:toggle_task' item.id %}">
                                     {% csrf_token %}
                                     <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
                                 </form>
@@ -538,9 +538,9 @@
                             </td>
                             <td>
                                 <div class="task-actions">
-                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                                 </div>
                             </td>
                         </tr>
@@ -559,7 +559,7 @@
                 <span class="status-group-label">
                     Completed
                     <!-- <span class="status-group-count">
-                        {% for item in items %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
+                        {% for item in tasks %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}
                     </span> -->
                 </span>
                 <svg class="status-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -578,11 +578,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in items %}
+                        {% for item in tasks %}
                         {% if item.status == 'completed' %}
                         <tr>
                             <td>
-                                <form method="post" action="{% url 'planner:toggle_schedule_item' item.id %}">
+                                <form method="post" action="{% url 'planner:toggle_task' item.id %}">
                                     {% csrf_token %}
                                     <input type="checkbox" class="task-check" onchange="this.form.submit()" {% if item.is_done %}checked{% endif %}>
                                 </form>
@@ -602,9 +602,9 @@
                             </td>
                             <td>
                                 <div class="task-actions">
-                                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                                 </div>
                             </td>
                         </tr>
@@ -627,10 +627,10 @@
             <div class="board-col-header">
                 <span class="board-col-title">
                     Not Started
-                    <span class="board-col-count">{% for item in items %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                    <span class="board-col-count">{% for item in tasks %}{% if item.status == 'not_started' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
                 </span>
             </div>
-            {% for item in items %}
+            {% for item in tasks %}
             {% if item.status == 'not_started' %}
             <div class="board-card">
                 <span class="board-card-title {% if item.is_done %}done{% endif %}">{{ item.title }}</span>
@@ -648,9 +648,9 @@
                     {% endif %}
                 </div>
                 <div class="board-card-actions">
-                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                 </div>
             </div>
             {% endif %}
@@ -664,10 +664,10 @@
             <div class="board-col-header">
                 <span class="board-col-title">
                     In Progress
-                    <span class="board-col-count">{% for item in items %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                    <span class="board-col-count">{% for item in tasks %}{% if item.status == 'in_progress' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
                 </span>
             </div>
-            {% for item in items %}
+            {% for item in tasks %}
             {% if item.status == 'in_progress' %}
             <div class="board-card">
                 <span class="board-card-title">{{ item.title }}</span>
@@ -685,9 +685,9 @@
                     {% endif %}
                 </div>
                 <div class="board-card-actions">
-                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                 </div>
             </div>
             {% endif %}
@@ -701,10 +701,10 @@
             <div class="board-col-header">
                 <span class="board-col-title">
                     Completed
-                    <span class="board-col-count">{% for item in items %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
+                    <span class="board-col-count">{% for item in tasks %}{% if item.status == 'completed' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% endfor %}</span>
                 </span>
             </div>
-            {% for item in items %}
+            {% for item in tasks %}
             {% if item.status == 'completed' %}
             <div class="board-card">
                 <span class="board-card-title done">{{ item.title }}</span>
@@ -722,9 +722,9 @@
                     {% endif %}
                 </div>
                 <div class="board-card-actions">
-                    <a href="{% url 'planner:view_schedule_item' item.id %}" class="task-action-link">View</a>
-                    <a href="{% url 'planner:edit_schedule_item' item.id %}" class="task-action-link">Edit</a>
-                    <a href="{% url 'planner:delete_schedule_item' item.id %}" class="task-action-link delete">Delete</a>
+                    <a href="{% url 'planner:view_task' item.id %}" class="task-action-link">View</a>
+                    <a href="{% url 'planner:edit_task' item.id %}" class="task-action-link">Edit</a>
+                    <a href="{% url 'planner:delete_task' item.id %}" class="task-action-link delete">Delete</a>
                 </div>
             </div>
             {% endif %}
@@ -764,11 +764,11 @@
             listBtn.classList.remove('active');
             sortBar.style.display = 'none';
         }
-        localStorage.setItem('scheduleView_{{ schedule.id }}', view);
+        localStorage.setItem('scheduleView_{{ task_board.id }}', view);
     }
 
     // ── Restore saved view ───────────────────────────
-    const savedView = localStorage.getItem('scheduleView_{{ schedule.id }}');
+    const savedView = localStorage.getItem('scheduleView_{{ task_board.id }}');
     if (savedView === 'board') switchView('board');
 
     // ── Group collapse ───────────────────────────────

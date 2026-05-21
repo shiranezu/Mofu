@@ -171,12 +171,12 @@
         align-items: center;
         gap: 16px;
         padding: 12px 20px;
-        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        border-bottom: 1px solid var(--overlay-sm);
         transition: background 0.15s;
     }
 
     .class-row:last-child { border-bottom: none; }
-    .class-row:hover { background: rgba(30, 37, 64, 0.02); }
+    .class-row:hover { background: var(--overlay-xs); }
 
     .class-time {
         font-size: 11px;
@@ -201,7 +201,7 @@
     /* ─── Goals ──────────────────────────────────────── */
     .goal-row {
         padding: 14px 20px;
-        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        border-bottom: 1px solid var(--overlay-sm);
     }
 
     .goal-row:last-child { border-bottom: none; }
@@ -230,12 +230,12 @@
         align-items: center;
         gap: 12px;
         padding: 12px 20px;
-        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
+        border-bottom: 1px solid var(--overlay-sm);
         transition: background 0.15s;
     }
 
     .task-row:last-child { border-bottom: none; }
-    .task-row:hover { background: rgba(30, 37, 64, 0.02); }
+    .task-row:hover { background: var(--overlay-xs); }
 
     .task-title {
         flex: 1;
@@ -285,7 +285,7 @@
         min-width: 120px;
         background: transparent !important;
         border: none !important;
-        border-bottom: 1.5px solid rgba(30, 37, 64, 0.2) !important;
+        border-bottom: 1.5px solid var(--input-border) !important;
         border-radius: 0 !important;
         padding: 7px 0 !important;
         font-size: 13px !important;
@@ -506,7 +506,7 @@
             <div class="section-card" style="margin-bottom: 16px;">
                 <div class="section-card-header">
                     <span class="section-card-title">Tasks Due</span>
-                    <a href="{% url 'planner:schedule_home' %}" class="section-card-link">View all</a>
+                    <a href="{% url 'planner:tasks_home' %}" class="section-card-link">View all</a>
                 </div>
                 <div class="section-card-body">
                     {% if today_tasks %}
@@ -524,7 +524,7 @@
                                 {% if task.due_date < today_date %}
                                     <span class="task-overdue">Overdue</span>
                                 {% endif %}
-                                <a href="{% url 'planner:schedule_view' task.schedule.id %}" class="task-link">View</a>
+                                <a href="{% url 'planner:task_board' task.task_board.id %}" class="task-link">View</a>
                             </div>
                         </div>
                         {% endfor %}

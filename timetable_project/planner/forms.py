@@ -2,7 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import (
-    Subject_and_location, Timeslot, ScheduleItem, Schedule,
+    ScheduleEntry,
+    Subject_and_location, Timeslot, Task, TaskBoard,
     StudyCategory, StudyGoal, StudyResource, DAYS_OF_WEEK, Timetable
 )
 
@@ -46,17 +47,17 @@ class RegistrationForm(UserCreationForm):
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
 
 
-class ScheduleForm(forms.ModelForm):
+class TaskBoardForm(forms.ModelForm):
     """Form for creating schedules"""
     class Meta:
-        model = Schedule
+        model = TaskBoard
         fields = ["name"]
 
 
-class ScheduleItemForm(forms.ModelForm):
+class TaskForm(forms.ModelForm):
     """Form for creating schedule items/tasks"""
     class Meta:
-        model = ScheduleItem
+        model = Task
         fields = ["title", "description", "priority", "status", "due_date"]
         widgets = {
             "due_date": forms.DateInput(attrs={"type": "date"})
@@ -110,3 +111,14 @@ class StudyResourceForm(forms.ModelForm):
         if user:
             self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
             self.fields['category'].required = False
+
+class ScheduleEntryForm(forms.ModelForm):
+    class Meta:
+        model = ScheduleEntry
+        fields = ['title', 'date', 'start_time', 'end_time', 'description']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }

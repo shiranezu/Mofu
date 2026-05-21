@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule — Mofu{% endblock %}
+{% block nav_schedule %}active{% endblock %}
+
+{% block extra_styles %}
+
+    /* ─── Layout ─────────────────────────────────────── */
+    .sc-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ─── Calendar Card ──────────────────────────────── */
+    .sc-cal-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    /* Month header */
+    .sc-cal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 28px 16px;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .sc-cal-month {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+    }
+
+    .sc-cal-nav {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .sc-cal-nav-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        transition: all 0.15s;
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+
+    .sc-cal-nav-btn:hover {
+        background: var(--overlay-sm);
+        color: var(--text-dark);
+        border-color: var(--card-border);
+    }
+
+    /* Day-of-week row */
+    .sc-cal-grid {
+        padding: 16px 20px 20px;
+    }
+
+    .sc-dow-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        margin-bottom: 8px;
+    }
+
+    .sc-dow {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        padding: 4px 0;
+    }
+
+    /* Weeks */
+    .sc-week-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        margin-bottom: 2px;
+    }
+
+    /* Day cell */
+    .sc-day {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        position: relative;
+        gap: 3px;
+    }
+
+    .sc-day:hover {
+        background: var(--overlay-sm);
+    }
+
+    .sc-day-num {
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--text-dark);
+        line-height: 1;
+    }
+
+    .sc-day.other-month .sc-day-num {
+        color: var(--text-muted);
+        opacity: 0.4;
+    }
+
+    .sc-day.today-cell .sc-day-num {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .sc-day.selected {
+        background: var(--text-dark);
+    }
+
+    .sc-day.selected .sc-day-num {
+        color: var(--cream);
+        font-weight: 500;
+    }
+
+    .sc-day.today-cell.selected {
+        background: var(--accent);
+    }
+
+    .sc-day.today-cell.selected .sc-day-num {
+        color: white;
+    }
+
+    [data-theme="dark"] .sc-day.selected:not(.today-cell) .sc-day-num {
+        color: var(--accent);
+    }
+
+    /* Dot indicator */
+    .sc-day-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+    }
+
+    .sc-day.selected .sc-day-dot {
+        background: rgba(240, 231, 213, 0.6);
+    }
+
+    /* ─── Day Panel ──────────────────────────────────── */
+    .sc-panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sc-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 22px 16px;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .sc-panel-date {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.2;
+    }
+
+    .sc-panel-day {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 2px;
+    }
+
+    /* Entry list */
+    .sc-entry-list {
+        min-height: 200px;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .sc-entry-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 22px;
+        border-bottom: 1px solid var(--overlay-sm);
+        transition: background 0.15s;
+    }
+
+    .sc-entry-row:last-child { border-bottom: none; }
+    .sc-entry-row:hover { background: var(--overlay-xs); }
+
+    /* Checkbox */
+    .sc-checkbox {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1.5px solid var(--card-border);
+        background: transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        text-decoration: none;
+    }
+
+    .sc-checkbox:hover {
+        border-color: var(--accent);
+    }
+
+    .sc-checkbox.done {
+        background: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .sc-checkbox.done::after {
+        content: '';
+        width: 8px;
+        height: 5px;
+        border-left: 1.5px solid white;
+        border-bottom: 1.5px solid white;
+        transform: rotate(-45deg) translateY(-1px);
+        display: block;
+    }
+
+    /* Entry info */
+    .sc-entry-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sc-entry-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.15s;
+    }
+
+    .sc-entry-title.done {
+        text-decoration: line-through;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .sc-entry-time {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* Detail button */
+    .sc-entry-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: all 0.15s;
+        flex-shrink: 0;
+    }
+
+    .sc-entry-btn:hover {
+        background: var(--overlay-sm);
+        color: var(--text-dark);
+        border-color: var(--text-muted);
+    }
+
+    /* Empty state */
+    .sc-panel-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .sc-panel-empty-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-dark);
+        opacity: 0.35;
+    }
+
+    .sc-panel-empty-text {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* Add button in panel footer */
+    .sc-panel-footer {
+        padding: 14px 22px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .sc-add-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+        width: 100%;
+    }
+
+    .sc-add-btn:hover { color: var(--accent); }
+
+    /* Page header */
+    .sc-page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+
+    .sc-page-header-left {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+    }
+
+    .sc-page-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .sc-page-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+{% endblock %}
+
+{% block content %}
+
+    <!-- Page Header -->
+    <div class="sc-page-header">
+        <div class="sc-page-header-left">
+            <h1 class="sc-page-title">Schedule.</h1>
+            <p class="sc-page-subtitle">{{ month_name }} {{ year }}</p>
+        </div>
+        <a href="{% url 'planner:add_schedule_entry' %}?date={{ selected_date }}" class="btn btn-primary">
+            + New Entry
+        </a>
+    </div>
+
+    <div class="sc-layout">
+
+        <!-- LEFT — Calendar -->
+        <div class="sc-cal-card">
+            <div class="sc-cal-header">
+                <span class="sc-cal-month">{{ month_name }} {{ year }}</span>
+                <div class="sc-cal-nav">
+                    <a href="?month={{ prev_month }}" class="sc-cal-nav-btn" title="Previous month">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                        </svg>
+                    </a>
+                    <a href="?month={{ next_month }}" class="sc-cal-nav-btn" title="Next month">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sc-cal-grid">
+                <!-- Day of week headers -->
+                <div class="sc-dow-row">
+                    {% for d in dow_headers %}
+                    <div class="sc-dow">{{ d }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Weeks -->
+                {% for week in month_days %}
+                <div class="sc-week-row">
+                    {% for day in week %}
+                    <div class="sc-day
+                        {% if day.month != month %}other-month{% endif %}
+                        {% if day == today %}today-cell{% endif %}"
+                        data-date="{{ day|date:'Y-m-d' }}"
+                        onclick="selectDay('{{ day|date:'Y-m-d' }}')">
+                        <span class="sc-day-num">{{ day.day }}</span>
+                        <span class="sc-day-dot" id="dot-{{ day|date:'Y-m-d' }}" style="display:none;"></span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- RIGHT — Day Panel -->
+        <div class="sc-panel" id="sc-panel">
+            <div class="sc-panel-header">
+                <div>
+                    <div class="sc-panel-date" id="panel-date-label">—</div>
+                    <div class="sc-panel-day" id="panel-day-label"></div>
+                </div>
+            </div>
+
+            <div class="sc-entry-list" id="entry-list">
+                <div class="sc-panel-empty">
+                    <p class="sc-panel-empty-title">Select a day</p>
+                    <p class="sc-panel-empty-text">Click any date to see its entries.</p>
+                </div>
+            </div>
+
+            <div class="sc-panel-footer">
+                <a href="#" class="sc-add-btn" id="panel-add-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                    Add entry for this day
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const entriesData = {{ entries_json|safe }};
+    const today = '{{ today|date:"Y-m-d" }}';
+    let selectedDate = '{{ selected_date }}';
+
+    const MONTH_NAMES = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
+    const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    function formatDate(isoStr) {
+        const [y, m, d] = isoStr.split('-').map(Number);
+        return `${MONTH_NAMES[m-1]} ${d}, ${y}`;
+    }
+
+    function formatDayName(isoStr) {
+        const [y, m, d] = isoStr.split('-').map(Number);
+        return DAY_NAMES[new Date(y, m-1, d).getDay()];
+    }
+
+    function renderDots() {
+        document.querySelectorAll('.sc-day-dot').forEach(dot => dot.style.display = 'none');
+        Object.keys(entriesData).forEach(dateStr => {
+            const dot = document.getElementById('dot-' + dateStr);
+            if (dot && entriesData[dateStr].length > 0) dot.style.display = 'block';
+        });
+    }
+
+    function renderPanel(dateStr) {
+        // Update header
+        document.getElementById('panel-date-label').textContent = formatDate(dateStr);
+        document.getElementById('panel-day-label').textContent  = formatDayName(dateStr);
+        document.getElementById('panel-add-btn').href = `/schedule/add/?date=${dateStr}`;
+
+        // Highlight selected day
+        document.querySelectorAll('.sc-day').forEach(el => el.classList.remove('selected'));
+        const cell = document.querySelector(`.sc-day[data-date="${dateStr}"]`);
+        if (cell) cell.classList.add('selected');
+
+        // Render entries
+        const list = document.getElementById('entry-list');
+        const entries = entriesData[dateStr] || [];
+
+        if (entries.length === 0) {
+            list.innerHTML = `
+                <div class="sc-panel-empty">
+                    <p class="sc-panel-empty-title">Nothing here.</p>
+                    <p class="sc-panel-empty-text">No entries for this day yet.</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = entries.map(e => `
+            <div class="sc-entry-row" id="entry-row-${e.id}">
+                <a href="/schedule/${e.id}/toggle/" class="sc-checkbox ${e.is_done ? 'done' : ''}"
+                   title="${e.is_done ? 'Mark incomplete' : 'Mark done'}"></a>
+                <div class="sc-entry-info">
+                    <div class="sc-entry-title ${e.is_done ? 'done' : ''}">${e.title}</div>
+                    ${e.start_time
+                        ? `<div class="sc-entry-time">${e.start_time}${e.end_time ? ' – ' + e.end_time : ''}</div>`
+                        : '<div class="sc-entry-time">No time set</div>'}
+                </div>
+                <a href="/schedule/${e.id}/" class="sc-entry-btn" title="View details">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+                    </svg>
+                </a>
+            </div>`).join('');
+    }
+
+    function selectDay(dateStr) {
+        selectedDate = dateStr;
+        // Update URL without reload
+        const params = new URLSearchParams(window.location.search);
+        params.set('date', dateStr);
+        window.history.replaceState({}, '', '?' + params.toString());
+        renderPanel(dateStr);
+    }
+
+    // Init
+    renderDots();
+    renderPanel(selectedDate);
+</script>
+{% endblock %}

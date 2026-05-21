@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ entry.title }} — Mofu{% endblock %}
+{% block nav_schedule %}active{% endblock %}
+
+{% block extra_styles %}
+    .entry-page { max-width: 560px; }
+
+    .entry-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 36px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .entry-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+
+    .entry-title.done { text-decoration: line-through; opacity: 0.5; }
+
+    .entry-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    .entry-meta-strip {
+        display: flex;
+        gap: 32px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+
+    .entry-meta { display: flex; flex-direction: column; gap: 4px; }
+
+    .entry-meta-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .entry-meta-value {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.1;
+    }
+
+    .entry-vline {
+        width: 1px;
+        height: 40px;
+        background: var(--card-border);
+        align-self: center;
+    }
+
+    .entry-desc-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 14px;
+    }
+
+    .entry-desc-text {
+        font-size: 14px;
+        color: var(--text-dark);
+        line-height: 1.8;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+
+    .entry-desc-empty {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-style: italic;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+
+    .entry-actions { display: flex; align-items: center; gap: 10px; }
+
+    .entry-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: auto;
+        transition: color 0.15s;
+    }
+
+    .entry-back:hover { color: var(--text-dark); }
+{% endblock %}
+
+{% block content %}
+<div class="entry-page">
+
+    <div class="entry-header">
+        <div>
+            <h1 class="entry-title {% if entry.is_done %}done{% endif %}">{{ entry.title }}</h1>
+            <p class="entry-subtitle">{{ entry.date|date:"l, F d, Y" }}</p>
+        </div>
+        {% if entry.is_done %}
+            <span class="badge badge-done">Done</span>
+        {% else %}
+            <span class="badge badge-pending">Pending</span>
+        {% endif %}
+    </div>
+
+    <div class="entry-meta-strip">
+        <div class="entry-meta">
+            <span class="entry-meta-label">Date</span>
+            <span class="entry-meta-value">{{ entry.date|date:"M d, Y" }}</span>
+        </div>
+        {% if entry.start_time %}
+        <div class="entry-vline"></div>
+        <div class="entry-meta">
+            <span class="entry-meta-label">Time</span>
+            <span class="entry-meta-value">
+                {{ entry.start_time|time:"H:i" }}{% if entry.end_time %} – {{ entry.end_time|time:"H:i" }}{% endif %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <span class="entry-desc-label">Notes</span>
+    {% if entry.description %}
+        <div class="entry-desc-text">{{ entry.description|linebreaks }}</div>
+    {% else %}
+        <p class="entry-desc-empty">No notes for this entry.</p>
+    {% endif %}
+
+    <div class="entry-actions">
+        <a href="{% url 'planner:toggle_schedule_entry' entry.id %}" class="btn btn-ghost" style="font-size:12px;">
+            {% if entry.is_done %}Mark Incomplete{% else %}Mark Done{% endif %}
+        </a>
+        <a href="{% url 'planner:edit_schedule_entry' entry.id %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'planner:delete_schedule_entry' entry.id %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'planner:schedule_home' %}?date={{ entry.date|date:'Y-m-d' }}&month={{ entry.date|date:'Y-m' }}"
+           class="entry-back">← Back to Schedule</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count
 from datetime import timedelta
 from ..models import (
-    Timetable, TimetableEntry, ScheduleItem, 
-    StudySession, StudyGoal, Schedule, StudyCategory, StudyResource
+    Timetable, TimetableEntry, Task, 
+    StudySession, StudyGoal, TaskBoard, StudyCategory, StudyResource
 )
 
 
@@ -35,11 +35,11 @@ def home(request):
             })
     
     # Today's tasks (due today or overdue)
-    today_tasks = ScheduleItem.objects.filter(
-        schedule__user=request.user,
+    today_tasks = Task.objects.filter(
+        task_board__user=request.user,
         due_date__lte=today_date,
         is_done=False
-    ).select_related('schedule').order_by('due_date')[:10]
+    ).select_related('task_board').order_by('due_date')[:10]
     
     # Today's study time
     today_sessions = StudySession.objects.filter(
@@ -115,7 +115,7 @@ def my_account(request):
     
     # Count user's items
     timetables_count = Timetable.objects.filter(user=user).count()
-    schedules_count = Schedule.objects.filter(user=user).count()
+    task_boards_count = TaskBoard.objects.filter(user=user).count()
     categories_count = StudyCategory.objects.filter(user=user).count()
     resources_count = StudyResource.objects.filter(user=user).count()
     
@@ -128,7 +128,7 @@ def my_account(request):
         'current_streak': current_streak,
         'longest_streak': longest_streak,
         'timetables_count': timetables_count,
-        'schedules_count': schedules_count,
+        'task_boards_count': task_boards_count,
         'categories_count': categories_count,
         'resources_count': resources_count,
         'account_age': account_age,

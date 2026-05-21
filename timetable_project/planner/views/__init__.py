@@ -7,11 +7,11 @@ from .timetable_views import (
     edit_entry, delete_entry, delete_timeslot,
     export_timetable_pdf, toggle_days_mode,
 )
-from .schedule_views import (
-    schedule_home, schedule_view, create_schedule,
-    add_schedule_item, edit_schedule_item, view_schedule_item,
-    delete_schedule_item, toggle_schedule_item,
-    delete_schedule, export_schedule_pdf, quick_add_task
+from .task_views import (
+    tasks_home, task_board, create_task_board,
+    add_task, edit_task, view_task,
+    delete_task, toggle_task,
+    delete_task_board, export_tasks_pdf, quick_add_task
 )
 from .study_views import (
     study_timer, start_timer, stop_timer,
@@ -26,5 +26,8 @@ from .study_views import (
     complete_countdown, delete_session, clear_all_history,
 )
 from .general_views import home, help, my_account
-
 from .dictionary import dictionary, clear_dictionary_history
+from .schedule_views import (
+    schedule_home, add_schedule_entry, view_schedule_entry,
+    edit_schedule_entry, delete_schedule_entry, toggle_schedule_entry,
+)

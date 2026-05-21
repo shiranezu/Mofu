@@ -1,190 +1,124 @@
+import calendar
+import json
+from datetime import date, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from ..models import Schedule, ScheduleItem
-from ..forms import ScheduleForm, ScheduleItemForm
+from django.utils import timezone
+from ..models import ScheduleEntry
+from ..forms import ScheduleEntryForm
 
 
 @login_required(login_url='planner:login')
 def schedule_home(request):
-    """View all schedules"""
-    schedules = Schedule.objects.filter(user=request.user)
-    
-    schedules_data = []
-    for schedule in schedules:
-        total = schedule.items.count()
-        completed = schedule.items.filter(status='completed').count()
-        pending = total - completed
-        percentage = int((completed / total * 100)) if total > 0 else 0
-        schedules_data.append({
-            'schedule': schedule,
-            'total': total,
-            'completed': completed,
-            'pending': pending,
-            'percentage': percentage,
-        })
-    
-    return render(request, 'schedule_home.html', {
-        'schedules_data': schedules_data,
-        'schedules': schedules,
-    })
-
-
-@login_required(login_url='planner:login')
-def schedule_view(request, schedule_id):
-    """View a specific schedule"""
-    schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
-    items = schedule.items.all().order_by("due_date", "id")
-    
-    from django.utils import timezone
+    """Main calendar view"""
     today = timezone.now().date()
-    
-    return render(request, "schedule_view.html", {
-        "schedule": schedule, 
-        "items": items,
-        "today": today
-    })
+
+    # Determine which month to show
+    month_str = request.GET.get('month')
+    if month_str:
+        try:
+            year, month = int(month_str.split('-')[0]), int(month_str.split('-')[1])
+        except Exception:
+            year, month = today.year, today.month
+    else:
+        year, month = today.year, today.month
+
+    # Build calendar grid (weeks × days)
+    cal = calendar.Calendar(firstweekday=6)  # Sunday first
+    month_days = cal.monthdatescalendar(year, month)
+
+    # Fetch all entries for this month (include days from adjacent months shown in grid)
+    grid_start = month_days[0][0]
+    grid_end = month_days[-1][-1]
+    entries = ScheduleEntry.objects.filter(
+        user=request.user,
+        date__gte=grid_start,
+        date__lte=grid_end
+    )
+
+    # Build a dict: date_str -> list of entry dicts (for JS)
+    entries_by_date = {}
+    for entry in entries:
+        key = entry.date.isoformat()
+        if key not in entries_by_date:
+            entries_by_date[key] = []
+        entries_by_date[key].append({
+            'id': entry.id,
+            'title': entry.title,
+            'start_time': entry.start_time.strftime('%H:%M') if entry.start_time else '',
+            'end_time': entry.end_time.strftime('%H:%M') if entry.end_time else '',
+            'description': entry.description or '',
+            'is_done': entry.is_done,
+        })
+
+    # Prev / next month
+    first_of_month = date(year, month, 1)
+    prev_month = (first_of_month - timedelta(days=1)).replace(day=1)
+    next_month = (first_of_month + timedelta(days=32)).replace(day=1)
+
+    # Selected date (from query param, default today)
+    selected_str = request.GET.get('date', today.isoformat())
+
+    context = {
+        'year': year,
+        'month': month,
+        'month_name': calendar.month_name[month],
+        'month_days': month_days,
+        'today': today,
+        'prev_month': prev_month.strftime('%Y-%m'),
+        'next_month': next_month.strftime('%Y-%m'),
+        'entries_json': json.dumps(entries_by_date),
+        'selected_date': selected_str,
+        'dow_headers': ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    }
+    return render(request, 'schedule.html', context)
+
 
 @login_required(login_url='planner:login')
-def quick_add_task(request):
-    """Quick add task from Today page"""
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        priority = request.POST.get('priority', 'medium')
-        due_date = request.POST.get('due_date')
-        
-        # Get or create a default "Quick Tasks" schedule
-        schedule, created = Schedule.objects.get_or_create(
-            user=request.user,
-            name="Quick Tasks"
-        )
-        
-        ScheduleItem.objects.create(
-            schedule=schedule,
-            title=title,
-            priority=priority,
-            due_date=due_date if due_date else None,
-            status='not_started'
-        )
-        
-        messages.success(request, f"Task '{title}' added!")
-    
-    return redirect('planner:home')
-
-
-@login_required(login_url='planner:login')
-def create_schedule(request):
-    """Create a new schedule"""
-    form = ScheduleForm(request.POST or None)
+def add_schedule_entry(request):
+    date_str = request.GET.get('date') or request.POST.get('date') or timezone.now().date().isoformat()
+    initial = {'date': date_str}
+    form = ScheduleEntryForm(request.POST or None, initial=initial)
     if form.is_valid():
-        schedule = form.save(commit=False)
-        schedule.user = request.user
-        schedule.save()
-        return redirect("planner:schedule_view", schedule.id)
-    return render(request, "add_generic.html", {"form": form, "title": "Create Schedule"})
+        entry = form.save(commit=False)
+        entry.user = request.user
+        entry.save()
+        from django.urls import reverse
+        return redirect(reverse('planner:schedule_home') + f"?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")
+    return render(request, 'add_generic.html', {'form': form, 'title': 'Add Schedule Entry'})
 
 
 @login_required(login_url='planner:login')
-def add_schedule_item(request, schedule_id):
-    """Add an item to a schedule"""
-    schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
-    form = ScheduleItemForm(request.POST or None)
-    if form.is_valid():
-        item = form.save(commit=False)
-        item.schedule = schedule
-        item.save()
-        return redirect("planner:schedule_view", schedule.id)
-    return render(request, "add_generic.html", {"form": form, "title": "Add Task"})
+def view_schedule_entry(request, entry_id):
+    entry = get_object_or_404(ScheduleEntry, id=entry_id, user=request.user)
+    return render(request, 'schedule_entry.html', {'entry': entry})
 
 
 @login_required(login_url='planner:login')
-def edit_schedule_item(request, item_id):
-    """Edit a schedule item"""
-    item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    form = ScheduleItemForm(request.POST or None, instance=item)
+def edit_schedule_entry(request, entry_id):
+    entry = get_object_or_404(ScheduleEntry, id=entry_id, user=request.user)
+    form = ScheduleEntryForm(request.POST or None, instance=entry)
     if form.is_valid():
         form.save()
-        return redirect("planner:schedule_view", item.schedule.id)
-    return render(request, "add_generic.html", {"form": form, "title": "Edit Task"})
-
-
-from django.utils import timezone
-def view_schedule_item(request, item_id):
-    item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    return render(request, 'view_schedule_item.html', {
-        'item': item,
-        'today': timezone.now().date(),
-    })
+        return redirect(f"/schedule/?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")
+    return render(request, 'add_generic.html', {'form': form, 'title': 'Edit Schedule Entry'})
 
 
 @login_required(login_url='planner:login')
-def delete_schedule_item(request, item_id):
-    """Delete a schedule item"""
-    item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    schedule_id = item.schedule.id
-    item.delete()
-    return redirect("planner:schedule_view", schedule_id)
+def delete_schedule_entry(request, entry_id):
+    entry = get_object_or_404(ScheduleEntry, id=entry_id, user=request.user)
+    date_str = entry.date.isoformat()
+    month_str = entry.date.strftime('%Y-%m')
+    if request.method == 'POST':
+        entry.delete()
+        return redirect(f"/schedule/?date={date_str}&month={month_str}")
+    return render(request, 'confirm_delete.html', {'object': entry, 'type': 'schedule entry'})
 
 
 @login_required(login_url='planner:login')
-def toggle_schedule_item(request, item_id):
-    """Toggle schedule item completion"""
-    item = get_object_or_404(ScheduleItem, id=item_id, schedule__user=request.user)
-    if item.status == 'completed':
-        item.status = 'not_started'
-    else:
-        item.status = 'completed'
-    item.save()  # save() will auto-sync is_done from status
-    return redirect("planner:schedule_view", item.schedule.id)
-
-
-@login_required(login_url='planner:login')
-def delete_schedule(request, schedule_id):
-    """Delete a schedule"""
-    schedule = Schedule.objects.filter(id=schedule_id, user=request.user).first()
-    if not schedule:
-        messages.error(request, "This schedule does not exist or was already deleted.")
-        return redirect('planner:schedule_home')
-
-    if request.method == "POST":
-        schedule.delete()
-        messages.success(request, "Schedule deleted successfully.")
-        return redirect('planner:schedule_home')
-
-    return render(request, 'confirm_delete.html', {
-        'object': schedule,
-        'type': 'schedule'
-    })
-
-
-@login_required(login_url='planner:login')
-def export_schedule_pdf(request, schedule_id):
-    """Export schedule as PDF"""
-    schedule = get_object_or_404(Schedule, id=schedule_id, user=request.user)
-    items = schedule.items.all().order_by("id")
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{schedule.name}.pdf"'
-
-    p = canvas.Canvas(response, pagesize=letter)
-    width, height = letter
-
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, height - 50, f"Schedule: {schedule.name}")
-
-    y = height - 100
-    p.setFont("Helvetica", 12)
-    for item in items:
-        status = "[x]" if item.is_done else "[ ]"
-        p.drawString(60, y, f"{status} {item.title}")
-        y -= 20
-        if y < 50:
-            p.showPage()
-            y = height - 50
-
-    p.showPage()
-    p.save()
-    return response
+def toggle_schedule_entry(request, entry_id):
+    entry = get_object_or_404(ScheduleEntry, id=entry_id, user=request.user)
+    entry.is_done = not entry.is_done
+    entry.save()
+    return redirect(f"/schedule/?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")

@@ -27,17 +27,17 @@ urlpatterns = [
     path('timeslot/<int:timeslot_id>/delete/', views.delete_timeslot, name='delete_timeslot'),
     path('timetable/<int:timetable_id>/toggle-days/', views.toggle_days_mode, name='toggle_days_mode'),
 
-    # SCHEDULES
-    path('schedules/', views.schedule_home, name='schedule_home'),
-    path('schedule/<int:schedule_id>/', views.schedule_view, name='schedule_view'),
-    path('schedule/create/', views.create_schedule, name='create_schedule'),
-    path('schedule/<int:schedule_id>/add/', views.add_schedule_item, name='add_schedule_item'),
-    path('schedule/item/<int:item_id>/view/', views.view_schedule_item, name='view_schedule_item'),
-    path('schedule/item/<int:item_id>/edit/', views.edit_schedule_item, name='edit_schedule_item'),
-    path('schedule/item/<int:item_id>/delete/', views.delete_schedule_item, name='delete_schedule_item'),
-    path('schedule/item/<int:item_id>/toggle/', views.toggle_schedule_item, name='toggle_schedule_item'),
-    path('schedule/<int:schedule_id>/delete/', views.delete_schedule, name='delete_schedule'),
-    path('schedule/<int:schedule_id>/export/pdf/', views.export_schedule_pdf, name='export_schedule_pdf'),
+    # TASKS
+    path('tasks/', views.tasks_home, name='tasks_home'),
+    path('tasks/<int:board_id>/', views.task_board, name='task_board'),
+    path('tasks/create/', views.create_task_board, name='create_task_board'),
+    path('tasks/<int:board_id>/add/', views.add_task, name='add_task'),
+    path('tasks/item/<int:task_id>/view/', views.view_task, name='view_task'),
+    path('tasks/item/<int:task_id>/edit/', views.edit_task, name='edit_task'),
+    path('tasks/item/<int:task_id>/delete/', views.delete_task, name='delete_task'),
+    path('tasks/item/<int:task_id>/toggle/', views.toggle_task, name='toggle_task'),
+    path('tasks/<int:board_id>/delete/', views.delete_task_board, name='delete_task_board'),
+    path('tasks/<int:board_id>/export/pdf/', views.export_tasks_pdf, name='export_tasks_pdf'),
 
     # focus
     path('study/timer/', views.study_timer, name='study_timer'),
@@ -94,5 +94,13 @@ path('study/countdown/<int:session_id>/complete/', views.complete_countdown, nam
     path('study/dictionary/clear/', views.clear_dictionary_history, name='clear_dictionary_history'),
 
     # QUICK ADD
-    path('schedule/quick-add/', views.quick_add_task, name='quick_add_task'),
+    path('tasks/quick-add/', views.quick_add_task, name='quick_add_task'),
+
+    # SCHEDULE (Dynamic Calendar)
+    path('schedule/', views.schedule_home, name='schedule_home'),
+    path('schedule/add/', views.add_schedule_entry, name='add_schedule_entry'),
+    path('schedule/<int:entry_id>/', views.view_schedule_entry, name='view_schedule_entry'),
+    path('schedule/<int:entry_id>/edit/', views.edit_schedule_entry, name='edit_schedule_entry'),
+    path('schedule/<int:entry_id>/delete/', views.delete_schedule_entry, name='delete_schedule_entry'),
+    path('schedule/<int:entry_id>/toggle/', views.toggle_schedule_entry, name='toggle_schedule_entry'),
 ]

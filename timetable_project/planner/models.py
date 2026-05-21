@@ -70,7 +70,7 @@ class TimetableEntry(models.Model):
         unique_together = ('timetable', 'day', 'timeslot')
 
 
-class Schedule(models.Model):
+class TaskBoard(models.Model):
     """A user's schedule/task list"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -80,7 +80,7 @@ class Schedule(models.Model):
         return self.name
 
 
-class ScheduleItem(models.Model):
+class Task(models.Model):
     """A single task in a schedule"""
     PRIORITY_CHOICES = [
         ('low', 'Low'),
@@ -94,7 +94,7 @@ class ScheduleItem(models.Model):
         ('completed', 'Completed'),
     ]
     
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name="items")
+    task_board = models.ForeignKey(TaskBoard, on_delete=models.CASCADE, related_name="tasks")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
@@ -332,3 +332,20 @@ class DictionaryHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.word}"
+
+class ScheduleEntry(models.Model):
+    """A calendar entry for a specific date"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    date = models.DateField()
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    is_done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} — {self.date}"
+
+    class Meta:
+        ordering = ['date', 'start_time']

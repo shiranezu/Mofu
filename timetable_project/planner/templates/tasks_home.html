@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}Schedules — Mofu{% endblock %}
-{% block nav_schedule %}active{% endblock %}
+{% block title %}Tasks — Mofu{% endblock %}
+{% block nav_tasks %}active{% endblock %}
 
 {% block extra_styles %}
 
@@ -191,18 +191,18 @@
     <!-- Header -->
     <div class="sh-header">
         <div class="sh-header-left">
-            <h1 class="sh-title">Schedules.</h1>
-            <p class="sh-subtitle">{{ schedules.count }} schedule{{ schedules.count|pluralize }}</p>
+            <h1 class="sh-title">Tasks.</h1>
+            <p class="sh-subtitle">{{ task_boards|length }} task board{{ task_boards|length|pluralize }}</p>
         </div>
-        <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary">+ New Schedule</a>
+        <a href="{% url 'planner:create_task_board' %}" class="btn btn-primary">+ New Task Board</a>
     </div>
 
     <!-- Grid -->
     <div class="sh-grid">
-        {% for item in schedules_data %}
+        {% for item in boards_data %}
         <div class="sh-card">
 
-            <div class="sh-card-name">{{ item.schedule.name }}</div>
+            <div class="sh-card-name">{{ item.task_board.name }}</div>
 
             <div class="sh-card-stats">
                 <div class="sh-card-stat">
@@ -228,10 +228,10 @@
             </div>
 
             <div class="sh-card-footer">
-                <a href="{% url 'planner:schedule_view' item.schedule.id %}" class="sh-card-open">
-                    Open Schedule →
+                <a href="{% url 'planner:task_board' item.task_board.id %}" class="sh-card-open">
+                    Open Tasks →
                 </a>
-                <a href="{% url 'planner:delete_schedule' item.schedule.id %}" class="sh-card-delete">
+                <a href="{% url 'planner:delete_task_board' item.task_board.id %}" class="sh-card-delete">
                     Delete
                 </a>
             </div>
@@ -245,10 +245,10 @@
                 <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
                 <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
             </svg>
-            <p class="sh-empty-title">No schedules yet</p>
-            <p class="sh-empty-text">Create your first schedule to start tracking tasks.</p>
-            <a href="{% url 'planner:create_schedule' %}" class="btn btn-primary" style="margin-top:8px;">
-                + New Schedule
+            <p class="sh-empty-title">No task boards yet</p>
+            <p class="sh-empty-text">Create your first task board to start tracking tasks.</p>
+            <a href="{% url 'planner:create_task_board' %}" class="btn btn-primary" style="margin-top:8px;">
+                + New Task Board
             </a>
         </div>
         {% endfor %}

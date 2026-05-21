@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mofu{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     {% block head %}{% endblock %}
     <style>
@@ -32,6 +34,15 @@
             --sidebar-collapsed: 60px;
             --radius:            10px;
             --radius-sm:         6px;
+
+            /* ─── Adaptive translucent values ────────── */
+            --overlay-xs:    rgba(30, 37, 64, 0.02);
+            --overlay-sm:    rgba(30, 37, 64, 0.05);
+            --overlay-md:    rgba(30, 37, 64, 0.08);
+            --input-border:  rgba(30, 37, 64, 0.20);
+            --placeholder:   rgba(30, 37, 64, 0.25);
+            --ring-track:    rgba(30, 37, 64, 0.08);
+            --future-border: rgba(30, 37, 64, 0.14);
         }
 
         /* ─── Reset ─────────────────────────────────────── */
@@ -562,6 +573,16 @@
             --shadow-md:      0 4px 24px rgba(0, 0, 0, 0.4);
         }
 
+        [data-theme="dark"] {
+            --overlay-xs:    rgba(238, 229, 218, 0.02);
+            --overlay-sm:    rgba(238, 229, 218, 0.05);
+            --overlay-md:    rgba(238, 229, 218, 0.08);
+            --input-border:  rgba(238, 229, 218, 0.20);
+            --placeholder:   rgba(238, 229, 218, 0.25);
+            --ring-track:    rgba(238, 229, 218, 0.10);
+            --future-border: rgba(238, 229, 218, 0.14);
+        }
+
         [data-theme="dark"] body {
             background: #1a1818;
             color: #EEE5DA;
@@ -661,10 +682,17 @@
                 </svg>
                 <span>Timetables</span>
             </a>
-            <a href="{% url 'planner:schedule_home' %}" class="nav-link {% block nav_schedule %}{% endblock %}" data-tooltip="Today">
+            <a href="{% url 'planner:tasks_home' %}" class="nav-link {% block nav_tasks %}{% endblock %}" data-tooltip="Today">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
                     <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                </svg>
+                <span>Tasks</span>
+            </a>
+            <a href="{% url 'planner:schedule_home' %}" class="nav-link {% block nav_schedule %}{% endblock %}" data-tooltip="Schedule">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                    <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
                 </svg>
                 <span>Schedules</span>
             </a>
@@ -813,6 +841,12 @@
             localStorage.setItem('sidebarCollapsed', isCollapsed);
         });
     }
+
+    flatpickr('input[type="date"]', { dateFormat: 'Y-m-d' });
+    flatpickr('input[type="date"]', {
+    dateFormat: 'Y-m-d',
+    theme: 'dark' // flatpickr has a built-in dark theme
+    });
 </script>
 
 </body>
