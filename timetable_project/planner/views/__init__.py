@@ -31,3 +31,6 @@ from .schedule_views import (
     schedule_home, add_schedule_entry, view_schedule_entry,
     edit_schedule_entry, delete_schedule_entry, toggle_schedule_entry,
 )
+from .note_views import (
+    notes_home, create_note, note_detail, delete_note, save_note
+)

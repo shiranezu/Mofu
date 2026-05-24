@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Error — Mofu{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:    #1e2540;
+            --cream:   #F0E7D5;
+            --accent:  #C4714A;
+            --muted:   #8a8070;
+            --bg:      #faf6ef;
+            --radius:  10px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /*  Logo  */
+        .err-logo {
+            font-family: 'Homemade Apple', cursive;
+            font-size: 28px;
+            color: var(--navy);
+            opacity: 0.3;
+            margin-bottom: 64px;
+            letter-spacing: -0.5px;
+        }
+
+        /*  Code  */
+        .err-code {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 160px;
+            font-weight: 500;
+            color: var(--navy);
+            line-height: 1;
+            letter-spacing: -6px;
+            margin-bottom: 16px;
+        }
+
+        /*  Title  */
+        .err-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 14px;
+            letter-spacing: -0.3px;
+        }
+
+        /*  Message */
+        .err-message {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.8;
+            max-width: 380px;
+            margin-bottom: 40px;
+        }
+
+        /*Actions*/
+        .err-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .err-btn-primary {
+            padding: 10px 28px;
+            background: var(--navy);
+            color: var(--cream);
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            transition: opacity 0.18s;
+        }
+
+        .err-btn-primary:hover { opacity: 0.8; }
+
+        .err-btn-ghost {
+            font-size: 13px;
+            color: var(--muted);
+            transition: color 0.18s;
+        }
+
+        .err-btn-ghost:hover { color: var(--navy); }
+
+        /*Footer */
+        .err-footer {
+            position: fixed;
+            bottom: 24px;
+            font-size: 11px;
+            color: var(--muted);
+            opacity: 0.5;
+        }
+
+        /* Dark Mode*/
+        [data-theme="dark"] body      { background: #1a1818; }
+        [data-theme="dark"] .err-logo { color: #EEE5DA; }
+        [data-theme="dark"] .err-code  { color: #EEE5DA; }
+        [data-theme="dark"] .err-title { color: #EEE5DA; }
+        [data-theme="dark"] .err-btn-primary {
+            background: #EEE5DA;
+            color: #1a1818;
+        }
+        [data-theme="dark"] .err-btn-ghost { color: rgba(238,229,218,0.4); }
+        [data-theme="dark"] .err-btn-ghost:hover { color: #EEE5DA; }
+    </style>
+</head>
+<body>
+<script>
+    const t = localStorage.getItem('mofuTheme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+</script>
+
+    <span class="err-logo">Mofu.</span>
+
+    <div class="err-code">{% block code %}{% endblock %}</div>
+    <h1 class="err-title">{% block err_title %}{% endblock %}</h1>
+    <p class="err-message">{% block err_message %}{% endblock %}</p>
+
+    <div class="err-actions">
+        <a href="/" class="err-btn-primary">Go Home</a>
+        <a href="javascript:history.back()" class="err-btn-ghost"> Go back</a>
+    </div>
+
+    <span class="err-footer">&copy; Mofu 2026</span>
+
+</body>
+</html>

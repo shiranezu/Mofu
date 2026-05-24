@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ note.title }} — Mofu{% endblock %}
+{% block nav_notes %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .editor-wrap {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 80px);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    /* ─── Top Bar ────────────────────────────────────── */
+    .editor-topbar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+    }
+
+    .editor-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s;
+        white-space: nowrap;
+    }
+
+    .editor-back:hover { color: var(--text-dark); }
+
+    .editor-title-input {
+        flex: 1;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--text-dark) !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .editor-title-input::placeholder { color: var(--placeholder); }
+
+    .editor-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .editor-cat-select {
+        background: transparent;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        font-size: 11px;
+        font-family: 'DM Sans', sans-serif;
+        padding: 5px 8px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .editor-save-btn {
+        padding: 6px 16px;
+        font-size: 12px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        transition: opacity 0.18s;
+    }
+
+    .editor-save-btn:hover { opacity: 0.85; }
+    .editor-save-btn.saved { background: #7A9E7E; }
+
+    .editor-delete-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        background: transparent;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+
+    .editor-delete-btn:hover { border-color: #c0392b; color: #c0392b; }
+
+    /* ─── Toolbar ────────────────────────────────────── */
+    .editor-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 24px;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+        flex-wrap: wrap;
+    }
+
+    .tb-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .tb-btn:hover { background: var(--overlay-sm); color: var(--text-dark); }
+
+    .tb-divider {
+        width: 1px;
+        height: 18px;
+        background: var(--card-border);
+        margin: 0 4px;
+    }
+
+    .tb-select {
+        background: transparent;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        font-size: 11px;
+        font-family: 'DM Sans', sans-serif;
+        padding: 4px 6px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    /* ─── Editor Body ────────────────────────────────── */
+    .editor-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 32px 48px;
+    }
+
+    .editor-content {
+        outline: none;
+        min-height: 100%;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        color: var(--text-dark);
+        line-height: 1.9;
+        caret-color: var(--accent);
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .editor-content:empty::before {
+        content: 'Start writing...';
+        color: var(--placeholder);
+        pointer-events: none;
+    }
+
+    .editor-content h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin: 16px 0 8px;
+        line-height: 1.2;
+    }
+
+    .editor-content h2 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin: 14px 0 6px;
+    }
+
+    .editor-content h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin: 12px 0 4px;
+    }
+
+    .editor-content ul, .editor-content ol {
+        padding-left: 24px;
+        margin: 8px 0;
+    }
+
+    .editor-content li { margin: 2px 0; }
+
+    .editor-content blockquote {
+        border-left: 3px solid var(--accent);
+        margin: 12px 0;
+        padding: 4px 16px;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* ─── Status bar ─────────────────────────────────── */
+    .editor-status {
+        padding: 6px 24px;
+        font-size: 11px;
+        color: var(--text-muted);
+        border-top: 1px solid var(--card-border);
+        flex-shrink: 0;
+    }
+
+{% endblock %}
+
+{% block content %}
+
+<div class="editor-wrap">
+
+    <!-- Top Bar -->
+    <div class="editor-topbar">
+        <a href="{% url 'planner:notes_home' %}" class="editor-back">← Notes</a>
+        <input type="text" class="editor-title-input" id="note-title"
+               value="{{ note.title }}" placeholder="Untitled">
+        <div class="editor-topbar-right">
+            <select class="editor-cat-select" id="note-category">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if note.category and note.category.id == cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <button class="editor-save-btn" id="save-btn" onclick="saveNote()">Save</button>
+            <a href="{% url 'planner:delete_note' note.id %}" class="editor-delete-btn" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="editor-toolbar">
+        <select class="tb-select" onchange="formatBlock(this.value); this.value=''">
+            <option value="">Paragraph</option>
+            <option value="h1">Heading 1</option>
+            <option value="h2">Heading 2</option>
+            <option value="h3">Heading 3</option>
+        </select>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+        <button class="tb-btn" onclick="fmt('strikeThrough')" title="Strikethrough"><s>S</s></button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" onclick="fmt('insertUnorderedList')" title="Bullet list">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2m0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2m0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+            </svg>
+        </button>
+        <button class="tb-btn" onclick="fmt('insertOrderedList')" title="Numbered list">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/>
+            </svg>
+        </button>
+        <button class="tb-btn" onclick="fmt('formatBlock', 'blockquote')" title="Blockquote">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12 12a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1h-1.388q.044-.527.062-1.054.062-.372.166-.703.104-.33.31-.992.207-.66.716-.733.51-.074 1.42-.274V3q-.71 0-1.894.337-.547.225-1.387.967-.375.417-.643.904Q9.024 5.747 8.942 6.446 8.86 7.144 8.942 7.442V11a1 1 0 0 0 1 1zm-6 0a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1H4.612q.044-.527.062-1.054.062-.372.166-.703.104-.33.31-.992.207-.66.716-.733.51-.074 1.42-.274V3q-.71 0-1.894.337-.547.225-1.387.967-.375.417-.643.904Q3.024 5.747 2.942 6.446 2.86 7.144 2.942 7.442V11a1 1 0 0 0 1 1z"/>
+            </svg>
+        </button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" onclick="document.execCommand('removeFormat')" title="Clear formatting">Tx</button>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-body">
+        <div class="editor-content" id="editor"
+             contenteditable="true">{{ note.content|safe }}</div>
+    </div>
+
+    <!-- Status -->
+    <div class="editor-status" id="status-bar">
+        Last saved {{ note.updated_at|date:"M d, Y · g:i A" }}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const SAVE_URL = "{% url 'planner:save_note' note.id %}";
+    const CSRF = "{{ csrf_token }}";
+
+    function fmt(cmd, val) {
+        document.execCommand(cmd, false, val || null);
+        document.getElementById('editor').focus();
+    }
+
+    function formatBlock(tag) {
+        if (tag) document.execCommand('formatBlock', false, tag);
+        document.getElementById('editor').focus();
+    }
+
+    let saveTimer = null;
+
+    function saveNote(silent = false) {
+        const title   = document.getElementById('note-title').value.trim() || 'Untitled';
+        const content = document.getElementById('editor').innerHTML;
+        const catId   = document.getElementById('note-category').value;
+        const btn     = document.getElementById('save-btn');
+
+        fetch(SAVE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `csrfmiddlewaretoken=${CSRF}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}&category=${catId}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('status-bar').textContent = `Last saved ${data.updated_at}`;
+            if (!silent) {
+                btn.textContent = 'Saved ✓';
+                btn.classList.add('saved');
+                setTimeout(() => { btn.textContent = 'Save'; btn.classList.remove('saved'); }, 2000);
+            }
+        });
+    }
+
+    // Auto-save (2s debounce)
+    ['editor', 'note-title'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => saveNote(true), 2000);
+        });
+    });
+
+    document.getElementById('note-category').addEventListener('change', () => saveNote(true));
+
+    // Ctrl+S
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveNote();
+        }
+    });
+</script>
+{% endblock %}

@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.utils import timezone
 from ..models import ScheduleEntry
 from ..forms import ScheduleEntryForm
@@ -101,7 +102,7 @@ def edit_schedule_entry(request, entry_id):
     form = ScheduleEntryForm(request.POST or None, instance=entry)
     if form.is_valid():
         form.save()
-        return redirect(f"/schedule/?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")
+        return redirect(reverse("planner:schedule_home") + f"?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")
     return render(request, 'add_generic.html', {'form': form, 'title': 'Edit Schedule Entry'})
 
 
@@ -112,7 +113,7 @@ def delete_schedule_entry(request, entry_id):
     month_str = entry.date.strftime('%Y-%m')
     if request.method == 'POST':
         entry.delete()
-        return redirect(f"/schedule/?date={date_str}&month={month_str}")
+        return redirect(reverse("planner:schedule_home") + f"?date={date_str}&month={month_str}")
     return render(request, 'confirm_delete.html', {'object': entry, 'type': 'schedule entry'})
 
 
@@ -121,4 +122,4 @@ def toggle_schedule_entry(request, entry_id):
     entry = get_object_or_404(ScheduleEntry, id=entry_id, user=request.user)
     entry.is_done = not entry.is_done
     entry.save()
-    return redirect(f"/schedule/?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")
+    return redirect(reverse("planner:schedule_home") + f"?date={entry.date.isoformat()}&month={entry.date.strftime('%Y-%m')}")

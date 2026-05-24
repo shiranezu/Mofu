@@ -86,8 +86,8 @@ urlpatterns = [
 
     # COUNTDOWN TIMER
     path('study/countdown/start/', views.start_countdown, name='start_countdown'),
-path('study/countdown/<int:session_id>/stop/', views.stop_countdown, name='stop_countdown'),
-path('study/countdown/<int:session_id>/complete/', views.complete_countdown, name='complete_countdown'),
+    path('study/countdown/<int:session_id>/stop/', views.stop_countdown, name='stop_countdown'),
+    path('study/countdown/<int:session_id>/complete/', views.complete_countdown, name='complete_countdown'),
 
     # DICTIONARY
     path('study/dictionary/', views.dictionary, name='dictionary'),
@@ -103,4 +103,11 @@ path('study/countdown/<int:session_id>/complete/', views.complete_countdown, nam
     path('schedule/<int:entry_id>/edit/', views.edit_schedule_entry, name='edit_schedule_entry'),
     path('schedule/<int:entry_id>/delete/', views.delete_schedule_entry, name='delete_schedule_entry'),
     path('schedule/<int:entry_id>/toggle/', views.toggle_schedule_entry, name='toggle_schedule_entry'),
+
+    # NOTES
+    path('notes/', views.notes_home, name='notes_home'),
+    path('notes/create/', views.create_note, name='create_note'),
+    path('notes/<int:note_id>/', views.note_detail, name='note_detail'),
+    path('notes/<int:note_id>/delete/', views.delete_note, name='delete_note'),
+    path('notes/<int:note_id>/save/', views.save_note, name='save_note'),
 ]
