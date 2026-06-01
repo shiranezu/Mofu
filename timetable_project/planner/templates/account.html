@@ -1,85 +1,261 @@
 {% extends 'base.html' %}
 
-{% block title %}My Account - Sachi{% endblock %}
+{% block title %}My Account — Mofu{% endblock %}
+{% block nav_account %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .acc-page { max-width: 860px; }
+
+    .acc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--card-border);
+        gap: 16px;
+    }
+
+    .acc-header-left { display: flex; align-items: center; gap: 16px; }
+
+    .acc-avatar {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: rgba(196, 113, 74, 0.12);
+        border: 1.5px solid var(--accent);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px; font-weight: 500; color: var(--accent); flex-shrink: 0;
+    }
+
+    .acc-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 26px; font-weight: 500; color: var(--text-dark);
+        line-height: 1.1; margin-bottom: 3px;
+    }
+
+    .acc-meta { font-size: 12px; color: var(--text-muted); }
+
+    .acc-header-actions { display: flex; gap: 8px; align-items: center; }
+
+    .acc-btn {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border); background: transparent;
+        font-family: 'DM Sans', sans-serif; font-size: 12px;
+        color: var(--text-muted); text-decoration: none; cursor: pointer; transition: all 0.15s;
+    }
+
+    .acc-btn:hover { color: var(--text-dark); border-color: var(--text-muted); background: var(--overlay-xs); }
+    .acc-btn.danger:hover { color: #c0392b; border-color: #c0392b; }
+
+    .acc-stats {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 14px; margin-bottom: 20px;
+    }
+
+    .acc-stat {
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: var(--radius); padding: 18px 20px;
+        border-left: 3px solid var(--accent);
+    }
+
+    .acc-stat-val {
+        font-family: 'Cormorant Garamond', serif; font-size: 34px;
+        font-weight: 500; color: var(--text-dark); line-height: 1;
+        margin-bottom: 4px; letter-spacing: -1px;
+    }
+
+    .acc-stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); font-weight: 500; }
+    .acc-stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    .acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    .acc-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; }
+
+    .acc-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 20px; border-bottom: 1px solid var(--card-border);
+    }
+
+    .acc-card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; color: var(--text-dark); }
+    .acc-card-link { font-size: 11px; color: var(--accent); text-decoration: none; transition: opacity 0.15s; }
+    .acc-card-link:hover { opacity: 0.7; }
+
+    .acc-info-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 11px 20px; border-bottom: 1px solid var(--overlay-sm); font-size: 13px;
+    }
+
+    .acc-info-row:last-child { border-bottom: none; }
+    .acc-info-label { color: var(--text-muted); }
+    .acc-info-value { color: var(--text-dark); font-weight: 500; }
+
+    .acc-streak-row { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid var(--overlay-sm); }
+    .acc-streak-row:last-child { border-bottom: none; }
+
+    .acc-streak-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+
+    .acc-streak-val { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--text-dark); line-height: 1; margin-bottom: 2px; }
+    .acc-streak-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+
+    .acc-content-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+    .acc-content-item {
+        padding: 18px 20px; border-right: 1px solid var(--card-border);
+        border-bottom: 1px solid var(--card-border); text-align: center;
+    }
+
+    .acc-content-item:nth-child(3n) { border-right: none; }
+    .acc-content-item:nth-child(4),
+    .acc-content-item:nth-child(5),
+    .acc-content-item:nth-child(6) { border-bottom: none; }
+
+    .acc-content-num { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); line-height: 1; margin-bottom: 4px; }
+    .acc-content-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+
+    .acc-nav-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-top: 16px; }
+
+    .acc-nav-item {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 15px 20px; border-bottom: 1px solid var(--overlay-sm);
+        text-decoration: none; transition: background 0.15s;
+    }
+
+    .acc-nav-item:last-child { border-bottom: none; }
+    .acc-nav-item:hover { background: var(--overlay-xs); }
+
+    .acc-nav-item-left { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 500; color: var(--text-dark); }
+    .acc-nav-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .acc-nav-item-right { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .acc-nav-item.danger .acc-nav-item-left { color: #c0392b; }
+
+{% endblock %}
 
 {% block content %}
-    <h1>My Account</h1>
+<div class="acc-page">
 
-    <hr>
+    <div class="acc-header">
+        <div class="acc-header-left">
+            <div class="acc-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+            <div>
+                <div class="acc-name">{{ user.first_name }} {{ user.last_name }}</div>
+                <div class="acc-meta">@{{ user.username }} &nbsp;·&nbsp; Member for {{ account_age }} day{{ account_age|pluralize }}</div>
+            </div>
+        </div>
+        <div class="acc-header-actions">
+            <a href="{% url 'planner:settings' %}" class="acc-btn">Settings</a>
+            <a href="{% url 'planner:help' %}" class="acc-btn">Help</a>
+            <a href="{% url 'planner:logout' %}" class="acc-btn danger">Logout</a>
+        </div>
+    </div>
 
-    <!-- User Info -->
-    <h2>Profile Information</h2>
-    <table>
-        <tr>
-            <td><strong>Username:</strong></td>
-            <td>{{ user.username }}</td>
-        </tr>
-        <tr>
-            <td><strong>Name:</strong></td>
-            <td>{{ user.first_name }} {{ user.last_name }}</td>
-        </tr>
-        <tr>
-            <td><strong>Email:</strong></td>
-            <td>{{ user.email }}</td>
-        </tr>
-        <tr>
-            <td><strong>Member Since:</strong></td>
-            <td>{{ user.date_joined|date:"F d, Y" }} ({{ account_age }} days ago)</td>
-        </tr>
-    </table>
+    <div class="acc-stats">
+        <div class="acc-stat">
+            <div class="acc-stat-val">{{ total_hours }}</div>
+            <div class="acc-stat-lbl">Hours studied</div>
+            <div class="acc-stat-sub">all time</div>
+        </div>
+        <div class="acc-stat">
+            <div class="acc-stat-val">{{ total_sessions }}</div>
+            <div class="acc-stat-lbl">Sessions</div>
+            <div class="acc-stat-sub">completed</div>
+        </div>
+        <div class="acc-stat">
+            <div class="acc-stat-val">{{ current_streak }}</div>
+            <div class="acc-stat-lbl">Day streak</div>
+            <div class="acc-stat-sub">current</div>
+        </div>
+        <div class="acc-stat">
+            <div class="acc-stat-val">{{ longest_streak }}</div>
+            <div class="acc-stat-lbl">Longest streak</div>
+            <div class="acc-stat-sub">personal best</div>
+        </div>
+    </div>
 
-    <hr>
+    <div class="acc-grid">
+        <div class="acc-card">
+            <div class="acc-card-header">
+                <span class="acc-card-title">Profile</span>
+            </div>
+            <div class="acc-info-row"><span class="acc-info-label">Username</span><span class="acc-info-value">{{ user.username }}</span></div>
+            <div class="acc-info-row"><span class="acc-info-label">Name</span><span class="acc-info-value">{{ user.first_name }} {{ user.last_name }}</span></div>
+            <div class="acc-info-row"><span class="acc-info-label">Email</span><span class="acc-info-value">{{ user.email|default:"—" }}</span></div>
+            <div class="acc-info-row"><span class="acc-info-label">Joined</span><span class="acc-info-value">{{ user.date_joined|date:"M d, Y" }}</span></div>
+        </div>
 
-    <!-- Study Statistics -->
-    <h2>Study Statistics</h2>
-    <table>
-        <tr>
-            <td><strong>Total Study Time:</strong></td>
-            <td>{{ total_hours }} hours</td>
-        </tr>
-        <tr>
-            <td><strong>Total Sessions:</strong></td>
-            <td>{{ total_sessions }}</td>
-        </tr>
-        <tr>
-            <td><strong>Current Streak:</strong></td>
-            <td>{{ current_streak }} days 🔥</td>
-        </tr>
-        <tr>
-            <td><strong>Longest Streak:</strong></td>
-            <td>{{ longest_streak }} days 🏆</td>
-        </tr>
-    </table>
+        <div class="acc-card">
+            <div class="acc-card-header">
+                <span class="acc-card-title">Streaks</span>
+                <a href="{% url 'planner:study_streaks' %}" class="acc-card-link">View details →</a>
+            </div>
+            <div class="acc-streak-row">
+                <div class="acc-streak-icon" style="background:rgba(196,113,74,0.1);">🔥</div>
+                <div>
+                    <div class="acc-streak-val">{{ current_streak }} day{{ current_streak|pluralize }}</div>
+                    <div class="acc-streak-lbl">Current streak</div>
+                </div>
+            </div>
+            <div class="acc-streak-row">
+                <div class="acc-streak-icon" style="background:rgba(122,158,126,0.12);">🏆</div>
+                <div>
+                    <div class="acc-streak-val">{{ longest_streak }} day{{ longest_streak|pluralize }}</div>
+                    <div class="acc-streak-lbl">Longest streak</div>
+                </div>
+            </div>
+            <div class="acc-streak-row">
+                <div class="acc-streak-icon" style="background:rgba(107,127,212,0.1);">📅</div>
+                <div>
+                    <div class="acc-streak-val">{{ total_study_days }} day{{ total_study_days|pluralize }}</div>
+                    <div class="acc-streak-lbl">Total study days</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <hr>
+    <div class="acc-card">
+        <div class="acc-card-header">
+            <span class="acc-card-title">Your content</span>
+        </div>
+        <div class="acc-content-grid">
+            <div class="acc-content-item"><div class="acc-content-num">{{ timetables_count }}</div><div class="acc-content-lbl">Timetables</div></div>
+            <div class="acc-content-item"><div class="acc-content-num">{{ task_boards_count }}</div><div class="acc-content-lbl">Task boards</div></div>
+            <div class="acc-content-item"><div class="acc-content-num">{{ categories_count }}</div><div class="acc-content-lbl">Categories</div></div>
+            <div class="acc-content-item"><div class="acc-content-num">{{ resources_count }}</div><div class="acc-content-lbl">Resources</div></div>
+            <div class="acc-content-item"><div class="acc-content-num">{{ notes_count }}</div><div class="acc-content-lbl">Notes</div></div>
+            <div class="acc-content-item"><div class="acc-content-num">{{ schedule_entries_count }}</div><div class="acc-content-lbl">Schedule entries</div></div>
+        </div>
+    </div>
 
-    <!-- Content Statistics -->
-    <h2>Your Content</h2>
-    <table>
-        <tr>
-            <td><strong>Timetables:</strong></td>
-            <td>{{ timetables_count }}</td>
-        </tr>
-        <tr>
-            <td><strong>Schedules:</strong></td>
-            <td>{{ task_boards_count }}</td>
-        </tr>
-        <tr>
-            <td><strong>Categories:</strong></td>
-            <td>{{ categories_count }}</td>
-        </tr>
-        <tr>
-            <td><strong>Study Resources:</strong></td>
-            <td>{{ resources_count }}</td>
-        </tr>
-    </table>
+    <div class="acc-nav-card">
+        <a href="{% url 'planner:settings' %}" class="acc-nav-item">
+            <div class="acc-nav-item-left">
+                <div class="acc-nav-icon" style="background:rgba(196,113,74,0.08);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="var(--accent)" viewBox="0 0 16 16"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg>
+                </div>
+                Settings
+            </div>
+            <div class="acc-nav-item-right">Preferences, theme, display &rsaquo;</div>
+        </a>
+        <a href="{% url 'planner:help' %}" class="acc-nav-item">
+            <div class="acc-nav-item-left">
+                <div class="acc-nav-icon" style="background:rgba(107,127,212,0.08);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#6B7FD4" viewBox="0 0 16 16"><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1M2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8"/></svg>
+                </div>
+                Help & support
+            </div>
+            <div class="acc-nav-item-right">How to use Mofu &rsaquo;</div>
+        </a>
+        <a href="{% url 'planner:logout' %}" class="acc-nav-item danger">
+            <div class="acc-nav-item-left">
+                <div class="acc-nav-icon" style="background:rgba(192,57,43,0.08);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#c0392b" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/></svg>
+                </div>
+                Logout
+            </div>
+            <div class="acc-nav-item-right">&rsaquo;</div>
+        </a>
+    </div>
 
-    <hr>
-
-    <!-- Actions -->
-    <h2>Account Actions</h2>
-    <ul>
-        <li><a href="{% url 'planner:help' %}">Help & Support</a></li>
-        <li><a href="{% url 'planner:logout' %}">Logout</a></li>
-    </ul>
+</div>
 {% endblock %}

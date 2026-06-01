@@ -364,3 +364,14 @@ class Note(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
+
+
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+    pomodoro_work = models.IntegerField(default=25)
+    pomodoro_short_break = models.IntegerField(default=5)
+    pomodoro_long_break = models.IntegerField(default=15)
+    pomodoro_sessions = models.IntegerField(default=4)
+
+    def __str__(self):
+        return f"{self.user.username} settings"

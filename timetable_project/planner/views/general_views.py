@@ -1,11 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Sum, Count
 from datetime import timedelta
 from ..models import (
-    Timetable, TimetableEntry, Task, 
-    StudySession, StudyGoal, TaskBoard, StudyCategory, StudyResource
+    Timetable, TimetableEntry, Task,
+    StudySession, StudyGoal, TaskBoard, StudyCategory, StudyResource,
+    Note, ScheduleEntry, UserSettings
 )
 
 
@@ -118,6 +120,11 @@ def my_account(request):
     task_boards_count = TaskBoard.objects.filter(user=user).count()
     categories_count = StudyCategory.objects.filter(user=user).count()
     resources_count = StudyResource.objects.filter(user=user).count()
+    notes_count = Note.objects.filter(user=user).count()
+    schedule_entries_count = ScheduleEntry.objects.filter(user=user).count()
+    total_study_days = StudySession.objects.filter(
+        user=user, is_active=False
+    ).dates('start_time', 'day').count()
     
     # Account age
     account_age = (timezone.now() - user.date_joined).days
@@ -131,7 +138,49 @@ def my_account(request):
         'task_boards_count': task_boards_count,
         'categories_count': categories_count,
         'resources_count': resources_count,
+        'notes_count': notes_count,
+        'schedule_entries_count': schedule_entries_count,
+        'total_study_days': total_study_days,
         'account_age': account_age,
     }
     
     return render(request, 'account.html', context)
+
+@login_required(login_url='planner:login')
+def settings(request):
+    user = request.user
+    user_settings, _ = UserSettings.objects.get_or_create(user=user)
+    messages_list = []
+
+    if request.method == 'POST':
+        tab = request.POST.get('tab')
+
+        if tab == 'pomodoro':
+            user_settings.pomodoro_work = max(1, int(request.POST.get('pomodoro_work', 25)))
+            user_settings.pomodoro_short_break = max(1, int(request.POST.get('pomodoro_short_break', 5)))
+            user_settings.pomodoro_long_break = max(1, int(request.POST.get('pomodoro_long_break', 15)))
+            user_settings.pomodoro_sessions = max(1, int(request.POST.get('pomodoro_sessions', 4)))
+            user_settings.save()
+            messages.success(request, 'Pomodoro settings saved.')
+
+        elif tab == 'account':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            new_password = request.POST.get('new_password', '').strip()
+            if first_name: user.first_name = first_name
+            if last_name: user.last_name = last_name
+            if email: user.email = email
+            if new_password:
+                user.set_password(new_password)
+                messages.success(request, 'Password updated. Please log in again.')
+            else:
+                messages.success(request, 'Account details saved.')
+            user.save()
+
+        return redirect('planner:settings')
+
+    return render(request, 'settings.html', {
+        'user_settings': user_settings,
+        'active_tab': request.GET.get('tab', 'appearance'),
+    })

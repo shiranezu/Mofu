@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import (
+    UserSettings,
     Note,
     ScheduleEntry,
     Subject_and_location, Timeslot, TimetableEntry, Timetable,
@@ -20,6 +21,7 @@ admin.site.register(StudyResource)
 admin.site.register(DictionaryHistory)
 admin.site.register(ScheduleEntry)
 admin.site.register(Note)
+admin.site.register(UserSettings)
 
 
 class StudySessionAdmin(admin.ModelAdmin):

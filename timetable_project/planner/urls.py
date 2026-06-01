@@ -86,8 +86,8 @@ urlpatterns = [
 
     # COUNTDOWN TIMER
     path('study/countdown/start/', views.start_countdown, name='start_countdown'),
-    path('study/countdown/<int:session_id>/stop/', views.stop_countdown, name='stop_countdown'),
-    path('study/countdown/<int:session_id>/complete/', views.complete_countdown, name='complete_countdown'),
+path('study/countdown/<int:session_id>/stop/', views.stop_countdown, name='stop_countdown'),
+path('study/countdown/<int:session_id>/complete/', views.complete_countdown, name='complete_countdown'),
 
     # DICTIONARY
     path('study/dictionary/', views.dictionary, name='dictionary'),
@@ -110,4 +110,7 @@ urlpatterns = [
     path('notes/<int:note_id>/', views.note_detail, name='note_detail'),
     path('notes/<int:note_id>/delete/', views.delete_note, name='delete_note'),
     path('notes/<int:note_id>/save/', views.save_note, name='save_note'),
+
+    # SETTINGS
+    path('settings/', views.settings, name='settings'),
 ]

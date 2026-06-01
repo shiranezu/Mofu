@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings — Mofu{% endblock %}
+
+{% block extra_styles %}
+
+    .settings-page { max-width: 680px; }
+
+    .settings-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 28px;
+    }
+
+    .settings-header h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .settings-header p { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── Tabs ───────────────────────────────────────── */
+    .settings-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 24px;
+        gap: 0;
+    }
+
+    .settings-tab {
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .settings-tab:hover { color: var(--text-dark); }
+
+    .settings-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        font-weight: 500;
+    }
+
+    /* ─── Panels ─────────────────────────────────────── */
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    /* ─── Card ───────────────────────────────────────── */
+    .settings-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--overlay-sm);
+        gap: 24px;
+    }
+
+    .settings-row:last-child { border-bottom: none; }
+
+    .settings-row-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 3px;
+    }
+
+    .settings-row-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── Toggle ─────────────────────────────────────── */
+    .s-toggle-wrap { flex-shrink: 0; }
+
+    .s-toggle {
+        width: 40px;
+        height: 22px;
+        border-radius: 12px;
+        background: var(--accent);
+        position: relative;
+        cursor: pointer;
+        border: none;
+        flex-shrink: 0;
+        transition: background 0.2s;
+    }
+
+    .s-toggle::after {
+        content: '';
+        position: absolute;
+        right: 3px;
+        top: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        transition: right 0.2s, left 0.2s;
+    }
+
+    .s-toggle.off {
+        background: var(--card-border);
+    }
+
+    .s-toggle.off::after { right: auto; left: 3px; }
+
+    /* ─── Number input ───────────────────────────────── */
+    .s-number {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .s-num-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-muted);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: 'DM Sans', sans-serif;
+        line-height: 1;
+    }
+
+    .s-num-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .s-num-val {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-dark);
+        min-width: 32px;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .s-num-unit { font-size: 11px; color: var(--text-muted); }
+
+    /* Hidden input for number values */
+    .s-num-hidden { display: none; }
+
+    /* ─── Text input ─────────────────────────────────── */
+    .s-text-input {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1.5px solid var(--input-border) !important;
+        border-radius: 0 !important;
+        padding: 6px 0 !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 13px !important;
+        color: var(--text-dark) !important;
+        box-shadow: none !important;
+        outline: none !important;
+        width: 220px;
+        transition: border-color 0.18s !important;
+    }
+
+    .s-text-input:focus { border-bottom-color: var(--accent) !important; }
+    .s-text-input::placeholder { color: var(--placeholder) !important; }
+
+    /* ─── Save button ────────────────────────────────── */
+    .s-save-row {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 4px;
+    }
+
+    /* ─── Danger ─────────────────────────────────────── */
+    .settings-card.danger { border-color: rgba(192,57,43,0.3); }
+
+    .settings-card.danger .settings-row-label { color: #c0392b; }
+
+    .s-danger-btn {
+        padding: 7px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(192,57,43,0.4);
+        background: transparent;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12px;
+        color: #c0392b;
+        cursor: pointer;
+        transition: all 0.15s;
+        flex-shrink: 0;
+    }
+
+    .s-danger-btn:hover { background: rgba(192,57,43,0.08); }
+
+{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+
+    <div class="settings-header">
+        <h1>Settings.</h1>
+        <p>Manage your preferences and account details.</p>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="message {% if message.tags == 'error' %}error{% else %}success{% endif %}" style="margin-bottom:16px; padding:10px 14px; border-radius:var(--radius-sm); font-size:12px; background:rgba(122,158,126,0.1); border:1px solid rgba(122,158,126,0.3); color:#4a7a4e;">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Tabs -->
+    <div class="settings-tabs">
+        <a href="?tab=appearance" class="settings-tab {% if active_tab == 'appearance' %}active{% endif %}">Appearance</a>
+        <a href="?tab=pomodoro" class="settings-tab {% if active_tab == 'pomodoro' %}active{% endif %}">Pomodoro</a>
+        <a href="?tab=account" class="settings-tab {% if active_tab == 'account' %}active{% endif %}">Account</a>
+        <a href="?tab=danger" class="settings-tab {% if active_tab == 'danger' %}active{% endif %}">Danger zone</a>
+    </div>
+
+    <!-- Appearance -->
+    <div class="settings-panel {% if active_tab == 'appearance' %}active{% endif %}">
+        <div class="settings-card">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Dark mode</div>
+                    <div class="settings-row-desc">Switch between light and dark theme</div>
+                </div>
+                <button class="s-toggle" id="darkToggleBtn" onclick="toggleDark()" title="Toggle dark mode"></button>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Collapse sidebar by default</div>
+                    <div class="settings-row-desc">Start with a compact sidebar on every page load</div>
+                </div>
+                <button class="s-toggle off" id="sidebarToggleBtn" onclick="toggleSidebarPref()" title="Toggle sidebar preference"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pomodoro -->
+    <div class="settings-panel {% if active_tab == 'pomodoro' %}active{% endif %}">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="tab" value="pomodoro">
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Work session</div>
+                        <div class="settings-row-desc">How long each focus block lasts</div>
+                    </div>
+                    <div class="s-number">
+                        <button type="button" class="s-num-btn" onclick="adjust('work', -5)">−</button>
+                        <span class="s-num-val" id="work-val">{{ user_settings.pomodoro_work }}</span>
+                        <button type="button" class="s-num-btn" onclick="adjust('work', 5)">+</button>
+                        <span class="s-num-unit">min</span>
+                        <input type="hidden" name="pomodoro_work" id="work-input" value="{{ user_settings.pomodoro_work }}">
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Short break</div>
+                        <div class="settings-row-desc">Rest between sessions</div>
+                    </div>
+                    <div class="s-number">
+                        <button type="button" class="s-num-btn" onclick="adjust('short', -1)">−</button>
+                        <span class="s-num-val" id="short-val">{{ user_settings.pomodoro_short_break }}</span>
+                        <button type="button" class="s-num-btn" onclick="adjust('short', 1)">+</button>
+                        <span class="s-num-unit">min</span>
+                        <input type="hidden" name="pomodoro_short_break" id="short-input" value="{{ user_settings.pomodoro_short_break }}">
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Long break</div>
+                        <div class="settings-row-desc">Rest after every N sessions</div>
+                    </div>
+                    <div class="s-number">
+                        <button type="button" class="s-num-btn" onclick="adjust('long', -5)">−</button>
+                        <span class="s-num-val" id="long-val">{{ user_settings.pomodoro_long_break }}</span>
+                        <button type="button" class="s-num-btn" onclick="adjust('long', 5)">+</button>
+                        <span class="s-num-unit">min</span>
+                        <input type="hidden" name="pomodoro_long_break" id="long-input" value="{{ user_settings.pomodoro_long_break }}">
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Sessions before long break</div>
+                        <div class="settings-row-desc">How many focus blocks before a long rest</div>
+                    </div>
+                    <div class="s-number">
+                        <button type="button" class="s-num-btn" onclick="adjust('sessions', -1)">−</button>
+                        <span class="s-num-val" id="sessions-val">{{ user_settings.pomodoro_sessions }}</span>
+                        <button type="button" class="s-num-btn" onclick="adjust('sessions', 1)">+</button>
+                        <span class="s-num-unit">sessions</span>
+                        <input type="hidden" name="pomodoro_sessions" id="sessions-input" value="{{ user_settings.pomodoro_sessions }}">
+                    </div>
+                </div>
+            </div>
+            <div class="s-save-row">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Account -->
+    <div class="settings-panel {% if active_tab == 'account' %}active{% endif %}">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="tab" value="account">
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">First name</div>
+                        <div class="settings-row-desc">Your display name</div>
+                    </div>
+                    <input type="text" name="first_name" class="s-text-input"
+                           value="{{ user.first_name }}" placeholder="First name">
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Last name</div>
+                        <div class="settings-row-desc"></div>
+                    </div>
+                    <input type="text" name="last_name" class="s-text-input"
+                           value="{{ user.last_name }}" placeholder="Last name">
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">Email address</div>
+                        <div class="settings-row-desc">Used for account recovery</div>
+                    </div>
+                    <input type="email" name="email" class="s-text-input"
+                           value="{{ user.email }}" placeholder="Email">
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-row-label">New password</div>
+                        <div class="settings-row-desc">Leave blank to keep current password</div>
+                    </div>
+                    <input type="password" name="new_password" class="s-text-input"
+                           placeholder="••••••••">
+                </div>
+            </div>
+            <div class="s-save-row">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="settings-panel {% if active_tab == 'danger' %}active{% endif %}">
+        <div class="settings-card danger">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Delete account</div>
+                    <div class="settings-row-desc">Permanently remove your account and all data. This cannot be undone.</div>
+                </div>
+                <form method="post" onsubmit="return confirm('Are you absolutely sure? This will delete everything permanently.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="tab" value="delete">
+                    <button type="submit" class="s-danger-btn">Delete account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ── Dark mode toggle ──────────────────────────────
+    const darkBtn = document.getElementById('darkToggleBtn');
+    if (localStorage.getItem('mofuTheme') === 'dark') darkBtn.classList.remove('off');
+    else darkBtn.classList.add('off');
+
+    function toggleDark() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('mofuTheme', 'light');
+            darkBtn.classList.add('off');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('mofuTheme', 'dark');
+            darkBtn.classList.remove('off');
+        }
+    }
+
+    // ── Sidebar collapse pref ─────────────────────────
+    const sidebarBtn = document.getElementById('sidebarToggleBtn');
+    if (localStorage.getItem('mofuSidebarCollapsed') === 'true') sidebarBtn.classList.remove('off');
+    else sidebarBtn.classList.add('off');
+
+    function toggleSidebarPref() {
+        const current = localStorage.getItem('mofuSidebarCollapsed') === 'true';
+        localStorage.setItem('mofuSidebarCollapsed', !current);
+        sidebarBtn.classList.toggle('off', current);
+    }
+
+    // ── Pomodoro number controls ──────────────────────
+    const cfg = {
+        work:     { min: 5,  max: 90,  step: 5  },
+        short:    { min: 1,  max: 30,  step: 1  },
+        long:     { min: 5,  max: 60,  step: 5  },
+        sessions: { min: 1,  max: 10,  step: 1  },
+    };
+
+    function adjust(key, delta) {
+        const val  = document.getElementById(key + '-val');
+        const inp  = document.getElementById(key + '-input');
+        const c    = cfg[key];
+        let newVal = Math.min(c.max, Math.max(c.min, parseInt(val.textContent) + delta));
+        val.textContent = newVal;
+        inp.value = newVal;
+    }
+</script>
+{% endblock %}
