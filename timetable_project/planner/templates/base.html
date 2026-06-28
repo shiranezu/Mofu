@@ -48,6 +48,11 @@
         /* ─── Reset ─────────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--content-bg);
@@ -312,6 +317,7 @@
         main {
             margin-left: var(--sidebar-width);
             flex: 1;
+            min-width: 0;
             min-height: 100vh;
             padding: 36px 40px;
             background: var(--content-bg);
@@ -646,11 +652,28 @@
         background: #2e2b2b;
         }
 
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(240, 231, 213, 0.5);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: color 0.18s;
+            margin-left: 4px;
+        }
 
+        .theme-toggle:hover {
+            color: var(--cream);
+        }
 
         {% block extra_styles %}{% endblock %}
 
-        /* ─── Mobile ─────────────────────────────────────── */
+        /* ═══ MOBILE ════════════════════════════════════ */
         .mobile-topbar {
             display: none;
             position: fixed;
@@ -660,46 +683,18 @@
             z-index: 200;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            padding: 0 20px;
             border-bottom: 1px solid var(--sidebar-border);
         }
 
-        .mobile-topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .mobile-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(196, 113, 74, 0.18);
-            border: 1.5px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--accent);
-            flex-shrink: 0;
-        }
-
-        .mobile-app-name {
+        .mobile-logo {
             font-family: 'Homemade Apple', cursive;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--cream);
             opacity: 0.9;
         }
 
-        .mobile-topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .mobile-menu-btn {
+        .mobile-hamburger {
             background: none;
             border: none;
             cursor: pointer;
@@ -712,21 +707,23 @@
             transition: color 0.18s;
         }
 
-        .mobile-menu-btn:hover { color: var(--cream); }
+        .mobile-hamburger:hover { color: var(--cream); }
 
         .mobile-overlay {
-            display: none;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 99;
-            opacity: 0;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
         }
 
         .mobile-overlay.active {
-            display: block;
+            visibility: visible;
             opacity: 1;
+            pointer-events: all;
         }
 
         @media (max-width: 768px) {
@@ -734,110 +731,19 @@
 
             aside {
                 transform: translateX(-100%);
-                transition: transform 0.25s ease, width 0.25s ease;
-                width: var(--sidebar-width) !important;
+                transition: transform 0.25s ease;
                 z-index: 150;
+                width: var(--sidebar-width) !important;
             }
 
-            aside.mobile-open {
-                transform: translateX(0);
-            }
-
-            aside.collapsed ~ main { margin-left: 0; }
+            aside.mobile-open { transform: translateX(0); }
 
             main {
                 margin-left: 0 !important;
-                padding: 72px 16px 24px;
+                padding: 72px 16px 24px !important;
             }
 
-            /* Collapse grids */
-            .stats-row,
-            .today-grid,
-            .sh-grid,
-            .tt-home-grid,
-            .cat-grid,
-            .notes-grid,
-            .acc-stats,
-            .help-grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            .acc-grid,
-            .streaks-grid,
-            .sc-layout,
-            .stats-charts-row {
-                grid-template-columns: 1fr !important;
-            }
-
-            .stats-strip {
-                grid-template-columns: 1fr 1fr !important;
-            }
-
-            .help-centre-grid {
-                grid-template-columns: 1fr 1fr !important;
-            }
-
-            .acc-content-grid {
-                grid-template-columns: 1fr 1fr !important;
-            }
-
-            /* Fix border on acc content items */
-            .acc-content-item:nth-child(2n) { border-right: none; }
-            .acc-content-item:nth-child(n+3) { border-bottom: none; }
-
-            /* Timetable scrollable */
-            .tt-wrapper { overflow-x: auto; }
-            .tt-grid { min-width: 500px; }
-
-            /* Calendar stacked */
-            .sc-panel { position: static !important; }
-
-            /* Notes editor */
-            .editor-wrap { height: auto; min-height: calc(100vh - 56px); }
-
-            /* Notes layout */
-            .notes-layout {
-                grid-template-columns: 1fr !important;
-                height: auto !important;
-            }
-
-            .notes-list-panel {
-                border-right: none !important;
-                border-bottom: 1px solid var(--card-border);
-                max-height: 200px;
-            }
-
-            /* Settings rows */
-            .settings-row {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 12px !important;
-            }
-
-            .s-text-input { width: 100% !important; }
-
-            /* Task board table */
-            .task-table { font-size: 12px; }
-
-            /* Dict page */
-            .dict-page { grid-template-columns: 1fr !important; }
-
-            /* Goals page */
-            .goals-grid { grid-template-columns: 1fr !important; }
-
-            /* Resources */
-            .res-grid { grid-template-columns: 1fr !important; }
-
-            /* Stop summary */
-            .summary-page { max-width: 100%; }
-
-            /* History */
-            .hist-grid { grid-template-columns: 1fr !important; }
-
-            /* Statistics */
-            .stats-grid { grid-template-columns: 1fr !important; }
-
-            /* Hide sidebar toggle in mobile topbar */
+            .logo-box { display: none; }
             .sidebar-toggle { display: none; }
         }
 
@@ -846,23 +752,13 @@
 <body>
 
 {% if user.is_authenticated %}
-<!-- Mobile Top Bar -->
 <div class="mobile-topbar">
-    <div class="mobile-topbar-left">
-        <span class="mobile-app-name">Mofu.</span>
-    </div>
-    <div class="mobile-topbar-right">
-        <button class="mobile-menu-btn" id="themeToggleMobile" title="Toggle dark mode">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/>
-            </svg>
-        </button>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" title="Open menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-            </svg>
-        </button>
-    </div>
+    <span class="mobile-logo">Mofu.</span>
+    <button class="mobile-hamburger" id="mobileMenuBtn" title="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+        </svg>
+    </button>
 </div>
 <div class="mobile-overlay" id="mobileOverlay"></div>
 {% endif %}
@@ -1020,8 +916,7 @@
     // ── Dark Mode ─────────────────────────────────────
     const html = document.documentElement;
     // Apply saved theme
-    const savedTheme = localStorage.getItem('mofuTheme') || 'light';
-    if (savedTheme === 'dark') {
+    if (localStorage.getItem('mofuTheme') === 'dark') {
         html.setAttribute('data-theme', 'dark');
     }
 
@@ -1030,8 +925,8 @@
     const mainEl  = document.querySelector('main');
     const toggle  = document.getElementById('sidebarToggle');
 
-    // Persist state across pages
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+    // Persist state across pages — desktop only
+    if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth > 768) {
         sidebar.classList.add('collapsed');
         if (mainEl) mainEl.style.marginLeft = 'var(--sidebar-collapsed)';
     }
@@ -1046,12 +941,11 @@
     }
 
 
-    // ── Mobile Sidebar ────────────────────────────────
+    // ── Mobile sidebar ────────────────────────────────
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileOverlay = document.getElementById('mobileOverlay');
-    const themeToggleMobile = document.getElementById('themeToggleMobile');
 
-    if (mobileMenuBtn && sidebar) {
+    if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', () => {
             sidebar.classList.toggle('mobile-open');
             mobileOverlay.classList.toggle('active');
@@ -1065,7 +959,6 @@
         });
     }
 
-    // Close sidebar when nav link clicked on mobile
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
@@ -1075,21 +968,8 @@
         });
     });
 
-    // Mobile theme toggle
-    if (themeToggleMobile) {
-        themeToggleMobile.addEventListener('click', () => {
-            const isDark = html.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                html.removeAttribute('data-theme');
-                localStorage.setItem('mofuTheme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                localStorage.setItem('mofuTheme', 'dark');
-            }
-        });
-    }
-
     flatpickr('input[type="date"]', { dateFormat: 'Y-m-d' });
+
     flatpickr('input[type="date"]', {
     dateFormat: 'Y-m-d',
     theme: 'dark' // flatpickr has a built-in dark theme

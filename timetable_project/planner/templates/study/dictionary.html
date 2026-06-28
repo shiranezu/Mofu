@@ -13,6 +13,34 @@
         align-items: start;
     }
 
+    @media (max-width: 768px) {
+        .dict-page {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+        }
+
+        .dict-recent {
+            order: 2;
+        }
+
+        .dict-main {
+            order: 1;
+        }
+
+        .dict-recent-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dict-recent-item {
+            border-bottom: none !important;
+            background: var(--overlay-xs);
+            border-radius: var(--radius-sm);
+            padding: 6px 12px !important;
+        }
+    }
+
     /* ─── Header ─────────────────────────────────────── */
     .dict-header {
         border-left: 3px solid var(--accent);
@@ -44,7 +72,7 @@
         display: flex;
         align-items: stretch;
         gap: 0;
-        border-bottom: 2px solid var(--input-border);
+        border-bottom: 2px solid var(--text-dark);
         padding-bottom: 8px;
     }
 
@@ -64,7 +92,7 @@
     }
 
     .dict-search-input::placeholder {
-        color: var(--placeholder) !important;
+        color: rgba(30, 37, 64, 0.2) !important;
         font-style: italic;
     }
 
@@ -301,7 +329,7 @@
     <div class="dict-page">
 
         <!-- LEFT — Search + Result -->
-        <div>
+        <div class="dict-main">
             <!-- Search -->
             <div class="dict-search-wrap">
                 <form method="get" class="dict-search-form">

@@ -286,6 +286,33 @@
         color: var(--text-muted);
     }
 
+
+    @media (max-width: 768px) {
+        .goals-stats { grid-template-columns: 1fr !important; }
+        .goals-header, .gl-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+        .goal-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+        }
+
+        .goal-card-percent {
+            text-align: left;
+            min-width: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .goal-percent-value { font-size: 26px; }
+
+        .goal-card-actions {
+            opacity: 1 !important;
+            justify-content: flex-end;
+        }
+    }
+
 {% endblock %}
 
 {% block content %}
@@ -310,9 +337,9 @@
             <span class="goals-stat-label">Today's Target</span>
             <span class="goals-stat-value">
                 {% widthratio 0 1 1 as dummy %}
-                {% for item in active_goals %}
+                {% for item in goals_with_progress %}
                     {% if item.goal.goal_type == 'daily' %}
-                        {{ item.goal.target_hours }}h
+                        {{ item.progress.target_display }}
                     {% endif %}
                 {% endfor %}
             </span>
@@ -366,7 +393,7 @@
                     </div>
                     <div class="goal-progress-wrap">
                         <span>Progress</span>
-                        <span>{{ item.progress.current_hours }}h / {{ item.progress.target_hours }}h</span>
+                        <span>{{ item.progress.current_display }} / {{ item.progress.target_display }}</span>
                     </div>
                     <div class="goal-progress-bar-track">
                         <div class="goal-progress-bar-fill"
@@ -376,7 +403,7 @@
 
                 <div class="goal-card-percent">
                     <span class="goal-percent-value">{{ item.progress.percentage }}%</span>
-                    <span class="goal-percent-remaining">{{ item.progress.remaining_hours }}h left</span>
+                    <span class="goal-percent-remaining">{{ item.progress.remaining_display }} left</span>
                 </div>
 
                 <div class="goal-card-actions">
@@ -425,7 +452,7 @@
                     </div>
                     <div class="goal-progress-wrap">
                         <span>Progress</span>
-                        <span>{{ item.progress.current_hours }}h / {{ item.progress.target_hours }}h</span>
+                        <span>{{ item.progress.current_display }} / {{ item.progress.target_display }}</span>
                     </div>
                     <div class="goal-progress-bar-track">
                         <div class="goal-progress-bar-fill"
@@ -435,7 +462,7 @@
 
                 <div class="goal-card-percent">
                     <span class="goal-percent-value">{{ item.progress.percentage }}%</span>
-                    <span class="goal-percent-remaining">{{ item.progress.remaining_hours }}h left</span>
+                    <span class="goal-percent-remaining">{{ item.progress.remaining_display }} left</span>
                 </div>
 
                 <div class="goal-card-actions">
@@ -480,7 +507,7 @@
                     </div>
                     <div class="goal-progress-wrap">
                         <span>Target</span>
-                        <span>{{ item.goal.target_hours }}h</span>
+                        <span>{{ item.progress.target_display }}</span>
                     </div>
                     <div class="goal-progress-bar-track">
                         <div class="goal-progress-bar-fill"
@@ -521,3 +548,4 @@
     }
 </script>
 {% endblock %}
+{% block extra_mobile %}{% endblock %}

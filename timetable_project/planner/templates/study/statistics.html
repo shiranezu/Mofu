@@ -46,6 +46,29 @@
         margin-bottom: 24px;
     }
 
+    @media (max-width: 768px) {
+        .stats-strip {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        .stats-charts-row {
+            grid-template-columns: 1fr !important;
+        }
+
+        .stats-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .stats-cat-table thead th:nth-child(3),
+        .stats-cat-table tbody td:nth-child(3) {
+            display: none;
+        }
+
+        .stats-cat-bar-wrap { width: 80px !important; }
+    }
+
     .stats-strip-card {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
@@ -180,7 +203,7 @@
     }
 
     .stats-cat-table tbody tr:last-child td { border-bottom: none; }
-    .stats-cat-table tbody tr:hover td { background: var(--overlay-xs); }
+    .stats-cat-table tbody tr:hover td { background: rgba(30, 37, 64, 0.02); }
 
     .stats-cat-dot {
         width: 10px;
@@ -334,14 +357,12 @@
 
 {% block scripts %}
 <script>
-    const isDark    = document.documentElement.getAttribute('data-theme') === 'dark';
     const cream     = getComputedStyle(document.documentElement).getPropertyValue('--cream-dark').trim() || '#e6dbc7';
     const accent    = '#C4714A';
-    const textMuted = isDark ? '#a0998e' : '#8a8070';
-    const navy      = isDark ? '#EEE5DA' : '#1e2540';
-    const tooltipBg = isDark ? '#2e2c2c' : '#1e2540';
-    const tooltipTx = isDark ? '#EEE5DA' : '#F0E7D5';
+    const textMuted = '#8a8070';
+    const navy      = '#1e2540';
 
+    const isMobile = window.innerWidth <= 768;
     Chart.defaults.font.family = "'DM Sans', sans-serif";
     Chart.defaults.color       = textMuted;
 
@@ -374,9 +395,9 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: tooltipBg,
-                    titleColor: tooltipTx,
-                    bodyColor: tooltipTx,
+                    backgroundColor: navy,
+                    titleColor: '#F0E7D5',
+                    bodyColor: 'rgba(240,231,213,0.7)',
                     padding: 10,
                     callbacks: {
                         label: ctx => ` ${ctx.parsed.y}h`
@@ -418,7 +439,7 @@
                 datasets: [{
                     data: catData,
                     backgroundColor: catColors,
-                    borderColor: isDark ? '#2e2c2c' : '#faf6ef',
+                    borderColor: '#faf6ef',
                     borderWidth: 3,
                     hoverOffset: 6,
                 }]
@@ -438,9 +459,9 @@
                         }
                     },
                     tooltip: {
-                        backgroundColor: tooltipBg,
-                        titleColor: tooltipTx,
-                        bodyColor: tooltipTx,
+                        backgroundColor: navy,
+                        titleColor: '#F0E7D5',
+                        bodyColor: 'rgba(240,231,213,0.7)',
                         padding: 10,
                         callbacks: {
                             label: ctx => ` ${ctx.parsed}h`

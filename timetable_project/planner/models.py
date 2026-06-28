@@ -238,6 +238,18 @@ class StudySession(models.Model):
         ordering = ['-start_time']
 
 
+def format_hours_minutes(hours):
+    """Convert a float hours value into a readable 'Xh Ym' / 'Ym' / 'Xh' string"""
+    total_minutes = round(hours * 60)
+    h, m = divmod(total_minutes, 60)
+    if h > 0 and m > 0:
+        return f"{h}h {m}m"
+    elif h > 0:
+        return f"{h}h"
+    else:
+        return f"{m}m"
+
+
 class StudyGoal(models.Model):
     """A study goal (daily or weekly target)"""
     GOAL_TYPE_CHOICES = [
@@ -257,6 +269,7 @@ class StudyGoal(models.Model):
     def __str__(self):
         category_str = f" - {self.category.name}" if self.category else ""
         return f"{self.user.username} - {self.goal_type} goal: {self.target_hours}h{category_str}"
+    
 
     def get_progress(self):
         """Calculate current progress towards this goal"""
@@ -275,6 +288,13 @@ class StudyGoal(models.Model):
                 start_time__month=today.month,
                 start_time__day=today.day
             )
+            active_sessions = StudySession.objects.filter(
+                user=self.user,
+                is_active=True,
+                start_time__year=today.year,
+                start_time__month=today.month,
+                start_time__day=today.day
+            )
         else:  # weekly
             start_of_week = today - timedelta(days=today.weekday())
             sessions = StudySession.objects.filter(
@@ -283,11 +303,25 @@ class StudyGoal(models.Model):
                 start_time__date__gte=start_of_week,
                 start_time__date__lte=today
             )
+            active_sessions = StudySession.objects.filter(
+                user=self.user,
+                is_active=True,
+                start_time__date__gte=start_of_week,
+                start_time__date__lte=today
+            )
 
         if self.category:
             sessions = sessions.filter(category=self.category)
+            active_sessions = active_sessions.filter(category=self.category)
 
         total_seconds = sessions.aggregate(total=Sum('duration_seconds'))['total'] or 0
+
+        # Include elapsed time from any session currently in progress,
+        # so goals reflect live progress instead of only updating on stop.
+        for active_session in active_sessions:
+            elapsed = (now - active_session.start_time).total_seconds()
+            total_seconds += elapsed
+
         total_hours = total_seconds / 3600
 
         if self.target_hours > 0:
@@ -299,12 +333,14 @@ class StudyGoal(models.Model):
             'current_hours': round(total_hours, 2),
             'target_hours': float(self.target_hours),
             'percentage': int(round(percentage, 0)),
-            'remaining_hours': round(max(float(self.target_hours) - total_hours, 0), 2)
+            'remaining_hours': round(max(float(self.target_hours) - total_hours, 0), 2),
+            'current_display': format_hours_minutes(total_hours),
+            'target_display': format_hours_minutes(float(self.target_hours)),
+            'remaining_display': format_hours_minutes(max(float(self.target_hours) - total_hours, 0)),
         }
 
     class Meta:
         ordering = ['-created_at']
-
 
 class StudyResource(models.Model):
     """A study resource link (PDF, video, article, etc.)"""
@@ -372,6 +408,7 @@ class UserSettings(models.Model):
     pomodoro_short_break = models.IntegerField(default=5)
     pomodoro_long_break = models.IntegerField(default=15)
     pomodoro_sessions = models.IntegerField(default=4)
+    onboarding_dismissed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} settings"

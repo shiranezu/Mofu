@@ -367,6 +367,40 @@
         background: #7A9E7E;
     }
 
+    @media (max-width: 768px) {
+        .sv-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .sv-header-actions {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .status-group-header {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .task-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .task-table { min-width: 480px; }
+
+        /* Always show actions on mobile - no hover available */
+        .task-actions { opacity: 1 !important; }
+
+        /* Hide due-date column to reduce crowding */
+        .task-table thead th:nth-child(4),
+        .task-table tbody td:nth-child(4) {
+            display: none;
+        }
+    }
+
 {% endblock %}
 
 {% block content %}

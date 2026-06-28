@@ -1,0 +1,13 @@
+Hi {{ user.first_name|default:user.username }},
+
+Welcome to Mofu! Your account is ready, and we're glad you're here.
+
+Mofu is built to help you plan, focus, and actually follow through —
+timetables, tasks, a study timer, notes, and more, all in one place.
+
+If you ever have questions, the Help & Support page inside the app
+has guides for every feature.
+
+Happy studying.
+
+— The Mofu team

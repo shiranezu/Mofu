@@ -41,6 +41,16 @@
         gap: 20px;
     }
 
+    @media (max-width: 768px) {
+        .sh-grid { grid-template-columns: 1fr !important; }
+
+        .sh-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+    }
+
     /* ─── Schedule Card ──────────────────────────────── */
     .sh-card {
         background: var(--card-bg);

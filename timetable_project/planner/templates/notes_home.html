@@ -36,6 +36,19 @@
         gap: 20px;
     }
 
+    @media (max-width: 768px) {
+        .notes-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+        }
+
+        .notes-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+        .note-card-body { padding: 12px 14px !important; }
+
+        .note-new-card { min-height: 120px !important; }
+    }
+
     /* ─── New Note Card ──────────────────────────────── */
     .note-new-card {
         background: var(--card-bg);

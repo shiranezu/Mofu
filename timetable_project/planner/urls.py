@@ -113,4 +113,9 @@ path('study/countdown/<int:session_id>/complete/', views.complete_countdown, nam
 
     # SETTINGS
     path('settings/', views.settings, name='settings'),
+    path('settings/export/', views.export_data, name='export_data'),
+    path('settings/import/', views.import_data, name='import_data'),
+
+    # ONBOARDING
+    path('onboarding/dismiss/', views.dismiss_onboarding, name='dismiss_onboarding'),
 ]

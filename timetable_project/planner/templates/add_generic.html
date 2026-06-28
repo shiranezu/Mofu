@@ -63,7 +63,7 @@
     .form-field textarea {
         background: transparent !important;
         border: none !important;
-        border-bottom: 1.5px solid var(--input-border) !important;
+        border-bottom: 1.5px solid rgba(30, 37, 64, 0.2) !important;
         border-radius: 0 !important;
         padding: 8px 0 !important;
         font-family: 'DM Sans', sans-serif !important;
@@ -83,7 +83,7 @@
 
     .form-field input::placeholder,
     .form-field textarea::placeholder {
-        color: var(--placeholder) !important;
+        color: rgba(30, 37, 64, 0.25) !important;
         font-size: 14px !important;
     }
 
@@ -242,11 +242,58 @@
     /* Field errors */
     .field-error {
         font-size: 11px;
-        color: #a0482a;
-        margin-top: 4px;
+        color: #c0392b;
+        margin-top: 6px;
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
+        font-weight: 500;
+    }
+
+    .field-error::before {
+        content: '!';
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #c0392b;
+        color: white;
+        font-size: 9px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Red underline on invalid fields */
+    .has-error input[type="text"],
+    .has-error input[type="email"],
+    .has-error input[type="number"],
+    .has-error input[type="url"],
+    .has-error input[type="date"],
+    .has-error input[type="time"],
+    .has-error textarea {
+        border-bottom-color: #c0392b !important;
+    }
+
+    .has-error select {
+        border-color: #c0392b !important;
+    }
+
+    .has-error label {
+        color: #c0392b !important;
+        opacity: 1 !important;
+    }
+
+    /* Non-field errors */
+    .non-field-errors {
+        background: rgba(192,57,43,0.08);
+        border: 1px solid rgba(192,57,43,0.25);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #c0392b;
+        margin-bottom: 8px;
     }
 
     /* Help text */
@@ -272,6 +319,7 @@
         margin-top: 8px;
         padding-top: 32px;
         border-top: 1px solid var(--card-border);
+        flex-wrap: wrap;
     }
 
     .form-back {
@@ -316,7 +364,7 @@
 
         <!-- Render each field -->
         {% for field in form %}
-        <div class="form-field">
+        <div class="form-field {% if field.errors %}has-error{% endif %}">
             {{ field.label_tag }}
 
             {{ field }}
@@ -335,10 +383,8 @@
 
         <!-- Non-field errors -->
         {% if form.non_field_errors %}
-        <div>
-            {% for error in form.non_field_errors %}
-                <span class="field-error">{{ error }}</span>
-            {% endfor %}
+        <div class="non-field-errors">
+            {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
         </div>
         {% endif %}
 

@@ -28,11 +28,25 @@ def login_user(request):
 
 
 def register(request):
-    form = RegistrationForm
+    form = RegistrationForm()
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Send welcome email
+            from django.core.mail import send_mail
+            from django.template.loader import render_to_string
+
+            email_body = render_to_string('auth/welcome_email.txt', {'user': user})
+            send_mail(
+                subject='Welcome to Mofu!',
+                message=email_body,
+                from_email=None,  # uses DEFAULT_FROM_EMAIL
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+
             login(request, user)
             return redirect('planner:home')
     return render(request, 'auth/register.html', {'form': form})

@@ -25,7 +25,7 @@ from .study_views import (
     study_resources, add_resource, edit_resource, delete_resource, start_countdown, stop_countdown,
     complete_countdown, delete_session, clear_all_history,
 )
-from .general_views import home, help, my_account, settings
+from .general_views import home, help, my_account, settings, dismiss_onboarding
 from .dictionary import dictionary, clear_dictionary_history
 from .schedule_views import (
     schedule_home, add_schedule_entry, view_schedule_entry,
@@ -34,3 +34,5 @@ from .schedule_views import (
 from .note_views import (
     notes_home, create_note, note_detail, delete_note, save_note
 )
+from .export_views import export_data
+from .import_views import import_data

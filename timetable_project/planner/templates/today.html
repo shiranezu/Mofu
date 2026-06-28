@@ -68,12 +68,128 @@
 
     .session-banner a:hover { color: var(--cream); }
 
+    /* ─── Onboarding Checklist ────────────────────────── */
+    .onboarding-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 18px 22px;
+        margin-bottom: 28px;
+    }
+
+    .onboarding-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .onboarding-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-right: 10px;
+    }
+
+    .onboarding-count {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .onboarding-dismiss {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: color 0.15s;
+    }
+
+    .onboarding-dismiss:hover { color: var(--text-dark); }
+
+    .onboarding-progress-track {
+        height: 4px;
+        background: var(--overlay-sm);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .onboarding-progress-fill {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .onboarding-steps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .onboarding-step {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        font-size: 12px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+
+    .onboarding-step:hover { border-color: var(--accent); color: var(--accent); }
+
+    .onboarding-step.done {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        opacity: 0.6;
+    }
+
+    .onboarding-step.done:hover { border-color: var(--card-border); color: var(--text-muted); }
+
+    .onboarding-step-check {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1.5px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .onboarding-step.done .onboarding-step-check {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
     /* ─── Stats Row ──────────────────────────────────── */
     .stats-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 16px;
         margin-bottom: 28px;
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        .stats-row .stat-card:nth-child(3) {
+            grid-column: 1 / -1 !important;
+        }
     }
 
     .stat-card {
@@ -119,6 +235,41 @@
         gap: 20px;
         align-items: start;
         margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .today-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .clock-card {
+            grid-column: 1 / -1;
+        }
+
+        .today-right-col {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .today-right-col .section-card {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .today-right-col {
+            grid-template-columns: 1fr !important;
+        }
+
+        .today-right-col .section-card {
+            margin-bottom: 16px !important;
+        }
+
+        .today-right-col .section-card:last-child {
+            margin-bottom: 0 !important;
+        }
     }
 
     /* ─── Section Card ───────────────────────────────── */
@@ -171,12 +322,12 @@
         align-items: center;
         gap: 16px;
         padding: 12px 20px;
-        border-bottom: 1px solid var(--overlay-sm);
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
         transition: background 0.15s;
     }
 
     .class-row:last-child { border-bottom: none; }
-    .class-row:hover { background: var(--overlay-xs); }
+    .class-row:hover { background: rgba(30, 37, 64, 0.02); }
 
     .class-time {
         font-size: 11px;
@@ -201,7 +352,7 @@
     /* ─── Goals ──────────────────────────────────────── */
     .goal-row {
         padding: 14px 20px;
-        border-bottom: 1px solid var(--overlay-sm);
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
     }
 
     .goal-row:last-child { border-bottom: none; }
@@ -230,12 +381,12 @@
         align-items: center;
         gap: 12px;
         padding: 12px 20px;
-        border-bottom: 1px solid var(--overlay-sm);
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
         transition: background 0.15s;
     }
 
     .task-row:last-child { border-bottom: none; }
-    .task-row:hover { background: var(--overlay-xs); }
+    .task-row:hover { background: rgba(30, 37, 64, 0.02); }
 
     .task-title {
         flex: 1;
@@ -285,7 +436,7 @@
         min-width: 120px;
         background: transparent !important;
         border: none !important;
-        border-bottom: 1.5px solid var(--input-border) !important;
+        border-bottom: 1.5px solid rgba(30, 37, 64, 0.2) !important;
         border-radius: 0 !important;
         padding: 7px 0 !important;
         font-size: 13px !important;
@@ -306,6 +457,24 @@
     .quick-add-row select.qa-input {
         cursor: pointer;
         max-width: 110px;
+    }
+
+    .qa-date-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        border-bottom: 1px solid var(--input-border);
+        padding-bottom: 2px;
+    }
+
+    .qa-date-icon { color: var(--text-muted); flex-shrink: 0; }
+
+    .qa-date-input {
+        border: none !important;
+        border-bottom: none !important;
+        flex: 1;
+        padding-bottom: 0 !important;
     }
 
     .qa-btn {
@@ -446,6 +615,40 @@
     </div>
     {% endif %}
 
+    <!-- Onboarding Checklist -->
+    {% if onboarding %}
+    <div class="onboarding-card" id="onboardingCard">
+        <div class="onboarding-header">
+            <div>
+                <span class="onboarding-title">Getting started</span>
+                <span class="onboarding-count">{{ onboarding.completed_count }} of {{ onboarding.total_count }} done</span>
+            </div>
+            <button class="onboarding-dismiss" onclick="dismissOnboarding()" title="Dismiss">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </button>
+        </div>
+        <div class="onboarding-progress-track">
+            <div class="onboarding-progress-fill" style="width: {% widthratio onboarding.completed_count onboarding.total_count 100 %}%;"></div>
+        </div>
+        <div class="onboarding-steps">
+            {% for step in onboarding.steps %}
+            <a href="{% url step.url_name %}" class="onboarding-step {% if step.done %}done{% endif %}">
+                <span class="onboarding-step-check">
+                    {% if step.done %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+                    </svg>
+                    {% endif %}
+                </span>
+                <span class="onboarding-step-label">{{ step.label }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Stats Row -->
     <div class="stats-row">
         <div class="stat-card stat-card-accent">
@@ -502,7 +705,7 @@
         </div>
 
         <!-- RIGHT — Tasks + Quick Add -->
-        <div>
+        <div class="today-right-col">
             <div class="section-card" style="margin-bottom: 16px;">
                 <div class="section-card-header">
                     <span class="section-card-title">Tasks Due</span>
@@ -552,7 +755,12 @@
                             </select>
                         </div>
                         <div class="quick-add-row" style="margin-top: 12px;">
-                            <input type="date" name="due_date" class="qa-input">
+                            <div class="qa-date-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" class="qa-date-icon">
+                                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                                </svg>
+                                <input type="date" name="due_date" class="qa-input qa-date-input" placeholder="Due date">
+                            </div>
                             <button type="submit" class="qa-btn">Add Task</button>
                         </div>
                     </form>
@@ -615,6 +823,18 @@
 
 {% block scripts %}
 <script>
+    function dismissOnboarding() {
+        const card = document.getElementById('onboardingCard');
+        fetch("{% url 'planner:dismiss_onboarding' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        }).then(() => {
+            if (card) card.style.display = 'none';
+        });
+    }
+
     function updateClock() {
         const now = new Date();
         const h = String(now.getHours()).padStart(2, '0');

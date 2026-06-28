@@ -130,6 +130,23 @@
     .acc-nav-item-right { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
     .acc-nav-item.danger .acc-nav-item-left { color: #c0392b; }
 
+    /* ─── Mobile ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+        .acc-header { flex-direction: column; align-items: flex-start; }
+        .acc-header-actions { width: 100%; flex-wrap: wrap; }
+        .acc-stats { grid-template-columns: 1fr 1fr !important; }
+        .acc-grid { grid-template-columns: 1fr !important; }
+        .acc-content-grid { grid-template-columns: 1fr 1fr !important; }
+        .acc-content-item:nth-child(2n) { border-right: none !important; }
+        .acc-content-item:nth-child(3n) { border-right: 1px solid var(--card-border); }
+        .acc-content-item:nth-child(4),
+        .acc-content-item:nth-child(5),
+        .acc-content-item:nth-child(6) { border-bottom: 1px solid var(--card-border); }
+        .acc-content-item:nth-child(5),
+        .acc-content-item:nth-child(6) { border-bottom: none !important; }
+        .acc-nav-item-right span { display: none; }
+    }
+
 {% endblock %}
 
 {% block content %}
@@ -139,8 +156,8 @@
         <div class="acc-header-left">
             <div class="acc-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
             <div>
-                <div class="acc-name">{{ user.first_name }} {{ user.last_name }}</div>
-                <div class="acc-meta">@{{ user.username }} &nbsp;·&nbsp; Member for {{ account_age }} day{{ account_age|pluralize }}</div>
+                <div class="acc-name">{{ user.username }}</div>
+                <div class="acc-meta">{{ user.first_name }} {{ user.last_name }} &nbsp;·&nbsp; Member for {{ account_age }} day{{ account_age|pluralize }}</div>
             </div>
         </div>
         <div class="acc-header-actions">

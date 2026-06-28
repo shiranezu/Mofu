@@ -26,7 +26,9 @@ def timetable_view(request, timetable_id):
     all_timetables = Timetable.objects.filter(user=request.user)
     today_day = timezone.now().strftime('%A')
 
+    # Desktop grid: rows = days, cols = timeslots
     grid = []
+    entry_map = {}
     for day in days:
         row = []
         for timeslot in timeslots:
@@ -36,7 +38,17 @@ def timetable_view(request, timetable_id):
                 timeslot=timeslot
             ).first()
             row.append((entry, timeslot))
+            entry_map[(day, timeslot.id)] = entry
         grid.append((day, row))
+
+    # Mobile grid: rows = timeslots, cols = days
+    mobile_grid = []
+    for timeslot in timeslots:
+        row = []
+        for day in days:
+            entry = entry_map.get((day, timeslot.id))
+            row.append((day, entry))
+        mobile_grid.append((timeslot, row))
 
     # Collect categories used in this timetable for the legend
     category_ids = TimetableEntry.objects.filter(
@@ -49,6 +61,8 @@ def timetable_view(request, timetable_id):
     return render(request, 'index.html', {
         'timetable': timetable,
         'grid': grid,
+        'mobile_grid': mobile_grid,
+        'days': days,
         'timeslots': timeslots,
         'all_timetables': all_timetables,
         'today_day': today_day,

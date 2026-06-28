@@ -85,12 +85,40 @@
         border-radius: var(--radius);
         box-shadow: var(--shadow);
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 768px) {
+        .tt-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .tt-header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .tt-grid {
+            min-width: 480px;
+        }
+
+        .tt-bottom-bar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 
     .tt-grid {
         width: 100%;
         border-collapse: collapse;
-        min-width: 600px;
+    }
+
+    @media (min-width: 769px) {
+        .tt-grid {
+            min-width: 600px;
+        }
     }
 
     /* Header row — timeslots */
@@ -280,6 +308,149 @@
         flex-shrink: 0;
     }
 
+    /* ─── Mobile vertical grid ───────────────────────── */
+    .tt-mobile-wrapper { display: none; }
+
+    @media (max-width: 768px) {
+        .tt-wrapper { display: none; }
+        .tt-mobile-wrapper {
+            display: block;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tt-mobile-grid {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .tt-mobile-grid thead th {
+            padding: 10px 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            text-align: center;
+            width: auto;
+        }
+
+        .tt-mobile-grid thead th:first-child {
+            text-align: left;
+            padding-left: 14px;
+            width: 70px;
+        }
+
+        .tt-mobile-grid tbody td {
+            border-bottom: 1px solid var(--overlay-sm);
+            border-right: 1px solid var(--overlay-sm);
+            padding: 6px;
+            vertical-align: middle;
+            font-size: 11px;
+            height: 60px;
+        }
+
+        .tt-mobile-grid tbody td:first-child {
+            padding: 10px 14px;
+            border-right: 1px solid var(--card-border);
+            white-space: nowrap;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            vertical-align: top;
+        }
+
+        .tt-mobile-grid tbody tr:last-child td { border-bottom: none; }
+        .tt-mobile-grid tbody td:last-child { border-right: none; }
+
+        .tt-mobile-subject {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dark);
+            line-height: 1.3;
+            border-radius: 4px;
+            padding: 6px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .tt-mobile-subject-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2px;
+        }
+
+        .tt-mobile-subject-name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tt-mobile-subject-actions {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .tt-mobile-action-btn {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.7);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .tt-mobile-action-btn.delete:hover { color: #c0392b; }
+        [data-theme="dark"] .tt-mobile-action-btn { background: rgba(0,0,0,0.3); }
+
+        .tt-mobile-add {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            min-height: 36px;
+            color: var(--text-muted);
+            font-size: 18px;
+            text-decoration: none;
+            opacity: 0.6;
+            border: 1px dashed var(--card-border);
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .tt-mobile-add:hover, .tt-mobile-add:active { opacity: 1; color: var(--accent); border-color: var(--accent); }
+
+        .tt-header { flex-wrap: wrap; gap: 8px; }
+        .tt-header-actions { flex-wrap: wrap; gap: 6px; }
+        .tt-bottom-bar { flex-direction: column; align-items: flex-start; }
+
+        .tt-back-desktop { display: none !important; }
+        .tt-back-mobile {
+            display: inline-flex !important;
+            margin-top: 16px;
+            margin-bottom: 4px;
+        }
+    }
+
 {% endblock %}
 
 {% block content %}
@@ -326,7 +497,7 @@
                 </svg>
                 Export
             </a>
-            <a href="{% url 'planner:timetable_home' %}" class="btn btn-ghost" style="font-size:12px;">← Back</a>
+            <a href="{% url 'planner:timetable_home' %}" class="btn btn-ghost tt-back-desktop" style="font-size:12px;">← Back</a>
         </div>
     </div>
 
@@ -401,6 +572,71 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Mobile Vertical Grid -->
+    <div class="tt-mobile-wrapper">
+        <table class="tt-mobile-grid" style="min-width: calc(70px + {{ days|length }} * 130px);">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    {% for day in days %}
+                    <th class="{% if day == today_day %}today{% endif %}">{{ day|slice:":3" }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot, row in mobile_grid %}
+                <tr>
+                    <td>{{ slot.start_time|time:"H:i" }}<br><span style="opacity:0.6;">{{ slot.end_time|time:"H:i" }}</span></td>
+                    {% for day, entry in row %}
+                    <td>
+                        {% if entry %}
+                        {% with color=entry.subjectInfo.category.color|default:"#6B7FD4" %}
+                        <div class="tt-mobile-subject"
+                             style="background:{{ color }}18; border-left:2px solid {{ color }};">
+                            <div class="tt-mobile-subject-top">
+                                <span class="tt-mobile-subject-name">{{ entry.subjectInfo.subject }}</span>
+                                <div class="tt-mobile-subject-actions">
+                                    <a href="{% url 'planner:edit_entry' entry.id %}" class="tt-mobile-action-btn" title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="{% url 'planner:delete_entry' entry.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="tt-mobile-action-btn delete" title="Delete"
+                                            onclick="return confirm('Delete this entry?');">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% if entry.subjectInfo.location %}
+                            <div style="font-size:10px; color:var(--text-muted); font-weight:400; margin-top:2px; display:flex; align-items:center; gap:2px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                                </svg>
+                                {{ entry.subjectInfo.location }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endwith %}
+                        {% else %}
+                        <a href="{% url 'planner:add_course' %}?timetable={{ timetable.id }}&day={{ day }}&timeslot={{ slot.id }}"
+                           class="tt-mobile-add">+</a>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Back Button -->
+    <a href="{% url 'planner:timetable_home' %}" class="btn btn-ghost tt-back-mobile" style="font-size:12px; display:none;">← Back</a>
 
     <!-- Bottom Bar -->
     <div class="tt-bottom-bar">

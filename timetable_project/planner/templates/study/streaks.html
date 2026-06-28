@@ -34,6 +34,35 @@
         align-items: start;
     }
 
+    @media (max-width: 768px) {
+        .streaks-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .streaks-grid > * {
+            min-width: 0;
+        }
+
+        .streaks-main-card {
+            padding: 24px 14px !important;
+        }
+
+        .streaks-week {
+            justify-content: space-between !important;
+            gap: 4px;
+        }
+
+        .streaks-day { gap: 5px; min-width: 0; }
+
+        .streaks-circle {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 11px;
+        }
+
+        .streaks-big-num { font-size: 64px !important; }
+    }
+
     /* ─── Main Card ──────────────────────────────────── */
     .streaks-main-card {
         background: var(--card-bg);
@@ -128,7 +157,7 @@
 
     .streaks-circle.future {
         background: transparent;
-        border: 1.5px dashed var(--future-border);
+        border: 1.5px dashed rgba(30, 37, 64, 0.14);
     }
 
     .streaks-day-abbr {

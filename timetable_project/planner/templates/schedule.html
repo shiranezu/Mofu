@@ -13,6 +13,34 @@
         align-items: start;
     }
 
+    @media (max-width: 768px) {
+        .sc-layout {
+            grid-template-columns: 1fr !important;
+            gap: 16px;
+        }
+
+        .sc-panel {
+            position: static !important;
+        }
+
+        .sc-entry-list {
+            max-height: none !important;
+        }
+
+        .sc-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .sc-day {
+            aspect-ratio: auto !important;
+            padding: 8px 0;
+        }
+
+        .sc-day-num { font-size: 14px; }
+    }
+
     /* ─── Calendar Card ──────────────────────────────── */
     .sc-cal-card {
         background: var(--card-bg);

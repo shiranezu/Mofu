@@ -10,6 +10,11 @@
         border-left: 3px solid var(--accent);
         padding-left: 16px;
         margin-bottom: 28px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
     }
 
     .settings-header h1 {
@@ -24,7 +29,27 @@
 
     .settings-header p { font-size: 12px; color: var(--text-muted); }
 
+    .settings-back-link {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.18s;
+        white-space: nowrap;
+        margin-top: 4px;
+    }
+
+    .settings-back-link:hover { color: var(--accent); }
+
     /* ─── Tabs ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+        .settings-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+        .settings-tab { white-space: nowrap; padding: 10px 14px; }
+        .settings-row { flex-direction: column; align-items: flex-start !important; gap: 12px !important; }
+        .s-text-input { width: 100% !important; }
+        .s-number { width: 100%; justify-content: flex-start; }
+        .s-save-row { justify-content: flex-start; }
+    }
+
     .settings-tabs {
         display: flex;
         border-bottom: 1px solid var(--card-border);
@@ -213,8 +238,11 @@
 <div class="settings-page">
 
     <div class="settings-header">
-        <h1>Settings.</h1>
-        <p>Manage your preferences and account details.</p>
+        <div>
+            <h1>Settings.</h1>
+            <p>Manage your preferences and account details.</p>
+        </div>
+        <a href="{% url 'planner:my_account' %}" class="settings-back-link">← Back to Account</a>
     </div>
 
     {% if messages %}
@@ -230,6 +258,7 @@
         <a href="?tab=appearance" class="settings-tab {% if active_tab == 'appearance' %}active{% endif %}">Appearance</a>
         <a href="?tab=pomodoro" class="settings-tab {% if active_tab == 'pomodoro' %}active{% endif %}">Pomodoro</a>
         <a href="?tab=account" class="settings-tab {% if active_tab == 'account' %}active{% endif %}">Account</a>
+        <a href="?tab=export" class="settings-tab {% if active_tab == 'export' %}active{% endif %}">Data export</a>
         <a href="?tab=danger" class="settings-tab {% if active_tab == 'danger' %}active{% endif %}">Danger zone</a>
     </div>
 
@@ -326,6 +355,14 @@
             <div class="settings-card">
                 <div class="settings-row">
                     <div>
+                        <div class="settings-row-label">Username</div>
+                        <div class="settings-row-desc">Your unique login name</div>
+                    </div>
+                    <input type="text" name="username" class="s-text-input"
+                           value="{{ user.username }}" placeholder="Username">
+                </div>
+                <div class="settings-row">
+                    <div>
                         <div class="settings-row-label">First name</div>
                         <div class="settings-row-desc">Your display name</div>
                     </div>
@@ -351,7 +388,7 @@
                 <div class="settings-row">
                     <div>
                         <div class="settings-row-label">New password</div>
-                        <div class="settings-row-desc">Leave blank to keep current password</div>
+                        <div class="settings-row-desc">Leave blank to keep your current password</div>
                     </div>
                     <input type="password" name="new_password" class="s-text-input"
                            placeholder="••••••••">
@@ -361,6 +398,33 @@
                 <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
         </form>
+    </div>
+
+    <!-- Data Export -->
+    <div class="settings-panel {% if active_tab == 'export' %}active{% endif %}">
+        <div class="settings-card">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Export your data</div>
+                    <div class="settings-row-desc">Download a copy of your notes, study sessions, goals, resources, categories, and dictionary history as a JSON file.</div>
+                </div>
+                <a href="{% url 'planner:export_data' %}" class="btn btn-primary">Download JSON</a>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Import data</div>
+                    <div class="settings-row-desc">Upload a previously exported Mofu JSON file. This only adds data — nothing existing is ever changed or removed.</div>
+                </div>
+                <form method="post" action="{% url 'planner:import_data' %}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    {% csrf_token %}
+                    <input type="file" name="import_file" accept="application/json" required class="s-text-input" style="width:180px;">
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Danger zone -->
@@ -405,12 +469,12 @@
 
     // ── Sidebar collapse pref ─────────────────────────
     const sidebarBtn = document.getElementById('sidebarToggleBtn');
-    if (localStorage.getItem('mofuSidebarCollapsed') === 'true') sidebarBtn.classList.remove('off');
+    if (localStorage.getItem('sidebarCollapsed') === 'true') sidebarBtn.classList.remove('off');
     else sidebarBtn.classList.add('off');
 
     function toggleSidebarPref() {
-        const current = localStorage.getItem('mofuSidebarCollapsed') === 'true';
-        localStorage.setItem('mofuSidebarCollapsed', !current);
+        const current = localStorage.getItem('sidebarCollapsed') === 'true';
+        localStorage.setItem('sidebarCollapsed', !current);
         sidebarBtn.classList.toggle('off', current);
     }
 

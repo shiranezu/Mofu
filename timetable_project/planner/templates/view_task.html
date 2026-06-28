@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ item.title }} — Mofu{% endblock %}
-{% block nav_schedule %}active{% endblock %}
+{% block nav_tasks %}active{% endblock %}
 
 {% block extra_styles %}
 
@@ -133,7 +133,7 @@
     <div class="item-header">
         <div>
             <h1 class="item-title">{{ item.title }}</h1>
-            <p class="item-schedule-name">{{ item.schedule.name }}</p>
+            <p class="item-schedule-name">{{ item.task_board.name }}</p>
         </div>
         <!-- Status badge -->
         {% if item.status == 'completed' %}
@@ -196,9 +196,9 @@
 
     <!-- Actions -->
     <div class="item-actions">
-        <a href="{% url 'planner:edit_schedule_item' item.id %}" class="btn btn-primary">Edit Task</a>
-        <a href="{% url 'planner:delete_schedule_item' item.id %}" class="btn btn-danger">Delete</a>
-        <a href="{% url 'planner:schedule_view' item.schedule.id %}" class="item-back">← Back to Schedule</a>
+        <a href="{% url 'planner:edit_task' item.id %}" class="btn btn-primary">Edit Task</a>
+        <a href="{% url 'planner:delete_task' item.id %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'planner:task_board' item.task_board.id %}" class="item-back">← Back to Tasks</a>
     </div>
 
 </div>

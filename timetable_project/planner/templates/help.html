@@ -32,6 +32,12 @@
         margin-bottom: 16px;
     }
 
+    @media (max-width: 768px) {
+        .help-grid { grid-template-columns: 1fr !important; }
+        .help-centre-grid { grid-template-columns: 1fr 1fr !important; }
+        .help-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+
     /* ─── Cards ──────────────────────────────────────── */
     .help-card {
         background: var(--card-bg);
@@ -212,19 +218,19 @@
             <div class="help-item">
                 <div>
                     <a href="#" class="help-item-title">Timetables</a>
-                    <div class="help-item-desc">Flexibly arrange and organise your week by category.</div>
+                    <div class="help-item-desc">Build your weekly class schedule. Add timeslots, assign subjects and locations, and colour-code by category.</div>
                 </div>
             </div>
             <div class="help-item">
                 <div>
                     <a href="#" class="help-item-title">Schedule</a>
-                    <div class="help-item-desc">Your dynamic calendar for your day-to-day entries.</div>
+                    <div class="help-item-desc">A dynamic calendar for your day-to-day entries. Pick a date, add an entry, and tick it off when done.</div>
                 </div>
             </div>
             <div class="help-item">
                 <div>
                     <a href="#" class="help-item-title">Tasks</a>
-                    <div class="help-item-desc">Organise your priorities and to-dos into boards.</div>
+                    <div class="help-item-desc">Organise your to-dos into boards. Set priorities, due dates, and track progress as you complete each one.</div>
                 </div>
             </div>
         </div>

@@ -13,6 +13,50 @@
         align-items: start;
     }
 
+    .res-mobile-filter-btn {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 14px;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.15s;
+        margin-bottom: 16px;
+    }
+
+    .res-mobile-filter-btn:hover { color: var(--text-dark); }
+
+    @media (max-width: 768px) {
+        .res-page {
+            grid-template-columns: 1fr !important;
+        }
+
+        .res-filter {
+            display: none;
+            position: static !important;
+        }
+
+        .res-filter.mobile-open { display: block; }
+
+        .res-mobile-filter-btn { display: flex; }
+
+        .res-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+        }
+
+        .res-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+    }
+
     /* ─── Header ─────────────────────────────────────── */
     .res-header {
         display: flex;
@@ -128,7 +172,7 @@
         justify-content: flex-end;
         padding: 8px 16px;
         border-top: 1px solid var(--card-border);
-        background: var(--overlay-xs);
+        background: rgba(30, 37, 64, 0.02);
         min-height: 36px;
     }
 
@@ -238,11 +282,11 @@
     }
 
     .res-filter-item:hover {
-        background: var(--overlay-sm);
+        background: rgba(30, 37, 64, 0.04);
     }
 
     .res-filter-item.active {
-        background: var(--overlay-md);
+        background: rgba(30, 37, 64, 0.06);
         font-weight: 500;
     }
 
@@ -306,6 +350,12 @@
         <a href="{% url 'planner:add_resource' %}" class="btn btn-primary">+ Add Resource</a>
     </div>
 
+    <button class="res-mobile-filter-btn" onclick="document.querySelector('.res-filter').classList.toggle('mobile-open')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+        </svg>
+        Filter by category
+    </button>
     <div class="res-page">
 
         <!-- LEFT — Resource Grid -->

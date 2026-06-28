@@ -85,7 +85,7 @@
         color: var(--text-muted);
         border-bottom: 1px solid var(--card-border);
         text-align: left;
-        background: var(--overlay-xs);
+        background: rgba(30, 37, 64, 0.02);
     }
 
     /* Column widths */
@@ -104,7 +104,7 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: var(--text-muted);
-        background: var(--overlay-sm);
+        background: rgba(30, 37, 64, 0.025);
         border-bottom: 1px solid var(--card-border);
         border-top: 1px solid var(--card-border);
     }
@@ -116,7 +116,7 @@
     /* ─── Session Row ────────────────────────────────── */
     .hist-table tbody tr.session-row td {
         padding: 13px 20px;
-        border-bottom: 1px solid var(--overlay-sm);
+        border-bottom: 1px solid rgba(30, 37, 64, 0.05);
         font-size: 13px;
         color: var(--text-dark);
         vertical-align: middle;
@@ -130,7 +130,7 @@
     }
 
     .hist-table tbody tr.session-row:hover td {
-        background: var(--overlay-xs);
+        background: rgba(30, 37, 64, 0.02);
     }
 
     /* ─── Cell styles ────────────────────────────────── */
@@ -173,7 +173,7 @@
     }
 
     .hist-badge-regular {
-        background: var(--overlay-md);
+        background: rgba(30, 37, 64, 0.07);
         color: var(--text-muted);
     }
 
@@ -281,6 +281,39 @@
         opacity: 0.4;
         cursor: not-allowed;
         pointer-events: none;
+    }
+
+
+    @media (max-width: 768px) {
+        .hist-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .hist-filters { flex-wrap: wrap; gap: 8px; }
+        .hist-table-card { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+        .hist-table { min-width: 420px !important; width: 100%; table-layout: fixed; }
+
+        /* Column widths on mobile */
+        .hist-table colgroup col:nth-child(1) { width: 90px !important; }
+        .hist-table colgroup col:nth-child(2) { width: 130px !important; }
+        .hist-table colgroup col:nth-child(3) { width: 90px !important; }
+        .hist-table colgroup col:nth-child(6) { width: 60px !important; }
+
+        /* Hide Type and Tag columns */
+        .hist-table thead th:nth-child(4),
+        .hist-table tbody td:nth-child(4),
+        .hist-table thead th:nth-child(5),
+        .hist-table tbody td:nth-child(5) { display: none !important; }
+
+        /* Smaller font in cells */
+        .hist-table thead th,
+        .hist-table tbody td { font-size: 11px !important; padding: 14px 4px !important; }
+
+        /* Always show actions, only View link, hide ratings */
+        .hist-actions { opacity: 1 !important; display: flex !important; flex-direction: column !important; gap: 2px !important; }
+        .hist-actions .hist-rating { display: none !important; }
+        .hist-actions a { display: none !important; }
+        .hist-actions a.hist-action-link:first-of-type { display: inline !important; font-size: 11px !important; }
+
+        /* Let text wrap instead of truncate */
+        .hist-table tbody td { white-space: normal !important; word-break: break-word !important; }
     }
 
 {% endblock %}

@@ -47,6 +47,13 @@
         gap: 20px;
     }
 
+    @media (max-width: 768px) {
+        .cat-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+        .cat-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .cat-header-actions { width: 100%; }
+        .cat-card-actions { opacity: 1 !important; }
+    }
+
     /* ─── Category Card ──────────────────────────────── */
     .cat-card {
         border-radius: var(--radius);

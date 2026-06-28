@@ -75,15 +75,26 @@ class StudyCategoryForm(forms.ModelForm):
 
 class StudyGoalForm(forms.ModelForm):
     """Form for creating study goals"""
+
+    target_hours_input = forms.IntegerField(
+        label='Hours',
+        min_value=0,
+        initial=0,
+        widget=forms.NumberInput(attrs={'min': '0', 'placeholder': '0'})
+    )
+    target_minutes_input = forms.IntegerField(
+        label='Minutes',
+        min_value=0,
+        max_value=59,
+        initial=0,
+        widget=forms.NumberInput(attrs={'min': '0', 'max': '59', 'placeholder': '0'})
+    )
+
     class Meta:
         model = StudyGoal
-        fields = ['name', 'goal_type', 'target_hours', 'category']
-        widgets = {
-            'target_hours': forms.NumberInput(attrs={'step': '0.5', 'min': '0.5'})
-        }
+        fields = ['name', 'goal_type', 'category']
         labels = {
             'goal_type': 'Goal Type',
-            'target_hours': 'Target Hours',
             'category': 'Category (Optional - leave blank for all categories)'
         }
 
@@ -94,6 +105,31 @@ class StudyGoalForm(forms.ModelForm):
             self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
             self.fields['category'].required = False
             self.fields['category'].empty_label = "All Categories"
+
+        # Pre-fill hours/minutes when editing an existing goal
+        if self.instance and self.instance.pk and self.instance.target_hours:
+            total_minutes = round(float(self.instance.target_hours) * 60)
+            h, m = divmod(total_minutes, 60)
+            self.fields['target_hours_input'].initial = h
+            self.fields['target_minutes_input'].initial = m
+
+    def clean(self):
+        cleaned_data = super().clean()
+        hours = cleaned_data.get('target_hours_input') or 0
+        minutes = cleaned_data.get('target_minutes_input') or 0
+
+        if hours == 0 and minutes == 0:
+            raise forms.ValidationError("Target must be greater than 0.")
+
+        cleaned_data['target_hours'] = hours + (minutes / 60)
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.target_hours = self.cleaned_data['target_hours']
+        if commit:
+            instance.save()
+        return instance
 
 
 class StudyResourceForm(forms.ModelForm):
