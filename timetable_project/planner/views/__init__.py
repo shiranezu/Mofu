@@ -35,4 +35,9 @@ from .note_views import (
     notes_home, create_note, note_detail, delete_note, save_note
 )
 from .export_views import export_data
+
 from .import_views import import_data
+
+from .legal_views import privacy_policy, terms_of_use
+
+from .contact_view import contact

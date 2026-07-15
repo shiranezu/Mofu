@@ -171,6 +171,26 @@
         box-shadow: 0 4px 16px rgba(30, 37, 64, 0.2);
     }
 
+    .legal-disclosure {
+        font-size: 11px;
+        color: var(--navy);
+        opacity: 0.5;
+        margin-top: 14px;
+        line-height: 1.6;
+    }
+
+    .legal-disclosure a {
+        color: var(--navy);
+        opacity: 0.8;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .legal-disclosure a:hover { opacity: 1; }
+
+    [data-theme="dark"] .legal-disclosure { color: #EEE5DA; opacity: 0.45; }
+    [data-theme="dark"] .legal-disclosure a { color: #EEE5DA; opacity: 0.8; }
+
     /* ─── Responsive ─────────────────────────────── */
     @media (max-width: 768px) {
         .auth-right { padding: 24px 24px 20px; }
@@ -300,6 +320,12 @@
 
             <button type="submit" class="btn-register">Create account</button>
         </div>
+
+        <p class="legal-disclosure">
+            By creating an account, you agree to Mofu's
+            <a href="{% url 'planner:terms_of_use' %}" target="_blank">Terms of Use</a>
+            and <a href="{% url 'planner:privacy_policy' %}" target="_blank">Privacy Policy</a>.
+        </p>
     </form>
 {% endblock %}
 

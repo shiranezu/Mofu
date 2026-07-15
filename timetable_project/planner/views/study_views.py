@@ -445,12 +445,20 @@ def toggle_goal(request, goal_id):
 def manage_categories(request):
     """Manage study categories"""
     from django.db.models import Sum, Count
+    from django.core.paginator import Paginator
+ 
     categories = StudyCategory.objects.filter(user=request.user).annotate(
         total_sessions=Count('studysession'),
         total_hours=Sum('studysession__duration_seconds')
     )
+ 
+    paginator = Paginator(categories, 9)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+ 
     return render(request, 'study/categories.html', {
-        'categories': categories,
+        'categories': page_obj,
+        'page_obj': page_obj,
     })
 
 
@@ -647,16 +655,23 @@ def stop_pomodoro(request, session_id):
 @login_required(login_url='planner:login')
 def study_resources(request):
     """View all study resources"""
+    from django.core.paginator import Paginator
+ 
     resources = StudyResource.objects.filter(user=request.user)
     categories = StudyCategory.objects.filter(user=request.user)
-    
+ 
     # Filter by category if requested
     category_id = request.GET.get('category')
     if category_id:
         resources = resources.filter(category_id=category_id)
-    
+ 
+    paginator = Paginator(resources, 9)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+ 
     return render(request, 'study/resources.html', {
-        'resources': resources,
+        'resources': page_obj,
+        'page_obj': page_obj,
         'categories': categories,
         'selected_category': category_id
     })

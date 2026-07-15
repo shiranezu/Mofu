@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Mofu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:   #1e2540;
+            --cream:  #F0E7D5;
+            --accent: #C4714A;
+            --muted:  #8a8070;
+            --bg:     #faf6ef;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .legal-page {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 60px 32px 100px;
+        }
+
+        .legal-logo {
+            font-family: 'Homemade Apple', cursive;
+            font-size: 28px;
+            color: var(--navy);
+            opacity: 0.6;
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .legal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .legal-updated {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 36px;
+        }
+
+        .legal-section {
+            margin-bottom: 28px;
+        }
+
+        .legal-section h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 21px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .legal-section p {
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.8;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .legal-section ul {
+            margin: 10px 0 10px 20px;
+        }
+
+        .legal-section li {
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.8;
+            line-height: 1.8;
+            margin-bottom: 6px;
+        }
+
+        .legal-back {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.6;
+        }
+
+        .legal-back:hover { opacity: 1; }
+
+        [data-theme="dark"] body { background: #1a1818; }
+        [data-theme="dark"] .legal-logo,
+        [data-theme="dark"] .legal-title,
+        [data-theme="dark"] .legal-section h2,
+        [data-theme="dark"] .legal-section p,
+        [data-theme="dark"] .legal-section li,
+        [data-theme="dark"] .legal-back {
+            color: #EEE5DA;
+        }
+    </style>
+</head>
+<body>
+<script>
+    if (localStorage.getItem('mofuTheme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+</script>
+
+<div class="legal-page">
+
+    <span class="legal-logo">Mofu.</span>
+
+    <h1 class="legal-title">Privacy Policy.</h1>
+    <p class="legal-updated">Last updated June 2026</p>
+
+    <div class="legal-section">
+        <h2>What we collect</h2>
+        <p>To run your account, Mofu stores the information you give it directly: your name, username, email address, and password (encrypted, never stored in plain text).</p>
+        <p>Everything you create inside the app — timetables, tasks, notes, study sessions, goals, resources, and schedule entries — is stored so the app can show it back to you. We don't collect anything beyond what's needed to make the app work.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>What we don't do</h2>
+        <ul>
+            <li>We don't sell your data to anyone, ever.</li>
+            <li>We don't show ads or share your information with advertisers.</li>
+            <li>We don't read your notes or study content for any purpose other than displaying it to you.</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>How your data is stored</h2>
+        <p>Your data is stored in a secure database and is only accessible through your logged-in account. Passwords are hashed and never visible to anyone, including us.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Your data, your control</h2>
+        <p>You can export a full copy of your data at any time from Settings → Data Export. You can also permanently delete your account and all associated data from Settings → Danger Zone — this action cannot be undone.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Cookies</h2>
+        <p>Mofu uses a session cookie to keep you logged in. That's it — no tracking cookies, no third-party analytics scripts.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Changes to this policy</h2>
+        <p>If this policy changes, the date at the top of this page will be updated. Continued use of Mofu after changes means you accept the updated policy.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Questions?</h2>
+        <p>Reach out through the Contact link in Help & Support.</p>
+    </div>
+
+    <a href="javascript:history.back()" class="legal-back">← Back</a>
+
+</div>
+
+</body>
+</html>

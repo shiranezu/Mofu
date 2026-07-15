@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Use — Mofu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:   #1e2540;
+            --cream:  #F0E7D5;
+            --accent: #C4714A;
+            --muted:  #8a8070;
+            --bg:     #faf6ef;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .legal-page {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 60px 32px 100px;
+        }
+
+        .legal-logo {
+            font-family: 'Homemade Apple', cursive;
+            font-size: 28px;
+            color: var(--navy);
+            opacity: 0.6;
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .legal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .legal-updated {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 36px;
+        }
+
+        .legal-section {
+            margin-bottom: 28px;
+        }
+
+        .legal-section h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 21px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .legal-section p {
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.8;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .legal-section ul {
+            margin: 10px 0 10px 20px;
+        }
+
+        .legal-section li {
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.8;
+            line-height: 1.8;
+            margin-bottom: 6px;
+        }
+
+        .legal-back {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.6;
+        }
+
+        .legal-back:hover { opacity: 1; }
+
+        [data-theme="dark"] body { background: #1a1818; }
+        [data-theme="dark"] .legal-logo,
+        [data-theme="dark"] .legal-title,
+        [data-theme="dark"] .legal-section h2,
+        [data-theme="dark"] .legal-section p,
+        [data-theme="dark"] .legal-section li,
+        [data-theme="dark"] .legal-back {
+            color: #EEE5DA;
+        }
+    </style>
+</head>
+<body>
+<script>
+    if (localStorage.getItem('mofuTheme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+</script>
+
+<div class="legal-page">
+
+    <span class="legal-logo">Mofu.</span>
+
+    <h1 class="legal-title">Terms of Use.</h1>
+    <p class="legal-updated">Last updated June 2026</p>
+
+    <div class="legal-section">
+        <h2>Using Mofu</h2>
+        <p>Mofu is a personal study and productivity planner. By creating an account, you agree to use it for its intended purpose and to keep your login credentials secure.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Your account</h2>
+        <p>You're responsible for the accuracy of the information you provide and for any activity that happens under your account. If you suspect unauthorized access, change your password immediately from Settings.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Your content</h2>
+        <p>Everything you create — notes, tasks, timetables, study sessions — belongs to you. Mofu doesn't claim ownership over anything you put into the app, and you can export or delete it at any time.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Acceptable use</h2>
+        <ul>
+            <li>Don't attempt to access another user's account or data.</li>
+            <li>Don't use Mofu to store or share unlawful content.</li>
+            <li>Don't attempt to disrupt or overload the service.</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>Service availability</h2>
+        <p>Mofu is provided as-is. While we aim for reliability, we can't guarantee uninterrupted access, and we're not liable for data loss caused by factors outside our reasonable control.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Account termination</h2>
+        <p>You may delete your account at any time from Settings → Danger Zone. We reserve the right to suspend accounts that violate these terms.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Changes to these terms</h2>
+        <p>If these terms change, the date at the top of this page will be updated. Continued use of Mofu after changes means you accept the updated terms.</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>Questions?</h2>
+        <p>Reach out through the Contact link in Help & Support.</p>
+    </div>
+
+    <a href="javascript:history.back()" class="legal-back">← Back</a>
+
+</div>
+
+</body>
+</html>

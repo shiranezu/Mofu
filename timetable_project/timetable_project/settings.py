@@ -151,6 +151,16 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Used for simple rate limiting on login/register/password-reset views.
+# LocMemCache is fine for a single-server deployment; if Mofu ever scales
+# to multiple server instances, switch this to Redis so all instances
+# share the same rate-limit counters.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 LOGIN_URL = '/login/'  # or whatever your login page is
 LOGIN_REDIRECT_URL = '/'        # where to go after login
 
@@ -161,6 +171,9 @@ EMAIL_BACKEND = config(
 )
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Mofu <noreply@mofu.app>')
+
+# The address that messages from the public Contact page get sent to.
+CONTACT_EMAIL = config('CONTACT_EMAIL', default='')
 
 
 # Security hardening — only applied automatically when DEBUG is False,

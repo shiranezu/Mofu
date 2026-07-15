@@ -118,4 +118,9 @@ path('study/countdown/<int:session_id>/complete/', views.complete_countdown, nam
 
     # ONBOARDING
     path('onboarding/dismiss/', views.dismiss_onboarding, name='dismiss_onboarding'),
+
+    # LEGAL
+    path('privacy/', views.privacy_policy, name='privacy_policy'),
+    path('terms/', views.terms_of_use, name='terms_of_use'),
+    path('contact/', views.contact, name='contact'),
 ]

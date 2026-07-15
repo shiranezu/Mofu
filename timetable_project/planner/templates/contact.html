@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Mofu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:   #1e2540;
+            --cream:  #F0E7D5;
+            --accent: #C4714A;
+            --muted:  #8a8070;
+            --bg:     #faf6ef;
+            --radius: 10px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .contact-page {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 60px 32px 100px;
+        }
+
+        .contact-logo {
+            font-family: 'Homemade Apple', cursive;
+            font-size: 28px;
+            color: var(--navy);
+            opacity: 0.6;
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .contact-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .contact-subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 36px;
+            line-height: 1.7;
+        }
+
+        .contact-success {
+            background: rgba(122,158,126,0.12);
+            border: 1px solid rgba(122,158,126,0.35);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            font-size: 13px;
+            color: #4a7a4e;
+            margin-bottom: 28px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--navy);
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid rgba(30, 37, 64, 0.25);
+            border-radius: 0;
+            padding: 8px 0;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--navy);
+            outline: none;
+            width: 100%;
+            resize: vertical;
+            transition: border-color 0.18s ease;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-bottom-color: var(--navy);
+        }
+
+        .field-error {
+            font-size: 11px;
+            color: #c0392b;
+            margin-top: 4px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--navy);
+            color: var(--cream);
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: #2a3156;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(30, 37, 64, 0.2);
+        }
+
+        .contact-back {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--navy);
+            opacity: 0.6;
+        }
+
+        .contact-back:hover { opacity: 1; }
+
+        [data-theme="dark"] body { background: #1a1818; }
+        [data-theme="dark"] .contact-logo,
+        [data-theme="dark"] .contact-title,
+        [data-theme="dark"] .contact-back { color: #EEE5DA; }
+        [data-theme="dark"] .input-group label { color: rgba(238,229,218,0.5); }
+        [data-theme="dark"] .input-group input,
+        [data-theme="dark"] .input-group textarea {
+            color: #EEE5DA;
+            border-bottom-color: rgba(238,229,218,0.2);
+        }
+        [data-theme="dark"] .btn-submit { background: #EEE5DA; color: #1a1818; }
+    </style>
+</head>
+<body>
+<script>
+    if (localStorage.getItem('mofuTheme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+</script>
+
+<div class="contact-page">
+
+    <span class="contact-logo">Mofu.</span>
+
+    <h1 class="contact-title">Get in touch.</h1>
+    <p class="contact-subtitle">Questions, feedback, or something not working as expected — send a message and you'll hear back.</p>
+
+    {% if sent %}
+    <div class="contact-success">Your message has been sent. Thanks for reaching out.</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="input-group">
+            <label for="id_name">Name</label>
+            <input type="text" id="id_name" name="name" value="{{ form.name.value|default:'' }}" placeholder="Your name">
+            {% if form.name.errors %}<span class="field-error">{{ form.name.errors|join:", " }}</span>{% endif %}
+        </div>
+
+        <div class="input-group">
+            <label for="id_email">Email</label>
+            <input type="email" id="id_email" name="email" value="{{ form.email.value|default:'' }}" placeholder="you@example.com">
+            {% if form.email.errors %}<span class="field-error">{{ form.email.errors|join:", " }}</span>{% endif %}
+        </div>
+
+        <div class="input-group">
+            <label for="id_message">Message</label>
+            <textarea id="id_message" name="message" placeholder="What's on your mind?">{{ form.message.value|default:'' }}</textarea>
+            {% if form.message.errors %}<span class="field-error">{{ form.message.errors|join:", " }}</span>{% endif %}
+        </div>
+
+        <button type="submit" class="btn-submit">Send message</button>
+    </form>
+
+    <a href="javascript:history.back()" class="contact-back">← Back</a>
+
+</div>
+
+</body>
+</html>

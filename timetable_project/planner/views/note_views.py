@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
 from ..models import Note, StudyCategory
 
 
@@ -9,7 +10,16 @@ from ..models import Note, StudyCategory
 def notes_home(request):
     notes = Note.objects.filter(user=request.user)
     categories = StudyCategory.objects.filter(user=request.user)
-    return render(request, 'notes_home.html', {'notes': notes, 'categories': categories})
+
+    paginator = Paginator(notes, 8)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'notes_home.html', {
+        'notes': page_obj,
+        'page_obj': page_obj,
+        'categories': categories,
+    })
 
 
 @login_required(login_url='planner:login')

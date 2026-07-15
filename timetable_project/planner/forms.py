@@ -158,3 +158,8 @@ class ScheduleEntryForm(forms.ModelForm):
             'end_time': forms.TimeInput(attrs={'type': 'time'}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+class ContactForm(forms.Form):
+    name = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=True)
+    message = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}), required=True)
