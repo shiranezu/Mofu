@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Timeslots — Mofu{% endblock %}
+{% block nav_timetable %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .ts-page { max-width: 560px; }
+
+    .ts-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 36px;
+    }
+
+    .ts-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .ts-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    .ts-section-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    /* ─── Preset cards ───────────────────────────────── */
+    .ts-presets {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+
+    .ts-preset { position: relative; }
+
+    .ts-preset input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .ts-preset label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px 18px;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        background: var(--card-bg);
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+    }
+
+    .ts-preset label:hover { border-color: var(--text-dark); }
+
+    .ts-preset input[type="radio"]:checked + label {
+        border-color: var(--accent);
+        background: rgba(196, 113, 74, 0.08);
+    }
+
+    .ts-preset input[type="radio"]:focus-visible + label {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .ts-preset-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.2;
+    }
+
+    .ts-preset-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── Time range ─────────────────────────────────── */
+    .ts-range {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .ts-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .ts-field label {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .ts-field input[type="time"] {
+        background: transparent;
+        border: none;
+        border-bottom: 1.5px solid var(--input-border);
+        border-radius: 0;
+        padding: 8px 0;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 15px;
+        color: var(--text-dark);
+        outline: none;
+        width: 100%;
+        transition: border-color 0.18s;
+    }
+
+    .ts-field input[type="time"]:focus { border-bottom-color: var(--accent); }
+
+    .ts-error {
+        font-size: 12px;
+        color: #c0392b;
+        margin-bottom: 16px;
+    }
+
+    /* ─── Preview ────────────────────────────────────── */
+    .ts-preview {
+        padding: 16px 0 24px;
+        border-top: 1px solid var(--card-border);
+        margin-bottom: 8px;
+    }
+
+    .ts-preview-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+    }
+
+    .ts-preview-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .ts-preview-chip {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        color: var(--text-dark);
+        background: var(--card-bg);
+    }
+
+    /* ─── Actions ────────────────────────────────────── */
+    .ts-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-top: 24px;
+        border-top: 1px solid var(--card-border);
+        margin-bottom: 40px;
+    }
+
+    .ts-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: auto;
+        transition: color 0.15s;
+    }
+
+    .ts-back:hover { color: var(--text-dark); }
+
+    /* ─── Custom option ──────────────────────────────── */
+    .ts-custom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border: 1px dashed var(--card-border);
+        border-radius: var(--radius);
+        text-decoration: none;
+        transition: border-color 0.15s;
+    }
+
+    .ts-custom:hover { border-color: var(--accent); }
+
+    .ts-custom-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--text-dark);
+        line-height: 1.2;
+    }
+
+    .ts-custom-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .ts-custom-go { font-size: 12px; color: var(--accent); font-weight: 500; white-space: nowrap; }
+
+    @media (max-width: 520px) {
+        .ts-presets, .ts-range { grid-template-columns: 1fr; }
+    }
+
+{% endblock %}
+
+{% block content %}
+
+<div class="ts-page">
+
+    <div class="ts-header">
+        <h1 class="ts-title">Add Timeslots.</h1>
+        <p class="ts-subtitle">{{ timetable.name }}</p>
+    </div>
+
+    <form method="post" action="{% url 'planner:add_timeslot_preset' %}" id="preset-form">
+        {% csrf_token %}
+        <input type="hidden" name="timetable" value="{{ timetable.id }}">
+
+        <span class="ts-section-label">Fill the day with</span>
+        <div class="ts-presets">
+            <div class="ts-preset">
+                <input type="radio" name="preset" id="preset_hourly" value="hourly"
+                       {% if form.preset.value != 'bihourly' %}checked{% endif %}>
+                <label for="preset_hourly">
+                    <span class="ts-preset-name">Hourly</span>
+                    <span class="ts-preset-desc">1-hour blocks, like 8:00 – 9:00</span>
+                </label>
+            </div>
+            <div class="ts-preset">
+                <input type="radio" name="preset" id="preset_bihourly" value="bihourly"
+                       {% if form.preset.value == 'bihourly' %}checked{% endif %}>
+                <label for="preset_bihourly">
+                    <span class="ts-preset-name">Every 2 hours</span>
+                    <span class="ts-preset-desc">2-hour blocks, like 8:00 – 10:00</span>
+                </label>
+            </div>
+        </div>
+
+        <span class="ts-section-label">Between</span>
+        <div class="ts-range">
+            <div class="ts-field">
+                <label for="id_start_time">Starts at</label>
+                {{ form.start_time }}
+            </div>
+            <div class="ts-field">
+                <label for="id_end_time">Ends at</label>
+                {{ form.end_time }}
+            </div>
+        </div>
+
+        {% for error in form.start_time.errors %}<p class="ts-error">{{ error }}</p>{% endfor %}
+        {% for error in form.end_time.errors %}<p class="ts-error">{{ error }}</p>{% endfor %}
+        {% for error in form.preset.errors %}<p class="ts-error">{{ error }}</p>{% endfor %}
+        {% for error in form.non_field_errors %}<p class="ts-error">{{ error }}</p>{% endfor %}
+
+        <div class="ts-preview" id="ts-preview" hidden>
+            <p class="ts-preview-count" id="ts-preview-count"></p>
+            <div class="ts-preview-list" id="ts-preview-list"></div>
+        </div>
+
+        <div class="ts-actions">
+            <button type="submit" class="btn btn-primary">Add timeslots</button>
+            <a href="{% url 'planner:timetable_view' timetable.id %}" class="ts-back">← Back to timetable</a>
+        </div>
+    </form>
+
+    <a href="{% url 'planner:add_timeslot' %}?timetable={{ timetable.id }}&custom=1" class="ts-custom">
+        <div>
+            <div class="ts-custom-name">Custom</div>
+            <div class="ts-custom-desc">Add a single timeslot with your own start and end time</div>
+        </div>
+        <span class="ts-custom-go">Create one →</span>
+    </a>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        const startEl = document.getElementById('id_start_time');
+        const endEl   = document.getElementById('id_end_time');
+        const preview = document.getElementById('ts-preview');
+        const countEl = document.getElementById('ts-preview-count');
+        const listEl  = document.getElementById('ts-preview-list');
+
+        function toMinutes(value) {
+            if (!value) return null;
+            const [h, m] = value.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function label(total) {
+            const h = Math.floor(total / 60);
+            const m = total % 60;
+            const suffix = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 === 0 ? 12 : h % 12;
+            return h12 + ':' + String(m).padStart(2, '0') + ' ' + suffix;
+        }
+
+        function update() {
+            const step  = document.querySelector('input[name="preset"]:checked').value === 'bihourly' ? 120 : 60;
+            const start = toMinutes(startEl.value);
+            const end   = toMinutes(endEl.value);
+
+            listEl.innerHTML = '';
+            if (start === null || end === null || end - start < step) {
+                preview.hidden = true;
+                return;
+            }
+
+            let count = 0;
+            for (let t = start; t + step <= end; t += step) {
+                const chip = document.createElement('span');
+                chip.className = 'ts-preview-chip';
+                chip.textContent = label(t) + ' – ' + label(t + step);
+                listEl.appendChild(chip);
+                count++;
+            }
+            countEl.textContent = count + ' timeslot' + (count === 1 ? '' : 's') + ' will be added';
+            preview.hidden = false;
+        }
+
+        document.querySelectorAll('input[name="preset"]').forEach(r => r.addEventListener('change', update));
+        startEl.addEventListener('input', update);
+        endEl.addEventListener('input', update);
+        update();
+    })();
+</script>
+{% endblock %}

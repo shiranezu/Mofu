@@ -23,7 +23,7 @@ class Subject_and_location(models.Model):
     )
 
     def __str__(self):
-        return f"{self.subject} at {self.location}"
+        return f"{self.subject} at {self.location}" if self.location else self.subject
 
 
 class Timeslot(models.Model):
@@ -50,6 +50,7 @@ class Timetable(models.Model):
         default='weekdays'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

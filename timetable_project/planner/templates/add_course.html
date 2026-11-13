@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Course{% endblock %}
+{% block nav_timetable %}active{% endblock %}
+
+{% block extra_styles %}
+
+    .course-page { max-width: 480px; }
+
+    .course-header {
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+        margin-bottom: 32px;
+    }
+
+    .course-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 32px;
+        font-weight: 500;
+        color: var(--text-dark);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .course-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    /* The cell the user clicked, shown so they know where this lands */
+    .course-slot {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+
+    .course-slot-day {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--accent);
+        line-height: 1;
+    }
+
+    .course-slot-time { font-size: 13px; color: var(--text-muted); }
+
+    .course-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 26px;
+    }
+
+    .course-field label { font-size: 12px; color: var(--text-muted); }
+
+    .course-field input[type="text"],
+    .course-field select {
+        background: transparent;
+        border: none;
+        border-bottom: 1.5px solid var(--input-border);
+        border-radius: 0;
+        padding: 8px 0;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        color: var(--text-dark);
+        outline: none;
+        width: 100%;
+        box-shadow: none;
+        transition: border-color 0.18s;
+    }
+
+    .course-field input[type="text"]:focus,
+    .course-field select:focus { border-bottom-color: var(--accent); }
+
+    .course-field input::placeholder { color: var(--placeholder); }
+
+    .course-error { font-size: 12px; color: #c0392b; }
+
+    .course-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-top: 24px;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .course-back {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: auto;
+        transition: color 0.15s;
+    }
+
+    .course-back:hover { color: var(--text-dark); }
+
+{% endblock %}
+
+{% block content %}
+
+<div class="course-page">
+
+    <div class="course-header">
+        <h1 class="course-title">Add Course.</h1>
+        <p class="course-subtitle">{{ timetable.name }}</p>
+    </div>
+
+    <div class="course-slot">
+        <span class="course-slot-day">{{ day }}</span>
+        <span class="course-slot-time">
+            {{ timeslot.start_time|time:"g:i A" }} – {{ timeslot.end_time|time:"g:i A" }}
+        </span>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="timetable" value="{{ timetable.id }}">
+        <input type="hidden" name="day" value="{{ day }}">
+        <input type="hidden" name="timeslot" value="{{ timeslot.id }}">
+
+        <div class="course-field">
+            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
+            {{ form.subject }}
+            {% for error in form.subject.errors %}<span class="course-error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="course-field">
+            <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+            {{ form.location }}
+            {% for error in form.location.errors %}<span class="course-error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="course-field">
+            <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+            {{ form.category }}
+            {% for error in form.category.errors %}<span class="course-error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="course-actions">
+            <button type="submit" class="btn btn-primary">Add course</button>
+            <a href="{% url 'planner:timetable_view' timetable.id %}" class="course-back">← Back to timetable</a>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}

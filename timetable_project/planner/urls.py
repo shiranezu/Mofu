@@ -22,10 +22,12 @@ urlpatterns = [
     path('timetable/<int:timetable_id>/export/pdf/', views.export_timetable_pdf, name='export_timetable_pdf'),
     path('add/course/', views.add_course, name='add_course'),
     path('add/timeslot/', views.add_timeslot, name='add_timeslot'),
+    path('add/timeslot/preset/', views.add_timeslot_preset, name='add_timeslot_preset'),
     path('edit/<int:entry_id>/', views.edit_entry, name='edit_entry'),
     path('delete/<int:entry_id>/', views.delete_entry, name='delete_entry'),
     path('timeslot/<int:timeslot_id>/delete/', views.delete_timeslot, name='delete_timeslot'),
     path('timetable/<int:timetable_id>/toggle-days/', views.toggle_days_mode, name='toggle_days_mode'),
+    path('timetable/<int:timetable_id>/toggle-active/', views.toggle_timetable_active, name='toggle_timetable_active'),
 
     # TASKS
     path('tasks/', views.tasks_home, name='tasks_home'),

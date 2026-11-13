@@ -2,11 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
+from datetime import date, datetime, timedelta
 from ..models import Timetable, TimetableEntry, Timeslot, StudyCategory
-from ..forms import Subject_and_locationForm, TimeslotForm, TimetableForm
+from ..forms import (
+    Subject_and_locationForm, TimeslotForm, TimetableForm,
+    TimeslotPresetForm, PRESET_MINUTES,
+)
+
 
 
 @login_required(login_url='planner:login')
@@ -105,57 +111,122 @@ def delete_timetable(request, timetable_id):
 
 @login_required(login_url='planner:login')
 def add_course(request):
-    """Add a course to a timetable"""
-    timetable_id = request.GET.get('timetable') or request.POST.get('timetable')
-    timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
+    """Add a course to the timetable cell the user clicked"""
+    data = request.POST if request.method == 'POST' else request.GET
 
-    day = request.GET.get('day')
-    timeslot_id = request.GET.get('timeslot')
-    form = Subject_and_locationForm(request.POST or None, user=request.user, timetable=timetable)  # Changed
+    timetable = get_object_or_404(Timetable, id=data.get('timetable'), user=request.user)
+    days = FULL_WEEK if timetable.days_mode == 'full_week' else WEEKDAYS
+    day = data.get('day')
 
+    timeslot_id = data.get('timeslot', '')
+    timeslot = (Timeslot.objects.filter(id=timeslot_id, timetable=timetable).first()
+                if timeslot_id.isdigit() else None)
+
+    if day not in days or not timeslot:
+        messages.error(request, "Click a cell in the timetable to add a course there.")
+        return redirect('planner:timetable_view', timetable_id=timetable.id)
+
+    if TimetableEntry.objects.filter(timetable=timetable, day=day, timeslot=timeslot).exists():
+        messages.error(request, "That slot already has a course.")
+        return redirect('planner:timetable_view', timetable_id=timetable.id)
+
+    form = Subject_and_locationForm(request.POST or None, user=request.user)
     if form.is_valid():
         course = form.save()
-        timeslot = Timeslot.objects.get(id=request.POST.get('timeslot'), timetable=timetable)
         TimetableEntry.objects.create(
             timetable=timetable,
-            day=request.POST.get('day'),
+            user=request.user,
+            day=day,
             timeslot=timeslot,
-            subjectInfo=course
+            subjectInfo=course,
         )
         return redirect('planner:timetable_view', timetable_id=timetable.id)
 
-    return render(request, 'add_generic.html', {
+    return render(request, 'add_course.html', {
         'form': form,
-        'title': 'Add Course',
         'timetable': timetable,
         'day': day,
-        'timeslot_id': timeslot_id
+        'timeslot': timeslot,
+    })
+
+
+def _render_timeslot_chooser(request, timetable, form=None):
+    return render(request, 'timeslot_presets.html', {
+        'timetable': timetable,
+        'form': form or TimeslotPresetForm(),
     })
 
 
 @login_required(login_url='planner:login')
 def add_timeslot(request):
-    """Add a timeslot"""
+    """Preset chooser first; the custom form shows with ?custom=1 or on POST"""
     timetable_id = request.GET.get('timetable') or request.POST.get('timetable')
-    
+
     if not timetable_id:
         messages.error(request, "No timetable specified!")
         return redirect('planner:timetable_home')
-    
+
     timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
-    
+
+    if request.method == 'GET' and not request.GET.get('custom'):
+        return _render_timeslot_chooser(request, timetable)
+
     form = TimeslotForm(request.POST or None)
     if form.is_valid():
         timeslot = form.save(commit=False)
-        timeslot.timetable = timetable 
+        timeslot.timetable = timetable
         timeslot.save()
         return redirect('planner:timetable_view', timetable_id=timetable.id)
-    
+
     return render(request, 'add_generic.html', {
         'form': form,
         'title': 'Add Timeslot',
         'timetable': timetable
     })
+
+
+@login_required(login_url='planner:login')
+@require_POST
+def add_timeslot_preset(request):
+    """Generate hourly or 2-hourly timeslots between two times"""
+    timetable = get_object_or_404(
+        Timetable, id=request.POST.get('timetable'), user=request.user
+    )
+    form = TimeslotPresetForm(request.POST)
+    if not form.is_valid():
+        return _render_timeslot_chooser(request, timetable, form)
+
+    step = timedelta(minutes=PRESET_MINUTES[form.cleaned_data['preset']])
+    today = date.today()
+    cursor = datetime.combine(today, form.cleaned_data['start_time'])
+    end = datetime.combine(today, form.cleaned_data['end_time'])
+
+    existing = [(s.start_time, s.end_time)
+                for s in Timeslot.objects.filter(timetable=timetable)]
+
+    to_create, skipped = [], 0
+    while cursor + step <= end:
+        slot_start, slot_end = cursor.time(), (cursor + step).time()
+        overlaps = any(slot_start < ex_end and ex_start < slot_end
+                       for ex_start, ex_end in existing)
+        if overlaps:
+            skipped += 1
+        else:
+            to_create.append(Timeslot(
+                timetable=timetable, start_time=slot_start, end_time=slot_end
+            ))
+        cursor += step
+
+    Timeslot.objects.bulk_create(to_create)
+
+    if to_create:
+        messages.success(request, f"Added {len(to_create)} timeslot{'s' if len(to_create) != 1 else ''}.")
+    if skipped:
+        messages.warning(request, f"Skipped {skipped} that overlapped existing timeslots.")
+    if not to_create and not skipped:
+        messages.warning(request, "No timeslots were added.")
+
+    return redirect('planner:timetable_view', timetable_id=timetable.id)
 
 
 @login_required(login_url='planner:login')
@@ -166,7 +237,7 @@ def edit_entry(request, entry_id):
         messages.error(request, "This entry does not exist.")
         return redirect('planner:timetable_home')
 
-    form = Subject_and_locationForm(request.POST or None, instance=entry.subjectInfo)
+    form = Subject_and_locationForm(request.POST or None, instance=entry.subjectInfo, user=request.user)
     if form.is_valid():
         form.save()
         messages.success(request, "Entry updated successfully.")
@@ -258,3 +329,17 @@ def toggle_days_mode(request, timetable_id):
     timetable.days_mode = 'full_week' if timetable.days_mode == 'weekdays' else 'weekdays'
     timetable.save()
     return redirect('planner:timetable_view', timetable_id=timetable_id)
+
+@login_required(login_url='planner:login')
+@require_POST
+def toggle_timetable_active(request, timetable_id):
+    """Mark a timetable active or inactive"""
+    timetable = get_object_or_404(Timetable, id=timetable_id, user=request.user)
+    timetable.is_active = not timetable.is_active
+    timetable.save()
+
+    if timetable.is_active:
+        messages.success(request, f"'{timetable.name}' is active and will show on your Today page.")
+    else:
+        messages.success(request, f"'{timetable.name}' is inactive and won't show on your Today page.")
+    return redirect('planner:timetable_home')

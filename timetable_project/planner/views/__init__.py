@@ -3,9 +3,9 @@ from .auth_views import (
 )
 from .timetable_views import (
     timetable_home, timetable_view, create_timetable,
-    delete_timetable, add_course, add_timeslot,
+    delete_timetable, add_course, add_timeslot, add_timeslot_preset,
     edit_entry, delete_entry, delete_timeslot,
-    export_timetable_pdf, toggle_days_mode,
+    export_timetable_pdf, toggle_days_mode, toggle_timetable_active
 )
 from .task_views import (
     tasks_home, task_board, create_task_board,

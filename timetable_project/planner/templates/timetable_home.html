@@ -202,7 +202,57 @@
         font-size: 13px;
         color: var(--text-muted);
     }
+    .tt-home-card.inactive .tt-home-card-name,
+    .tt-home-card.inactive .tt-home-card-meta,
+    .tt-home-card.inactive .tt-home-days-badge { opacity: 0.5; }
 
+    .tt-home-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .tt-home-status-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    }
+
+    .tt-home-status-label.on { color: var(--accent); }
+
+    .tt-switch {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        padding: 0;
+        border: none;
+        border-radius: 20px;
+        background: rgba(138, 128, 112, 0.35);
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.2s;
+    }
+
+    .tt-switch-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s;
+    }
+
+    .tt-switch.on { background: #E2725B; }
+    .tt-switch.on .tt-switch-knob { transform: translateX(16px); }
+
+    .tt-switch:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
 {% endblock %}
 
 {% block content %}
@@ -217,7 +267,7 @@
 
     <div class="tt-home-grid">
         {% for timetable in timetables %}
-        <div class="tt-home-card">
+        <div class="tt-home-card {% if not timetable.is_active %} inactive{% endif %}">
             <div class="tt-home-card-body">
                 <a href="{% url 'planner:timetable_view' timetable.id %}" class="tt-home-card-name">
                     {{ timetable.name }}
@@ -235,6 +285,22 @@
                 <span class="tt-home-days-badge">
                     {% if timetable.days_mode == 'full_week' %}Sun – Sat{% else %}Mon – Fri{% endif %}
                 </span>
+               <div class="tt-home-status">
+                    <span class="tt-home-status-label{% if timetable.is_active %} on{% endif %}">
+                        {% if timetable.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                    <form method="post" action="{% url 'planner:toggle_timetable_active' timetable.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="tt-switch{% if timetable.is_active %} on{% endif %}"
+                                role="switch"
+                                aria-checked="{% if timetable.is_active %}true{% else %}false{% endif %}"
+                                aria-label="Show {{ timetable.name }} on the Today page"
+                                title="{% if timetable.is_active %}Active: click to deactivate{% else %}Inactive: click to activate{% endif %}">
+                            <span class="tt-switch-knob"></span>
+                        </button>
+                    </form>
+                </div>
             </div>
             <div class="tt-home-card-footer">
                 <a href="{% url 'planner:timetable_view' timetable.id %}" class="tt-home-card-link">Open timetable</a>

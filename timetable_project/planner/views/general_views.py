@@ -21,7 +21,7 @@ def home(request):
     day_name = today.strftime('%A')
 
     # Get user's active timetables
-    timetables = Timetable.objects.filter(user=request.user)
+    timetables = Timetable.objects.filter(user=request.user, is_active=True)
 
     # Today's classes from timetable
     today_classes = []

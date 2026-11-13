@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from datetime import time
 from .models import (
     ScheduleEntry,
     Subject_and_location, Timeslot, Task, TaskBoard,
@@ -9,24 +10,23 @@ from .models import (
 
 
 class Subject_and_locationForm(forms.ModelForm):
-    day = forms.ChoiceField(choices=DAYS_OF_WEEK)
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        timetable = kwargs.pop('timetable', None)
-        super().__init__(*args, **kwargs)
-        if timetable:
-            self.fields['timeslot'] = forms.ModelChoiceField(
-                queryset=Timeslot.objects.filter(timetable=timetable)
-            )
-        if user:
-            self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
-            self.fields['category'].required = False
-            self.fields['category'].empty_label = "No Category"
-
     class Meta:
         model = Subject_and_location
         fields = ['subject', 'location', 'category']
+        labels = {'location': 'Extra info'}
+        widgets = {
+            'location': forms.TextInput(attrs={'placeholder': 'Room, lecturer, notes...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        self.fields['location'].required = False
+        if user:
+            self.fields['category'].queryset = StudyCategory.objects.filter(user=user)
+        self.fields['category'].required = False
+        self.fields['category'].empty_label = "No Category"
+        
 
 class TimetableForm(forms.ModelForm):
     class Meta:
@@ -38,6 +38,42 @@ class TimeslotForm(forms.ModelForm):
     class Meta:
         model = Timeslot
         fields = ['start_time', 'end_time']
+
+
+
+PRESET_MINUTES = {'hourly': 60, 'bihourly': 120}
+
+class TimeslotPresetForm(forms.Form):
+    """Generates a run of timeslots between two times"""
+    preset = forms.ChoiceField(
+        choices=[('hourly', 'Hourly'), ('bihourly', 'Every 2 hours')],
+        initial='hourly',
+    )
+    start_time = forms.TimeField(
+        initial=time(8, 0),
+        widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time'}),
+    )
+    end_time = forms.TimeField(
+        initial=time(17, 0),
+        widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time'}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_time')
+        end = cleaned.get('end_time')
+        preset = cleaned.get('preset')
+
+        if start and end and preset:
+            span = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute)
+            if span <= 0:
+                raise forms.ValidationError("End time must be after the start time.")
+            step = PRESET_MINUTES[preset]
+            if span < step:
+                raise forms.ValidationError(
+                    f"The range must be at least {step // 60} hour{'s' if step > 60 else ''} long."
+                )
+        return cleaned
 
 
 class RegistrationForm(UserCreationForm):
